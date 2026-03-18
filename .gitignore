@@ -481,9 +481,12 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-# Docker data volumes
-postgres_data/
-redis_data/
-mongodb_data/
-*.db
-*.log
+# Ignorar carpetas de datos dentro de EvolutionSaaS
+EvolutionSaaS/mongo_data/
+EvolutionSaaS/postgres_data/
+EvolutionSaaS/redis_data/
+
+# Por si acaso, ignorar cualquier carpeta de datos en cualquier nivel
+**/mongo_data/
+**/postgres_data/
+**/redis_data/
