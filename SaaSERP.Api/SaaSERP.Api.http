@@ -1,0 +1,210 @@
+@HostAddress = https://localhost:7268
+
+### 1. Dar de alta la Barbería (Reemplaza TU_TOKEN_SUPERADMIN)
+POST {{HostAddress}}/api/Negocios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJhZG1pbkBtaXNhYXMuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU3VwZXJBZG1pbiIsIk5lZ29jaW9JZCI6IjAiLCJleHAiOjE3NzQyOTYyNTIsImlzcyI6IlNhYVNFUlAuQXBpIiwiYXVkIjoiU2FhU0VSUC5DbGllbnRlcyJ9.Lb3FKZBaUr_kNfMbEOYjIocnjJnqiATGiI0RCa6M-j4
+Content-Type: application/json
+
+{
+  "nombre": "Barbería Victoria",
+  "telefonoWhatsApp": "8340001111",
+  "activo": true,
+  "sistemaAsignado": "CITAS",
+  "capacidadMaxima": 5,
+  "duracionMinutosCita": 30,
+  "usaMesas": false
+}
+### 2. Registrar a Pedro, el dueño
+POST {{HostAddress}}/api/Auth/registrar
+Content-Type: application/json
+
+{
+  "nombre": "Pedro Barbero",
+  "correo": "pedro@barberia.com",
+  "password": "PasswordBarbero123",
+  "negocioId": 2,
+  "rol": "AdminNegocio"
+}
+### 3. Login de Pedro
+POST {{HostAddress}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "correo": "pedro@barberia.com",
+  "password": "PasswordBarbero123"
+}
+### 4. Agendar corte de cabello (Reemplaza TOKEN_DE_PEDRO)
+POST {{HostAddress}}/api/Citas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjMiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJwZWRyb0BiYXJiZXJpYS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbk5lZ29jaW8iLCJOZWdvY2lvSWQiOiIyIiwiZXhwIjoxNzc0Mjk2NjAyLCJpc3MiOiJTYWFTRVJQLkFwaSIsImF1ZCI6IlNhYVNFUlAuQ2xpZW50ZXMifQ.xxZUvb0wcv-80cJqM7btNjYdswgpv1PDRj2Gwy9aLHI
+Content-Type: application/json
+
+{
+  "nombreCliente": "Carlos Mendoza",
+  "telefonoCliente": "8349876543",
+  "fechaHoraInicio": "2026-03-20T14:30:00Z",
+  "duracionMinutos": 45
+}
+
+### 5. Consultar agenda de la Barbería (Reemplaza TOKEN_DE_PEDRO)
+GET {{HostAddress}}/api/Citas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjMiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJwZWRyb0BiYXJiZXJpYS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbk5lZ29jaW8iLCJOZWdvY2lvSWQiOiIyIiwiZXhwIjoxNzc0Mjk2NjAyLCJpc3MiOiJTYWFTRVJQLkFwaSIsImF1ZCI6IlNhYVNFUlAuQ2xpZW50ZXMifQ.xxZUvb0wcv-80cJqM7btNjYdswgpv1PDRj2Gwy9aLHI
+
+
+### 1. Registrar una orden de Tacos (OJO a la línea en blanco abajo)
+POST {{HostAddress}}/api/Comandas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJqdWFuQHRhcXVlcmlhLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluTmVnb2NpbyIsIk5lZ29jaW9JZCI6IjEiLCJleHAiOjE3NzQyOTY0MjEsImlzcyI6IlNhYVNFUlAuQXBpIiwiYXVkIjoiU2FhU0VSUC5DbGllbnRlcyJ9.s-6CxfJVlbWBp6bAfdIFWtr5MHEvOsAlnKpnUWkPJGE
+Content-Type: application/json
+
+{
+  "identificadorAtencion": "Mesa 3",
+  "resumenPedido": "5 Tacos de Pastor, 2 Quesadillas, 2 Cocas",
+  "total": 185.50
+}
+
+
+### 2. Ver las comandas activas
+GET {{HostAddress}}/api/Comandas/activas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJqdWFuQHRhcXVlcmlhLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluTmVnb2NpbyIsIk5lZ29jaW9JZCI6IjEiLCJleHAiOjE3NzQyOTY0MjEsImlzcyI6IlNhYVNFUlAuQXBpIiwiYXVkIjoiU2FhU0VSUC5DbGllbnRlcyJ9.s-6CxfJVlbWBp6bAfdIFWtr5MHEvOsAlnKpnUWkPJGE
+
+
+### 3. Actualizar estado (Ahora enviamos un objeto JSON real)
+PUT {{HostAddress}}/api/Comandas/1/estado
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJqdWFuQHRhcXVlcmlhLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluTmVnb2NpbyIsIk5lZ29jaW9JZCI6IjEiLCJleHAiOjE3NzQyOTY0MjEsImlzcyI6IlNhYVNFUlAuQXBpIiwiYXVkIjoiU2FhU0VSUC5DbGllbnRlcyJ9.s-6CxfJVlbWBp6bAfdIFWtr5MHEvOsAlnKpnUWkPJGE
+Content-Type: application/json
+
+{
+  "nuevoEstado": "Preparando"
+}
+
+
+
+### A. Dar de alta la Barbería (Reemplaza TU_TOKEN_SUPERADMIN)
+POST {{HostAddress}}/api/Negocios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJhZG1pbkBtaXNhYXMuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU3VwZXJBZG1pbiIsIk5lZ29jaW9JZCI6IjAiLCJleHAiOjE3NzQyOTYyNTIsImlzcyI6IlNhYVNFUlAuQXBpIiwiYXVkIjoiU2FhU0VSUC5DbGllbnRlcyJ9.Lb3FKZBaUr_kNfMbEOYjIocnjJnqiATGiI0RCa6M-j4
+Content-Type: application/json
+
+{
+  "nombre": "Estacionamiento Victoria Centro",
+  "telefonoWhatsApp": "8341112222",
+  "activo": true,
+"sistemaAsignado": "PARQUEADERO",
+ "capacidadMaxima": 50,
+ "duracionMinutosCita": 0,
+  "usaMesas": false
+}
+
+### 1. Registrar al encargado del Estacionamiento
+POST {{HostAddress}}/api/Auth/registrar
+Content-Type: application/json
+
+{
+  "nombre": "Luis Encargado Parking",
+  "correo": "luis@parkingvictoria.com",
+  "password": "ParkingPassword2026",
+  "negocioId": 3,
+  "rol": "AdminNegocio"
+}
+
+
+### 3. Login de Luis
+POST {{HostAddress}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "correo": "luis@parkingvictoria.com",
+  "password": "ParkingPassword2026"
+}
+
+
+### 1. Entrada de un vehículo
+POST {{HostAddress}}/api/Tickets/entrada
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjQiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJsdWlzQHBhcmtpbmd2aWN0b3JpYS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbk5lZ29jaW8iLCJOZWdvY2lvSWQiOiIzIiwiZXhwIjoxNzc0MzAwODc3LCJpc3MiOiJTYWFTRVJQLkFwaSIsImF1ZCI6IlNhYVNFUlAuQ2xpZW50ZXMifQ.2e3oy0l3jh46oY1IBiaoJdiTp_b5lENDUA9xkxbZ-5A
+Content-Type: application/json
+
+{
+  "placa": "TAM-2026-VIC"
+}
+
+### 2. Salida del vehículo (Reemplaza el "1" por el ID que te dio arriba)
+PUT {{HostAddress}}/api/Tickets/1/salida
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjQiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJsdWlzQHBhcmtpbmd2aWN0b3JpYS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbk5lZ29jaW8iLCJOZWdvY2lvSWQiOiIzIiwiZXhwIjoxNzc0MzAwODc3LCJpc3MiOiJTYWFTRVJQLkFwaSIsImF1ZCI6IlNhYVNFUlAuQ2xpZW50ZXMifQ.2e3oy0l3jh46oY1IBiaoJdiTp_b5lENDUA9xkxbZ-5A
+
+
+###
+POST http://localhost:8080/instance/create
+apikey: MiLlaveSaaS2026
+Content-Type: application/json
+
+{
+  "instanceName": "BarberiaVip",
+  "qrcode": true
+}
+
+###
+GET http://localhost:8080/instance/connect/pairing/BarberiaVip?number=5218343085240
+apikey: MiLlaveSaaS2026
+
+### Crear Instancia Barberia_2026
+POST http://localhost:8080/instance/create
+apikey: MiLlaveSaaS2026
+Content-Type: application/json
+
+{
+  "instanceName": "Barberia_2026",
+  "token": "MiLlaveSaaS2026",
+  "integration": "WHATSAPP-BAILEYS",
+  "qrcode": true
+}
+### Pairing "oculto" en el connect (v1.8.2)
+GET http://localhost:8080/instance/connect/Barberia_2026?number=5218341505309
+apikey: MiLlaveSaaS2026
+
+
+###
+  DELETE http://localhost:8080/instance/delete/Barberia_2026
+apikey: MiLlaveSaaS2026
+
+
+### Enviar mensaje de prueba
+POST http://localhost:8080/message/sendText/Barberia_2026
+apikey: MiLlaveSaaS2026
+Content-Type: application/json
+
+{
+  "number": "528343085240",
+  "textMessage": {
+    "text": "¡Hola! El sistema de la Barbería ya está en línea y conectado a la nube. 💈🔥"
+  }
+}
+
+### Redirigir Webhook a SaasERP.Api
+POST http://localhost:8080/webhook/set/Barberia_2026
+apikey: MiLlaveSaaS2026
+Content-Type: application/json
+
+{
+  "webhook": {
+    "enabled": true,
+    "url": "https://merissa-fountainlike-windily.ngrok-free.dev/api/whatsapp/recepcion",
+    "webhookByEvents": false,
+    "webhookBase64": false,
+    "events": [
+      "MESSAGES_UPSERT"
+    ]
+  }
+}
+ 
+### Forzar mensaje al LID
+POST http://localhost:8080/message/sendText/Barberia_2026
+apikey: MiLlaveSaaS2026
+Content-Type: application/json
+
+{
+  "number": "184189924155640@lid",
+  "options": {
+    "verifyContact": false
+  },
+  "textMessage": {
+    "text": "Prueba manual para vencer al LID."
+  }
+}
