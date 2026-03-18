@@ -1,0 +1,50 @@
+services:
+  # 1. El cerebro de la memoria rápida
+  redis_db:
+    image: redis:7-alpine
+    container_name: redis_db
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning
+
+  # 2. La base de datos permanente
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: saaserp
+      POSTGRES_PASSWORD: Victoria2026
+      POSTGRES_DB: evolution
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  # 3. La API de Evolution
+  evolution_api:
+    image: evoapicloud/evolution-api:latest
+    container_name: evolution_api
+    restart: always
+    depends_on:
+      - postgres_db
+      - redis_db
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_API_KEY=MiLlaveSaaS2026
+
+      # CONFIG BASE DE DATOS
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://saaserp:Victoria2026@postgres_db:5432/evolution?schema=public
+
+      # CONFIG REDIS (Para quitar los errores rojos)
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis_db:6379
+      - REDIS_ENABLED=true
+      - REDIS_URI=redis://redis_db:6379
+
+      # PERSISTENCIA
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_CHATS=true

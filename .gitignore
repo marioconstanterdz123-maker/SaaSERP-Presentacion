@@ -480,3 +480,10 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Docker data volumes
+postgres_data/
+redis_data/
+mongodb_data/
+*.db
+*.log
