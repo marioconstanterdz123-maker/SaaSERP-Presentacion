@@ -155,8 +155,8 @@ Content-Type: application/json
   "integration": "WHATSAPP-BAILEYS",
   "qrcode": true
 }
-### Pairing "oculto" en el connect (v1.8.2)
-GET http://localhost:8080/instance/connect/Barberia_2026?number=5218341505309
+### Obtener QR de la Instancia Barberia_2026 (Para escanear si se desconecta)
+GET http://localhost:8080/instance/connect/Barberia_2026
 apikey: MiLlaveSaaS2026
 
 
@@ -185,7 +185,7 @@ Content-Type: application/json
 {
   "webhook": {
     "enabled": true,
-    "url": "https://merissa-fountainlike-windily.ngrok-free.dev/api/whatsapp/recepcion",
+    "url": "http://host.docker.internal:5202/api/whatsapp/recepcion",
     "webhookByEvents": false,
     "webhookBase64": false,
     "events": [

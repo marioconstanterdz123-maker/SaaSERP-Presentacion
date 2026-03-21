@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SaaSERP.Api.Models
@@ -23,5 +23,9 @@ namespace SaaSERP.Api.Models
 
         [MaxLength(50)]
         public string Estado { get; set; } = "Activo";
+
+        /// <summary>Teléfono del dueño del vehículo (opcional). Si se proporciona, se envía recibo por WhatsApp al salir.</summary>
+        [MaxLength(20)]
+        public string? TelefonoContacto { get; set; }
     }
 }

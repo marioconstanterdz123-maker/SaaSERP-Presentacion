@@ -1,77 +1,152 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SaaSERP.Api.Models;
-using System;
-using System.Net.Http;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SaaSERP.Api.Data;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace SaaSERP.Api.Controllers
 {
+    /// <summary>
+    /// Gestión de Instancias de WhatsApp por Negocio (EvolutionAPI).
+    /// Solo accesible para SuperAdmins.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    public class WhatsappController : ControllerBase
+    [Authorize(Roles = "SuperAdmin")]
+    public class WhatsAppController : ControllerBase
     {
-        [HttpPost("recepcion")]
-        public async Task<IActionResult> RecibirMensaje([FromBody] JsonElement payload)
+        private readonly SaaSContext _context;
+        private readonly IHttpClientFactory _httpFactory;
+        private readonly string _baseUrl;
+        private readonly string _apiKey;
+
+        public WhatsAppController(SaaSContext context, IHttpClientFactory httpFactory, IConfiguration config)
         {
-            try
+            _context = context;
+            _httpFactory = httpFactory;
+            _baseUrl = config["EvolutionApi:BaseUrl"]!.TrimEnd('/');
+            _apiKey = config["EvolutionApi:GlobalApiKey"]!;
+        }
+
+        // ──────────────────────────────────────────
+        // 1. CREAR INSTANCIA para un Negocio
+        //    POST /api/WhatsApp/{negocioId}/crear
+        // ──────────────────────────────────────────
+        [HttpPost("{negocioId}/crear")]
+        public async Task<IActionResult> CrearInstancia(int negocioId)
+        {
+            var negocio = await _context.Negocios.FindAsync(negocioId);
+            if (negocio == null) return NotFound(new { error = "Negocio no encontrado." });
+
+            string instancia = $"negocio_{negocioId}";
+
+            // Llamar a EvolutionAPI para crear la instancia
+            var client = _httpFactory.CreateClient();
+            var payload = new { instanceName = instancia, qrcode = true };
+            var req = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/instance/create")
             {
-                var data = payload.GetProperty("data");
-                var key = data.GetProperty("key");
+                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+            };
+            req.Headers.Add("apikey", _apiKey);
 
-                if (key.GetProperty("fromMe").GetBoolean()) return Ok();
-
-                // 1. Prioridad al número real (remoteJidAlt) que vimos en tus logs
-                string jidFinal = "";
-                if (key.TryGetProperty("remoteJidAlt", out var altJid))
-                {
-                    jidFinal = altJid.GetString();
-                }
-                else
-                {
-                    jidFinal = key.GetProperty("remoteJid").GetString();
-                }
-
-                string nombreCliente = data.TryGetProperty("pushName", out var name) ? name.GetString() : "Cliente";
-                string textoRecibido = data.GetProperty("message").TryGetProperty("conversation", out var conv)
-                                       ? conv.GetString() : "";
-
-                // 2. Limpieza de número para México
-                string numeroLimpio = jidFinal.Replace("@s.whatsapp.net", "").Replace("@lid", "");
-                if (numeroLimpio.StartsWith("521") && numeroLimpio.Length == 13)
-                {
-                    numeroLimpio = "52" + numeroLimpio.Substring(3);
-                }
-
-                // 3. RESPUESTA CON FORMATO V2 (La clave del éxito)
-                var bodyDict = new
-                {
-                    number = numeroLimpio,
-                    text = $"¡Hola {nombreCliente}! 💈 Recibí tu '{textoRecibido}'. Ya estamos en la v2.3.7."
-                };
-
-                using (var httpClient = new HttpClient())
-                {
-                    httpClient.DefaultRequestHeaders.Add("apikey", "MiLlaveSaaS2026");
-                    var content = new StringContent(JsonSerializer.Serialize(bodyDict), Encoding.UTF8, "application/json");
-
-                    // Enviamos el POST
-                    var response = await httpClient.PostAsync("http://127.0.0.1:8080/message/sendText/Barberia_2026", content);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        var errorDetails = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine($"Error de Evolution: {errorDetails}");
-                    }
-                }
-            }
-            catch (Exception ex)
+            var res = await client.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
             {
-                Console.WriteLine($"Error en C#: {ex.Message}");
+                var err = await res.Content.ReadAsStringAsync();
+                return BadRequest(new { error = "Error al crear instancia en EvolutionAPI.", detalle = err });
             }
 
-            return Ok();
+            // Guardar el nombre de instancia en el negocio
+            negocio.InstanciaWhatsApp = instancia;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { instancia, mensaje = "Instancia creada. Solicita el QR para conectar el teléfono." });
+        }
+
+        // ──────────────────────────────────────────
+        // 2. OBTENER QR CODE (Base64)
+        //    GET /api/WhatsApp/{negocioId}/qr
+        // ──────────────────────────────────────────
+        [HttpGet("{negocioId}/qr")]
+        public async Task<IActionResult> ObtenerQr(int negocioId)
+        {
+            var negocio = await _context.Negocios.FindAsync(negocioId);
+            if (negocio == null || string.IsNullOrEmpty(negocio.InstanciaWhatsApp))
+                return NotFound(new { error = "Este negocio no tiene instancia WhatsApp configurada. Primero crea la instancia." });
+
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Get,
+                $"{_baseUrl}/instance/connect/{negocio.InstanciaWhatsApp}");
+            req.Headers.Add("apikey", _apiKey);
+
+            var res = await client.SendAsync(req);
+            var body = await res.Content.ReadAsStringAsync();
+
+            if (!res.IsSuccessStatusCode)
+                return BadRequest(new { error = "No se pudo obtener el QR.", detalle = body });
+
+            // EvolutionAPI devuelve { base64: "data:image/png;base64,..." }
+            return Content(body, "application/json");
+        }
+
+        // ──────────────────────────────────────────
+        // 3. ESTADO DE LA CONEXIÓN
+        //    GET /api/WhatsApp/{negocioId}/estado
+        // ──────────────────────────────────────────
+        [HttpGet("{negocioId}/estado")]
+        public async Task<IActionResult> ObtenerEstado(int negocioId)
+        {
+            var negocio = await _context.Negocios.FindAsync(negocioId);
+            if (negocio == null || string.IsNullOrEmpty(negocio.InstanciaWhatsApp))
+                return Ok(new { estado = "SIN_INSTANCIA", conectado = false });
+
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Get,
+                $"{_baseUrl}/instance/connectionState/{negocio.InstanciaWhatsApp}");
+            req.Headers.Add("apikey", _apiKey);
+
+            var res = await client.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
+                return Ok(new { estado = "ERROR", conectado = false, instancia = negocio.InstanciaWhatsApp });
+
+            var body = await res.Content.ReadAsStringAsync();
+            // EvolutionAPI devuelve { instance: { state: "open" } }
+            using var doc = JsonDocument.Parse(body);
+            var state = doc.RootElement
+                .GetProperty("instance")
+                .GetProperty("state")
+                .GetString() ?? "DESCONOCIDO";
+
+            return Ok(new
+            {
+                instancia = negocio.InstanciaWhatsApp,
+                estado = state,
+                conectado = state == "open"
+            });
+        }
+
+        // ──────────────────────────────────────────
+        // 4. DESCONECTAR / ELIMINAR INSTANCIA
+        //    DELETE /api/WhatsApp/{negocioId}
+        // ──────────────────────────────────────────
+        [HttpDelete("{negocioId}")]
+        public async Task<IActionResult> EliminarInstancia(int negocioId)
+        {
+            var negocio = await _context.Negocios.FindAsync(negocioId);
+            if (negocio == null || string.IsNullOrEmpty(negocio.InstanciaWhatsApp))
+                return NotFound(new { error = "No hay instancia configurada para este negocio." });
+
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Delete,
+                $"{_baseUrl}/instance/delete/{negocio.InstanciaWhatsApp}");
+            req.Headers.Add("apikey", _apiKey);
+            await client.SendAsync(req);
+
+            negocio.InstanciaWhatsApp = null;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensaje = "Instancia de WhatsApp desconectada y eliminada." });
         }
     }
 }

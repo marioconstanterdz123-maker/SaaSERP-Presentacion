@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SaaSERP.Api.Data;
+using SaaSERP.Api.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,9 +10,30 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. AGREGAR SERVICIOS
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<INegocioService, NegocioService>();
+builder.Services.AddScoped<ICitaService, CitaService>();
+builder.Services.AddScoped<IChatMemoryService, ChatMemoryService>();
+builder.Services.AddScoped<IEstadiaService, EstadiaService>();
+builder.Services.AddScoped<IComandaService, ComandaService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
-// 2. SWAGGER LIMPIO (Sin el candado visual que causa el error)
+// IA NATIVA Y WHATSAPP OUTBOUND
+builder.Services.AddHttpClient<IEvolutionService, EvolutionService>();
+builder.Services.AddHttpClient<IAIService, AIService>();
+builder.Services.AddHttpClient<WhatsAppService>(); // Servicio propio de notificaciones WA
+
+// 2. SWAGGER LIMPIO Y CORS
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 // 3. BASE DE DATOS
 builder.Services.AddDbContext<SaaSContext>(options =>
@@ -38,6 +60,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+// Inicializar tablas automáticas (Ej. Memoria del Chat)
+using (var scope = app.Services.CreateScope())
+{
+    var chatMemory = scope.ServiceProvider.GetRequiredService<IChatMemoryService>();
+    chatMemory.InicializarTablaAsync().GetAwaiter().GetResult();
+}
+
 // PIPELINE HTTP
 if (app.Environment.IsDevelopment())
 {
@@ -48,6 +77,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // EL ORDEN ES VITAL
+// Habilitar CORS ANTES DE LA AUTORIZACIÓN
+app.UseCors("AllowReactApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

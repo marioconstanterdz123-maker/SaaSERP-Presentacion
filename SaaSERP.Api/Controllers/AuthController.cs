@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,7 +26,9 @@ namespace SaaSERP.Api.Controllers
 
         // ==========================================
         // 1. REGISTRAR UN NUEVO USUARIO/EMPLEADO
+        //    Solo SuperAdmin puede crear cuentas
         // ==========================================
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost("registrar")]
         public async Task<IActionResult> Registrar(RegistroRequest request)
         {
@@ -56,9 +58,18 @@ namespace SaaSERP.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            // 1. Buscamos al usuario por correo
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == request.Correo);
+            // 1. Buscamos al usuario por correo e incluimos el negocio
+            var usuario = await _context.Usuarios
+                .Include(u => u.Negocio)
+                .FirstOrDefaultAsync(u => u.Correo == request.Correo);
+
             if (usuario == null) return Unauthorized("Correo o contraseña incorrectos.");
+
+            // 1.5. Verificamos Acceso Web (SuperAdmin siempre entra)
+            if (usuario.Rol != "SuperAdmin" && usuario.Negocio != null && !usuario.Negocio.AccesoWeb)
+            {
+                return Unauthorized("Su negocio tiene el acceso web deshabilitado. Contacte a soporte.");
+            }
 
             // 2. Verificamos que la contraseña coincida con el Hash
             bool passwordCorrecto = BCrypt.Net.BCrypt.Verify(request.Password, usuario.PasswordHash);
@@ -99,11 +110,50 @@ namespace SaaSERP.Api.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-    }
+
+        // ==========================================
+        // 3. LISTAR TODOS LOS USUARIOS (Solo SuperAdmin)
+        // ==========================================
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpGet("usuarios")]
+        public async Task<IActionResult> ListarUsuarios()
+        {
+            var usuarios = await _context.Usuarios
+                .Select(u => new {
+                    u.Id,
+                    u.Nombre,
+                    u.Correo,
+                    u.Rol,
+                    u.NegocioId,
+                    NegocioNombre = u.Negocio != null ? u.Negocio.Nombre : null
+                })
+                .OrderBy(u => u.NegocioId)
+                .ThenBy(u => u.Nombre)
+                .ToListAsync();
+
+            return Ok(usuarios);
+        }
+
+        // ==========================================
+        // 4. ELIMINAR USUARIO (Solo SuperAdmin)
+        // ==========================================
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpDelete("usuarios/{id}")]
+        public async Task<IActionResult> EliminarUsuario(int id)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null) return NotFound(new { error = "Usuario no encontrado." });
+
+            _context.Usuarios.Remove(usuario);
+            await _context.SaveChangesAsync();
+            return Ok(new { mensaje = "Usuario eliminado correctamente." });
+        }
 
     // ==========================================
     // CLASES AUXILIARES (DTOs) PARA RECIBIR DATOS
     // ==========================================
+    } // end AuthController
+
     public class RegistroRequest
     {
         public string Nombre { get; set; } = string.Empty;
@@ -118,4 +168,4 @@ namespace SaaSERP.Api.Controllers
         public string Correo { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
-}
+}

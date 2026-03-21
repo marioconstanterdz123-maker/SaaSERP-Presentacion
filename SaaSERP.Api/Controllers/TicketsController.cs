@@ -1,25 +1,32 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SaaSERP.Api.Data;
 using SaaSERP.Api.Models;
+using SaaSERP.Api.Services;
 
 namespace SaaSERP.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    // [Authorize] // Temporalmente removido para probar front sin JWT
     public class TicketsController : ControllerBase
     {
         private readonly SaaSContext _context;
+        private readonly WhatsAppService _whatsApp;
 
-        public TicketsController(SaaSContext context)
+        public TicketsController(SaaSContext context, WhatsAppService whatsApp)
         {
             _context = context;
+            _whatsApp = whatsApp;
         }
 
-        private int ObtenerNegocioIdDelToken() =>
-            int.Parse(User.FindFirst("NegocioId")?.Value ?? "0");
+        private int ObtenerNegocioIdDelToken()
+        {
+            if (Request.Headers.TryGetValue("X-Negocio-Id", out var val))
+                return int.Parse(val);
+            return int.Parse(User.FindFirst("NegocioId")?.Value ?? "0");
+        }
 
         // ==========================================
         // 1. ENTRADA DE VEHÍCULO
@@ -31,11 +38,11 @@ namespace SaaSERP.Api.Controllers
             {
                 NegocioId = ObtenerNegocioIdDelToken(),
                 Placa = dto.Placa,
+                TelefonoContacto = dto.TelefonoContacto,
                 HoraEntrada = DateTime.Now,
                 Estado = "Activo"
             };
 
-            // CORRECCIÓN: Usando _context.Tickets (como está en tu SaaSContext)
             _context.Tickets.Add(nuevaEntrada);
             await _context.SaveChangesAsync();
             return Ok(nuevaEntrada);
@@ -69,6 +76,28 @@ namespace SaaSERP.Api.Controllers
 
             await _context.SaveChangesAsync();
 
+            // --- Notificación WhatsApp (fire-and-forget) ---
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(ticket.TelefonoContacto))
+                    {
+                        var negocio = await _context.Negocios.FindAsync(ticket.NegocioId);
+                        string instancia = $"negocio_{ticket.NegocioId}";
+                        await _whatsApp.EnviarReciboParkingAsync(
+                            instancia,
+                            ticket.TelefonoContacto,
+                            ticket.Placa,
+                            negocio?.Nombre ?? "Estacionamiento",
+                            ticket.HoraEntrada,
+                            ticket.HoraSalida!.Value,
+                            ticket.MontoCalculado ?? 0);
+                    }
+                }
+                catch { /* Silenciar errores WA */ }
+            });
+
             return Ok(new
             {
                 Mensaje = "Salida exitosa",
@@ -77,10 +106,37 @@ namespace SaaSERP.Api.Controllers
                 Cobro = ticket.MontoCalculado
             });
         }
+
+        // ==========================================
+        // 3. OBTENER VEHÍCULOS ADENTRO
+        // ==========================================
+        [HttpGet("activas")]
+        public async Task<ActionResult<IEnumerable<TicketParqueadero>>> GetActivas()
+        {
+            int miNegocioId = ObtenerNegocioIdDelToken();
+            var parqueados = await _context.Tickets
+                .Where(t => t.NegocioId == miNegocioId && t.Estado == "Activo")
+                .OrderByDescending(t => t.HoraEntrada)
+                .ToListAsync();
+            return Ok(parqueados);
+        }
+
+        [HttpGet("historial")]
+        public async Task<ActionResult<IEnumerable<TicketParqueadero>>> GetHistorial()
+        {
+            int miNegocioId = ObtenerNegocioIdDelToken();
+            var historial = await _context.Tickets
+                .Where(t => t.NegocioId == miNegocioId && t.Estado == "Cerrado")
+                .OrderByDescending(t => t.HoraEntrada)
+                .ToListAsync();
+            return Ok(historial);
+        }
     }
 
     public class TicketEntradaDto
     {
         public string Placa { get; set; } = string.Empty;
+        /// <summary>Teléfono del dueño del vehículo para recibir el recibo por WhatsApp (opcional)</summary>
+        public string? TelefonoContacto { get; set; }
     }
 }

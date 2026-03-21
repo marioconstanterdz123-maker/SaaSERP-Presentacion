@@ -49,6 +49,12 @@ namespace SaaSERP.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("RecursoId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ServicioId")
+                        .HasColumnType("int");
+
                     b.Property<string>("TelefonoCliente")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -75,7 +81,7 @@ namespace SaaSERP.Api.Migrations
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("IdentificadorAtencion")
+                    b.Property<string>("IdentificadorMesa")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -83,10 +89,19 @@ namespace SaaSERP.Api.Migrations
                     b.Property<int>("NegocioId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ResumenPedido")
+                    b.Property<string>("NombreCliente")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TelefonoCliente")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TipoAtencion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
@@ -94,6 +109,77 @@ namespace SaaSERP.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Comandas", "Operacion");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.DetalleComanda", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ComandaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NotasOpcionales")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ServicioId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComandaId");
+
+                    b.ToTable("DetalleComanda");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.KpiComandaActiva", b =>
+                {
+                    b.Property<decimal>("DineroEnCurso")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Negocio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NegocioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalOrdenesActivas")
+                        .HasColumnType("int");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_KpiComandasActivas", "Reportes");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.KpiEstadiaActiva", b =>
+                {
+                    b.Property<int>("MinutosTotalesEstacionados")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Negocio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NegocioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehiculosAdentro")
+                        .HasColumnType("int");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_KpiEstadiasActivas", "Reportes");
                 });
 
             modelBuilder.Entity("SaaSERP.Api.Models.Negocio", b =>
@@ -115,6 +201,12 @@ namespace SaaSERP.Api.Migrations
 
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("HoraApertura")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("HoraCierre")
+                        .HasColumnType("time");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -169,6 +261,10 @@ namespace SaaSERP.Api.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("TelefonoContacto")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Tickets", "Operacion");
@@ -211,6 +307,15 @@ namespace SaaSERP.Api.Migrations
                     b.ToTable("Usuarios", "Core");
                 });
 
+            modelBuilder.Entity("SaaSERP.Api.Models.DetalleComanda", b =>
+                {
+                    b.HasOne("SaaSERP.Api.Models.Comanda", null)
+                        .WithMany("Detalles")
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SaaSERP.Api.Models.Usuario", b =>
                 {
                     b.HasOne("SaaSERP.Api.Models.Negocio", "Negocio")
@@ -218,6 +323,11 @@ namespace SaaSERP.Api.Migrations
                         .HasForeignKey("NegocioId");
 
                     b.Navigation("Negocio");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.Comanda", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 #pragma warning restore 612, 618
         }

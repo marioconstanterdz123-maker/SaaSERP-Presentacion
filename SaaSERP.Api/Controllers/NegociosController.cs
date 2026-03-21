@@ -1,57 +1,72 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SaaSERP.Api.Data;
 using SaaSERP.Api.Models;
+using SaaSERP.Api.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SaaSERP.Api.Controllers
 {
-    // Estas etiquetas le dicen a C# que esto es una API y configuran la URL (ej: /api/negocios)
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    // [Authorize] // Temporalmente desactivado para desarrollo Frontend
     public class NegociosController : ControllerBase
     {
-        private readonly SaaSContext _context;
+        private readonly IAdminService _adminService;
 
-
-        public NegociosController(SaaSContext context)
+        public NegociosController(IAdminService adminService)
         {
-            _context = context;
+            _adminService = adminService;
         }
-
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Negocio>>> GetNegocios()
+        public async Task<ActionResult<IEnumerable<Negocio>>> Get()
         {
-
-            return await _context.Negocios.ToListAsync();
+            var data = await _adminService.ObtenerTodosNegociosAsync();
+            return Ok(data);
         }
-
 
         [HttpPost]
-        [HttpPost]
-        public async Task<ActionResult<Negocio>> PostNegocio([FromBody] Negocio negocio)
+        public async Task<ActionResult<Negocio>> Post(Negocio negocio)
         {
-            // Forzamos la fecha y reseteamos el ID por seguridad
-            negocio.Id = 0;
-            negocio.FechaRegistro = DateTime.UtcNow;
-
-            _context.Negocios.Add(negocio);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetNegocios), new { id = negocio.Id }, negocio);
+            negocio.Id = await _adminService.CrearNegocioAsync(negocio);
+            return Ok(negocio);
         }
-        // Al final de tu archivo, fuera de la clase del controlador pero dentro del namespace
-        public class NegocioCreateDto
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, Negocio negocio)
         {
-            public string Nombre { get; set; } = string.Empty;
-            public string? TelefonoWhatsApp { get; set; }
-            public bool Activo { get; set; }
-            public string SistemaAsignado { get; set; } = string.Empty; // CITAS, COMANDAS, PARQUEADERO
-            public int CapacidadMaxima { get; set; }
-            public int DuracionMinutosCita { get; set; }
-            public bool UsaMesas { get; set; }
+            if (id != negocio.Id) return BadRequest("El ID no coincide");
+            bool result = await _adminService.ActualizarNegocioAsync(negocio);
+            if (!result) return NotFound();
+            return NoContent();
         }
+
+        // ─── Feature Flags: Solo SuperAdmin ──────────────────────────────────
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPatch("{id}/modulos")]
+        public async Task<IActionResult> PatchModulos(int id, [FromBody] ModulosDto dto)
+        {
+            var negocio = await _adminService.ObtenerNegocioPorIdAsync(id);
+            if (negocio == null) return NotFound();
+
+            negocio.AccesoWeb       = dto.AccesoWeb;
+            negocio.AccesoMovil     = dto.AccesoMovil;
+            negocio.ModuloHistorial = dto.ModuloHistorial;
+            negocio.ModuloWhatsApp  = dto.ModuloWhatsApp;
+            negocio.ModuloReportes  = dto.ModuloReportes;
+
+            await _adminService.ActualizarNegocioAsync(negocio);
+            return Ok(new { mensaje = "Módulos actualizados correctamente." });
+        }
+    }
+
+    public class ModulosDto
+    {
+        public bool AccesoWeb       { get; set; }
+        public bool AccesoMovil     { get; set; }
+        public bool ModuloHistorial { get; set; }
+        public bool ModuloWhatsApp  { get; set; }
+        public bool ModuloReportes  { get; set; }
     }
 }

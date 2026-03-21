@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SaaSERP.Api.Models;
 
 namespace SaaSERP.Api.Data
@@ -12,6 +12,9 @@ namespace SaaSERP.Api.Data
         public DbSet<Cita> Citas { get; set; }
         public DbSet<TicketParqueadero> Tickets { get; set; }
         public DbSet<Comanda> Comandas { get; set; }
+
+        public DbSet<KpiComandaActiva> KpiComandasActivas { get; set; }
+        public DbSet<KpiEstadiaActiva> KpiEstadiasActivas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +31,10 @@ namespace SaaSERP.Api.Data
             modelBuilder.Entity<Cita>().ToTable("Citas", schema: "Operacion");
             modelBuilder.Entity<TicketParqueadero>().ToTable("Tickets", schema: "Operacion");
             modelBuilder.Entity<Comanda>().ToTable("Comandas", schema: "Operacion");
+
+            // Vistas SQL (KPIs)
+            modelBuilder.Entity<KpiComandaActiva>().HasNoKey().ToView("vw_KpiComandasActivas", "Reportes");
+            modelBuilder.Entity<KpiEstadiaActiva>().HasNoKey().ToView("vw_KpiEstadiasActivas", "Reportes");
         }
     }
 }
