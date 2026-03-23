@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Store, LogOut, Users } from 'lucide-react';
+import { Settings, Store, LogOut, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Layout: React.FC = () => {
@@ -9,7 +9,7 @@ const Layout: React.FC = () => {
     const { user, logout } = useAuth();
 
     const menuItems = [
-        { path: '/', name: 'Súper Dashboard', icon: <LayoutDashboard size={20} /> },
+        { path: '/configuracion', name: 'Configuración', icon: <Settings size={20} /> },
         { path: '/negocios', name: 'Tus Negocios', icon: <Store size={20} /> },
         { path: '/usuarios', name: 'Usuarios', icon: <Users size={20} /> },
     ];

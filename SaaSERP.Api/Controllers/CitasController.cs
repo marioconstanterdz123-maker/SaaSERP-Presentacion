@@ -62,7 +62,23 @@ namespace SaaSERP.Api.Controllers
                 // Calculamos FechaHoraFin si no viene en el JSON (para evitar SqlDateTime overflow)
                 if (cita.FechaHoraFin == DateTime.MinValue)
                 {
-                    cita.FechaHoraFin = cita.FechaHoraInicio.AddMinutes(cita.DuracionMinutos);
+                    // Si no mandaron duracion explicita, usamos 30 mins por defecto para prevenir fallos (puede mejorarse leyendo config local)
+                    var duracionReal = cita.DuracionMinutos > 0 ? cita.DuracionMinutos : 30;
+                    cita.FechaHoraFin = cita.FechaHoraInicio.AddMinutes(duracionReal);
+                }
+
+                // [!] DOBLE VALIDACIÓN ANTI-CONCURRENCIA [!]
+                // Previene que 2 clientes (o el bot IA) tomen el mismo asiento en nanosegundos
+                bool espacioDisponible = await _citaService.ValidarDisponibilidadAsync(
+                    cita.NegocioId, 
+                    cita.FechaHoraInicio, 
+                    cita.FechaHoraFin, 
+                    cita.RecursoId == 0 ? null : cita.RecursoId
+                );
+
+                if (!espacioDisponible)
+                {
+                    return StatusCode(409, new { error = "Concurrencia detectada: El horario elegido ya no se encuentra disponible." });
                 }
 
                 int citaId = await _citaService.RegistrarCitaAsync(cita);
@@ -76,8 +92,8 @@ namespace SaaSERP.Api.Controllers
                         var negocio = await _negocioService.ObtenerConfiguracionPorIdAsync(cita.NegocioId);
                         if (negocio != null && !string.IsNullOrWhiteSpace(cita.TelefonoCliente))
                         {
-                            // El nombre de la instancia WA se guarda como "instance_{negocioId}"
                             string instancia = $"negocio_{cita.NegocioId}";
+                            // 1. Confirmación al cliente
                             await _whatsApp.EnviarConfirmacionCitaAsync(
                                 instancia,
                                 cita.TelefonoCliente,
@@ -85,6 +101,18 @@ namespace SaaSERP.Api.Controllers
                                 negocio.Nombre,
                                 cita.ServicioNombre ?? "Cita",
                                 cita.FechaHoraInicio);
+
+                            // 2. Owner Routing (inmediato si no tiene Web, si no solo avisa)
+                            if (!string.IsNullOrWhiteSpace(negocio.TelefonoWhatsApp))
+                            {
+                                await _whatsApp.NotificarOwnerCitaAsync(
+                                    instancia,
+                                    negocio.TelefonoWhatsApp,
+                                    negocio.AccesoWeb,
+                                    cita.NombreCliente,
+                                    cita.FechaHoraInicio,
+                                    cita.ServicioNombre ?? "Cita general");
+                            }
                         }
                     }
                     catch { /* Silenciar errores de WA para no romper el flujo */ }

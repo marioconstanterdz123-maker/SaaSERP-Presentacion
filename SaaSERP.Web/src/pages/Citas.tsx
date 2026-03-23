@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
-import { Scissors, XSquare, CheckCircle, Plus } from 'lucide-react';
+import { Scissors, XSquare, CheckCircle, Plus, Clock } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+moment.locale('es');
+const localizer = momentLocalizer(moment);
 
 const Citas: React.FC = () => {
     const { negocioId } = useParams();
@@ -10,6 +16,7 @@ const Citas: React.FC = () => {
     const [recursosDisponibles, setRecursosDisponibles] = useState<any[]>([]);
     const [serviciosDisponibles, setServiciosDisponibles] = useState<any[]>([]);
     const [isCitaModalOpen, setIsCitaModalOpen] = useState(false);
+    const [selectedCita, setSelectedCita] = useState<any>(null);
     const [nuevaCita, setNuevaCita] = useState({
         nombreCliente: '',
         telefonoCliente: '',
@@ -85,10 +92,14 @@ const Citas: React.FC = () => {
             setIsCitaModalOpen(false);
             setNuevaCita({ nombreCliente: '', telefonoCliente: '', fechaHoraInicio: '', duracionMinutos: 30, servicioId: 0, recursoId: 0 });
             fetchCitas();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error al registrar cita:", error);
-            alert("No se pudo registrar la cita.");
+            alert(error.response?.data?.error || "No se pudo registrar la cita de forma local. Verifica tu conexión.");
         }
+    };
+
+    const handleEventClick = (event: any) => {
+        setSelectedCita(event.resource);
     };
 
     if (negocio?.sistemaAsignado !== 'CITAS') {
@@ -101,15 +112,15 @@ const Citas: React.FC = () => {
 
     return (
         <div className="flex flex-col flex-1 h-full animate-fade-in-up">
-            <div className="flex justify-between items-center mb-6 bg-white/60 p-4 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white/60 p-4 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md gap-4">
                 <div className="flex items-center gap-4">
-                    <Scissors size={32} className="text-fuchsia-500 drop-shadow-sm" />
+                    <Scissors size={28} className="text-fuchsia-500 drop-shadow-sm md:w-8 md:h-8" />
                     <div>
-                        <h3 className="text-2xl font-black text-slate-800 tracking-tight">Agenda de Hoy</h3>
-                        <p className="text-sm font-medium text-slate-500">{citas.length} citas registradas</p>
+                        <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Agenda de Hoy</h3>
+                        <p className="text-xs md:text-sm font-medium text-slate-500">{citas.length} citas registradas</p>
                     </div>
                 </div>
-                <button onClick={() => setIsCitaModalOpen(true)} className="bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-2xl shadow-lg shadow-pink-500/30 transition-transform active:scale-95 flex items-center gap-2">
+                <button onClick={() => setIsCitaModalOpen(true)} className="w-full md:w-auto bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-600 hover:to-pink-600 text-white font-bold py-3 md:py-2 px-6 rounded-2xl shadow-lg shadow-pink-500/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
                     <Plus size={20} /> Nueva Cita
                 </button>
             </div>
@@ -117,46 +128,51 @@ const Citas: React.FC = () => {
             {citas.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center bg-white/40 rounded-3xl border border-white/20 border-dashed min-h-[400px]">
                     <CheckCircle size={48} className="text-slate-300 mb-4" />
-                    <h3 className="text-xl font-bold text-slate-400">Sin citas para hoy</h3>
+                    <h3 className="text-xl font-bold text-slate-400">Sin citas para hoy. Agrega una para empezar.</h3>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start pb-10">
-                    {citas.map(c => (
-                        <div key={c.id} className="bg-white/80 backdrop-blur-xl rounded-3xl p-5 shadow-lg border border-slate-100 flex flex-col hover:-translate-y-1 transition-transform border-t-4 border-t-fuchsia-400">
-                            <div className="flex justify-between items-start mb-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold border ${c.estado === 'Completada' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>
-                                    {c.estado}
-                                </span>
-                                <span className="font-black text-slate-300 text-xl">#{c.id}</span>
-                            </div>
-                            
-                            <h4 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-1">{c.nombreCliente}</h4>
-                            <p className="text-sm font-bold text-fuchsia-600 mb-4 flex items-center gap-1">
-                                📞 {c.telefonoCliente}
-                            </p>
-                            
-                            <div className="bg-slate-50 rounded-2xl p-4 mb-4 flex-1">
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-slate-500 font-medium">Horario:</span>
-                                    <span className="font-bold text-slate-700">{new Date(c.fechaHoraInicio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-2 mt-auto">
-                                {c.estado === 'Pendiente' && (
-                                    <button onClick={() => handleCambiarEstadoCita(c.id, 'Completada')} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95 text-lg">
-                                        ✅ Terminar y Cobrar
-                                    </button>
-                                )}
-                                {c.estado === 'Completada' && (
-                                    <button disabled className="bg-slate-200 text-slate-400 font-bold py-3 rounded-xl shadow-sm text-lg cursor-not-allowed">
-                                        ✔ Finalizada
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex-1 p-3 md:p-5 min-h-[750px] overflow-hidden flex flex-col">
+                    <div className="overflow-x-auto">
+                        <div className="min-w-[800px]">
+                            <Calendar
+                                localizer={localizer}
+                                events={citas.map((c: any) => ({
+                                    id: c.id,
+                                    title: `${c.nombreCliente} - ${c.estado === 'Pendiente' ? '⏳' : '✅'}`,
+                                    start: new Date(c.fechaHoraInicio),
+                                    end: new Date(c.fechaHoraFin || new Date(c.fechaHoraInicio).getTime() + (c.duracionMinutos || 30) * 60000),
+                                    resource: c
+                                }))}
+                                startAccessor="start"
+                                endAccessor="end"
+                                defaultView={window.innerWidth < 768 ? Views.AGENDA : Views.DAY}
+                                views={[Views.DAY, Views.WEEK, Views.MONTH, Views.AGENDA]}
+                        step={15}
+                        timeslots={2}
+                        onSelectEvent={handleEventClick}
+                        min={new Date(new Date().setHours(negocio?.horaApertura ? parseInt(negocio.horaApertura.split(':')[0]) : 8, 0, 0))}
+                        max={new Date(new Date().setHours(negocio?.horaCierre ? parseInt(negocio.horaCierre.split(':')[0]) : 20, 0, 0))}
+                        messages={{
+                            next: "Sig",
+                            previous: "Ant",
+                            today: "Hoy",
+                            month: "Mes",
+                            week: "Semana",
+                            day: "Día",
+                            agenda: "Agenda",
+                            noEventsInRange: "No hay citas en esta ventana de tiempo."
+                        }}
+                        eventPropGetter={(event: any) => {
+                            let backgroundColor = '#d946ef'; // fuchsia-500
+                            if (event.resource.estado === 'Completada') backgroundColor = '#10b981'; // emerald-500
+                            if (event.resource.estado === 'Cancelada') backgroundColor = '#ef4444'; // red-500
+                            return { style: { backgroundColor, borderRadius: '8px', border: 'none', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' } };
+                        }}
+                        className="font-sans text-slate-700 CalendarOverwrites"
+                    />
                 </div>
+            </div>
+        </div>
             )}
 
             {isCitaModalOpen && (
@@ -212,6 +228,41 @@ const Citas: React.FC = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {selectedCita && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in text-left">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 relative">
+                        <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 className="text-2xl font-black text-slate-800 leading-tight">{selectedCita.nombreCliente}</h3>
+                                <p className="text-sm font-bold text-fuchsia-600 flex items-center gap-1 mt-1">
+                                    📞 {selectedCita.telefonoCliente}
+                                </p>
+                            </div>
+                            <button onClick={() => setSelectedCita(null)} className="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-2 transition-colors"><XSquare size={20} /></button>
+                        </div>
+                        
+                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-5 space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500 font-bold flex items-center gap-2"><Clock size={16}/> Horario:</span>
+                                <span className="font-bold text-slate-700 tracking-wide">{new Date(selectedCita.fechaHoraInicio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-500 font-bold flex items-center gap-2"><CheckCircle size={16}/> Estado:</span>
+                                <span className={`font-bold uppercase tracking-wider text-xs px-2 py-1 rounded-full ${selectedCita.estado === 'Completada' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                                    {selectedCita.estado}
+                                </span>
+                            </div>
+                        </div>
+
+                        {selectedCita.estado === 'Pendiente' && (
+                            <button onClick={() => { handleCambiarEstadoCita(selectedCita.id, 'Completada'); setSelectedCita(null); }} className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black py-4 rounded-xl shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-lg flex items-center justify-center gap-2">
+                                ✅ Concluir y Cobrar
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

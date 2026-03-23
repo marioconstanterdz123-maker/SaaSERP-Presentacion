@@ -44,6 +44,9 @@ namespace SaaSERP.Api.Models
 
         /// <summary>Analítica avanzada y gráficos habilitados.</summary>
         public bool ModuloReportes { get; set; } = true;
+
+        [MaxLength(255)]
+        public string? MercadoPagoAccessToken { get; set; }
     }
 }
 

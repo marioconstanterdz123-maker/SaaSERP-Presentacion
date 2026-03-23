@@ -32,7 +32,7 @@ const Recursos: React.FC = () => {
                 // Predefinimos el tipo genérico en base al giro
                 setNewRecurso(prev => ({
                     ...prev, 
-                    tipo: current.sistemaAsignado === 'TAQUERIA' || current.sistemaAsignado === 'RESTAURANTES' ? 'MESA' : 'ESPECIALISTA' 
+                    tipo: current.sistemaAsignado === 'TAQUERIA' || current.sistemaAsignado === 'RESTAURANTES' ? 'MESA' : 'COLABORADOR' 
                 }));
             }
         });
@@ -80,10 +80,10 @@ const Recursos: React.FC = () => {
                 <div>
                     <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
                         <Users className="text-blue-500" size={32} /> 
-                        {isMesas ? 'Disposición de Mesas' : 'Equipo Especializado'}
+                        {isMesas ? 'Disposición de Mesas' : 'Personal y Colaboradores'}
                     </h2>
                     <p className="text-slate-500 mt-1">
-                        {isMesas ? 'Administra las mesas disponibles en el local.' : 'Agrega a las personas que ofrecen los servicios.'}
+                        {isMesas ? 'Administra las mesas disponibles en el local.' : 'Agrega al personal operativo o colaboradores que brindan los servicios.'}
                     </p>
                 </div>
                 <div className="flex flex-col items-end gap-3">
@@ -91,7 +91,7 @@ const Recursos: React.FC = () => {
                         onClick={() => setIsModalOpen(true)}
                         className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-transform active:scale-95"
                     >
-                        <Plus size={20} /> {isMesas ? 'Nueva Mesa' : 'Nuevo Especialista'}
+                        <Plus size={20} /> {isMesas ? 'Nueva Mesa' : 'Nuevo Colaborador'}
                     </button>
                     <input
                         type="text"
@@ -164,13 +164,13 @@ const Recursos: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-6 flex justify-between items-center text-white">
-                            <h3 className="text-xl font-bold">{isMesas ? 'Agregar Mesa' : 'Agregar Especialista'}</h3>
+                            <h3 className="text-xl font-bold">{isMesas ? 'Agregar Mesa' : 'Agregar Colaborador'}</h3>
                             <button onClick={() => setIsModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors"><XCircle size={24} /></button>
                         </div>
                         <form onSubmit={handleCreate} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                                    {isMesas ? 'Número o Nombre de la Mesa' : 'Nombre del Especialista'}
+                                    {isMesas ? 'Número o Nombre de la Mesa' : 'Nombre del Colaborador'}
                                 </label>
                                 <input required type="text" placeholder={isMesas ? "Ej. Mesa 1, Terraza A" : "Ej. Carlos Martínez"} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700" 
                                     value={newRecurso.nombre} onChange={e => setNewRecurso({...newRecurso, nombre: e.target.value})} />
@@ -182,7 +182,7 @@ const Recursos: React.FC = () => {
                                     value={newRecurso.tipo} 
                                     onChange={e => !isMesas && setNewRecurso({...newRecurso, tipo: e.target.value.toUpperCase()})}
                                     readOnly={isMesas} 
-                                    placeholder={!isMesas ? "Ej. DENTISTA, TERAPEUTA, TATUADOR" : ""}
+                                    placeholder={!isMesas ? "Ej. CAJERO, OPERADOR, ASESOR" : ""}
                                     title={isMesas ? "Se autocompleta por el sistema" : "Describe la profesión o rol"} />
                             </div>
                             <div className="pt-4">

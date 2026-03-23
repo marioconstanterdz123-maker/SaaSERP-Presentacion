@@ -85,6 +85,28 @@ namespace SaaSERP.Api.Services
         }
 
         // ───────────────────────────────────────────────
+        // Helper: enviar recordatorio preventivo de cita (Worker)
+        // ───────────────────────────────────────────────
+        public async Task<bool> EnviarRecordatorioCitaAsync(
+            string instanceName,
+            string telefonoCliente,
+            string nombreCliente,
+            string nombreNegocio,
+            DateTime fechaHoraInicio)
+        {
+            var msg = $"""
+                🔔 *{nombreNegocio}* — Recordatorio de Cita
+
+                ¡Hola *{nombreCliente}*! Te recordamos que tu cita está por comenzar a las *{fechaHoraInicio:h:mm tt}*.
+
+                Por favor, intenta llegar unos minutos antes para brindarte el mejor servicio.
+                ¡Te esperamos pronto! ⏰
+                """;
+
+            return await SendTextAsync(instanceName, telefonoCliente, msg);
+        }
+
+        // ───────────────────────────────────────────────
         // Helper: enviar recibo al salir del parqueadero
         // ───────────────────────────────────────────────
         public async Task<bool> EnviarReciboParkingAsync(
@@ -121,6 +143,129 @@ namespace SaaSERP.Api.Services
             // Si no tiene código de país México, añadirlo
             if (digits.Length == 10) digits = "52" + digits;
             return digits;
+        }
+
+        // ───────────────────────────────────────────────
+        // OWNER ROUTING — RESTAURANTE
+        // Sin Web: ticket inmediato. Con Web: resumen del turno.
+        // ───────────────────────────────────────────────
+        public async Task NotificarOwnerComandaAsync(
+            string instanceName,
+            string telefonoDueno,
+            bool accesoWebActivo,
+            int comandaId,
+            string nombreCliente,
+            string tipoAtencion,
+            decimal total,
+            string detalles,
+            // Para modo resumen:
+            int totalComandas = 0,
+            decimal ventasDia = 0)
+        {
+            string msg;
+            if (!accesoWebActivo)
+            {
+                // Modalidad 100% WhatsApp: cada ticket al instante
+                msg = $"""
+                    🛒 *Nuevo Pedido #{comandaId}* — {DateTime.Now:HH:mm}
+
+                    Cliente: *{nombreCliente}*
+                    Tipo: {tipoAtencion}
+
+                    {detalles}
+
+                    💰 *Total: ${total:F2} MXN*
+                    """;
+            }
+            else
+            {
+                // Tiene panel Web: resumen ejecutivo del día
+                msg = $"""
+                    📊 *Resumen del Día* — {DateTime.Now:dd/MM/yyyy}
+
+                    Comandas generadas: *{totalComandas}*
+                    Ventas acumuladas: *${ventasDia:F2} MXN*
+
+                    Consulta el detalle completo en tu panel web 💻
+                    """;
+            }
+            await SendTextAsync(instanceName, telefonoDueno, msg);
+        }
+
+        // ───────────────────────────────────────────────
+        // OWNER ROUTING — CITAS
+        // Sin Web: cita registrada al instante. Con Web: resumen del día.
+        // ───────────────────────────────────────────────
+        public async Task NotificarOwnerCitaAsync(
+            string instanceName,
+            string telefonoDueno,
+            bool accesoWebActivo,
+            string nombreCliente,
+            DateTime fechaHoraInicio,
+            string servicioNombre,
+            // Para modo resumen:
+            int totalCitasHoy = 0)
+        {
+            string msg;
+            if (!accesoWebActivo)
+            {
+                msg = $"""
+                    📅 *Nueva Cita Registrada*
+
+                    Cliente: *{nombreCliente}*
+                    Servicio: {servicioNombre}
+                    Horario: *{fechaHoraInicio:dddd dd/MM HH:mm}*
+
+                    Revisa tu agenda cuando puedas. 💇
+                    """;
+            }
+            else
+            {
+                msg = $"""
+                    📊 *Agenda del Día — {DateTime.Now:dd/MM/yyyy}*
+
+                    Total de citas programadas hoy: *{totalCitasHoy}*
+
+                    Revisa los detalles en tu panel web 💻
+                    """;
+            }
+            await SendTextAsync(instanceName, telefonoDueno, msg);
+        }
+
+        // ───────────────────────────────────────────────
+        // OWNER ROUTING — PARQUEADERO
+        // Sin Web: cada entrada/salida al instante. Con Web: resumen al cierre del día.
+        // ───────────────────────────────────────────────
+        public async Task NotificarOwnerParqueaderoAsync(
+            string instanceName,
+            string telefonoDueno,
+            bool accesoWebActivo,
+            string placa,
+            string evento,         // "Entrada" o "Salida"
+            decimal montoSalida = 0,
+            // Para modo resumen:
+            int totalVehiculos = 0,
+            decimal ingresosDia = 0)
+        {
+            string msg;
+            if (!accesoWebActivo)
+            {
+                msg = evento == "Salida"
+                    ? $"🚗 *Vehículo Salió* — Placa: *{placa}*\n💰 Cobro: *${montoSalida:F2} MXN*"
+                    : $"🚗 *Vehículo Entró* — Placa: *{placa}*\n⏰ {DateTime.Now:HH:mm}";
+            }
+            else
+            {
+                msg = $"""
+                    🅿️ *Resumen Parqueadero — {DateTime.Now:dd/MM/yyyy}*
+
+                    Vehículos atendidos: *{totalVehiculos}*
+                    Ingresos totales: *${ingresosDia:F2} MXN*
+
+                    Consulta el detalle en tu panel web 💻
+                    """;
+            }
+            await SendTextAsync(instanceName, telefonoDueno, msg);
         }
     }
 }

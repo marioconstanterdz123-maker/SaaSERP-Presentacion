@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
                                 <div className="w-2 h-2 rounded-full bg-blue-500 group-hover:scale-150 transition-transform"></div>
                                 <div>
                                     <p className="text-sm font-semibold text-slate-700">Bot programó cita</p>
-                                    <p className="text-xs text-slate-400">Hace {i * 12} mins - Taquería El Primo</p>
+                                    <p className="text-xs text-slate-400">Hace {i * 12} mins - Operación Registrada</p>
                                 </div>
                             </div>
                         ))}

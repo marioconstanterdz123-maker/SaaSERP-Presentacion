@@ -46,5 +46,11 @@ services:
       - REDIS_URI=redis://redis_db:6379
 
       # PERSISTENCIA
-      - DATABASE_SAVE_DATA_INSTANCE=true
-      - DATABASE_SAVE_DATA_CHATS=true
+      # APAGAR ERROR DE PRISMA REPORTADO EN LOGS
+      - DATABASE_SAVE_DATA_MESSAGE_UPDATE=false
+
+      # WEBHOOK GLOBAL P/ ENVIAR AL BACKEND SaaS
+      - WEBHOOK_GLOBAL_URL=http://host.docker.internal:5202/api/WhatsApp/recepcion
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=false
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true

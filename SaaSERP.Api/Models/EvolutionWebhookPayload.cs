@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
 namespace SaaSERP.Api.Models // Cambia esto por el namespace real de tu proyecto
@@ -18,7 +18,7 @@ namespace SaaSERP.Api.Models // Cambia esto por el namespace real de tu proyecto
         public string Destination { get; set; }
 
         [JsonPropertyName("date_time")]
-        public DateTime DateTime { get; set; }
+        public string? DateTime { get; set; }
 
         [JsonPropertyName("sender")]
         public string Sender { get; set; }
@@ -54,7 +54,7 @@ namespace SaaSERP.Api.Models // Cambia esto por el namespace real de tu proyecto
         public string RemoteJid { get; set; }
 
         [JsonPropertyName("fromMe")]
-        public bool FromMe { get; set; }
+        public bool? FromMe { get; set; }
 
         [JsonPropertyName("id")]
         public string Id { get; set; }

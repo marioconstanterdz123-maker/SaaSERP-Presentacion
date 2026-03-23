@@ -26,12 +26,23 @@ namespace SaaSERP.Api.Controllers
 
         // ==========================================
         // 1. REGISTRAR UN NUEVO USUARIO/EMPLEADO
-        //    Solo SuperAdmin puede crear cuentas
+        //    SuperAdmin puede crear en cualquier negocio, AdminNegocio solo en el suyo.
         // ==========================================
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
         [HttpPost("registrar")]
         public async Task<IActionResult> Registrar(RegistroRequest request)
         {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userNegocioIdStr = User.Claims.FirstOrDefault(c => c.Type == "NegocioId")?.Value;
+            int? userNegocioId = string.IsNullOrEmpty(userNegocioIdStr) ? null : int.Parse(userNegocioIdStr);
+
+            if (userRole == "AdminNegocio")
+            {
+                // Forzar que el AdminNegocio solo cree usuarios en su propio negocio
+                request.NegocioId = userNegocioId;
+                if (request.Rol == "SuperAdmin") return Forbid("No puede crear un SuperAdmin.");
+            }
+
             // 1. Verificamos que el correo no exista ya
             var existe = await _context.Usuarios.AnyAsync(u => u.Correo == request.Correo);
             if (existe) return BadRequest("El correo ya está registrado.");
@@ -65,10 +76,14 @@ namespace SaaSERP.Api.Controllers
 
             if (usuario == null) return Unauthorized("Correo o contraseña incorrectos.");
 
-            // 1.5. Verificamos Acceso Web (SuperAdmin siempre entra)
-            if (usuario.Rol != "SuperAdmin" && usuario.Negocio != null && !usuario.Negocio.AccesoWeb)
+            // 1.5. Verificar Acceso según plataforma
+            var platform = Request.Headers["X-Platform"].FirstOrDefault() ?? "web";
+            if (usuario.Rol != "SuperAdmin" && usuario.Negocio != null)
             {
-                return Unauthorized("Su negocio tiene el acceso web deshabilitado. Contacte a soporte.");
+                if (platform == "web" && !usuario.Negocio.AccesoWeb)
+                    return Unauthorized("Su negocio tiene el acceso web deshabilitado. Contacte a soporte.");
+                if (platform == "mobile" && !usuario.Negocio.AccesoMovil)
+                    return Unauthorized("Su negocio tiene el acceso móvil deshabilitado. Contacte a soporte.");
             }
 
             // 2. Verificamos que la contraseña coincida con el Hash
@@ -112,13 +127,24 @@ namespace SaaSERP.Api.Controllers
         }
 
         // ==========================================
-        // 3. LISTAR TODOS LOS USUARIOS (Solo SuperAdmin)
+        // 3. LISTAR TODOS LOS USUARIOS
         // ==========================================
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
         [HttpGet("usuarios")]
         public async Task<IActionResult> ListarUsuarios()
         {
-            var usuarios = await _context.Usuarios
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userNegocioIdStr = User.Claims.FirstOrDefault(c => c.Type == "NegocioId")?.Value;
+            int? userNegocioId = string.IsNullOrEmpty(userNegocioIdStr) ? null : int.Parse(userNegocioIdStr);
+
+            var query = _context.Usuarios.AsQueryable();
+
+            if (userRole == "AdminNegocio")
+            {
+                query = query.Where(u => u.NegocioId == userNegocioId);
+            }
+
+            var usuarios = await query
                 .Select(u => new {
                     u.Id,
                     u.Nombre,
@@ -135,18 +161,52 @@ namespace SaaSERP.Api.Controllers
         }
 
         // ==========================================
-        // 4. ELIMINAR USUARIO (Solo SuperAdmin)
+        // 4. ELIMINAR USUARIO
         // ==========================================
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
         [HttpDelete("usuarios/{id}")]
         public async Task<IActionResult> EliminarUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null) return NotFound(new { error = "Usuario no encontrado." });
 
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userNegocioIdStr = User.Claims.FirstOrDefault(c => c.Type == "NegocioId")?.Value;
+            int? userNegocioId = string.IsNullOrEmpty(userNegocioIdStr) ? null : int.Parse(userNegocioIdStr);
+
+            if (userRole == "AdminNegocio" && usuario.NegocioId != userNegocioId)
+            {
+                return Forbid("No puede eliminar un usuario de otro negocio.");
+            }
+
             _context.Usuarios.Remove(usuario);
             await _context.SaveChangesAsync();
             return Ok(new { mensaje = "Usuario eliminado correctamente." });
+        }
+
+        // ==========================================
+        // 5. CAMBIAR ROL DE USUARIO
+        // ==========================================
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
+        [HttpPut("usuarios/{id}/rol")]
+        public async Task<IActionResult> CambiarRolUsuario(int id, [FromBody] CambiarRolRequest request)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null) return NotFound(new { error = "Usuario no encontrado." });
+
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userNegocioIdStr = User.Claims.FirstOrDefault(c => c.Type == "NegocioId")?.Value;
+            int? userNegocioId = string.IsNullOrEmpty(userNegocioIdStr) ? null : int.Parse(userNegocioIdStr);
+
+            if (userRole == "AdminNegocio")
+            {
+                if (usuario.NegocioId != userNegocioId) return Forbid("No puede modificar un usuario de otro negocio.");
+                if (request.Rol == "SuperAdmin") return Forbid("No puede asignar el rol de SuperAdmin.");
+            }
+
+            usuario.Rol = request.Rol;
+            await _context.SaveChangesAsync();
+            return Ok(new { mensaje = "Rol actualizado correctamente." });
         }
 
     // ==========================================
@@ -167,5 +227,10 @@ namespace SaaSERP.Api.Controllers
     {
         public string Correo { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    public class CambiarRolRequest
+    {
+        public string Rol { get; set; } = string.Empty;
     }
 }

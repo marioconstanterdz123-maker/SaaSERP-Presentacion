@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { Plus, CheckCircle2, XCircle, Store, Clock, Settings, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import WhatsAppPanel from '../components/WhatsAppPanel';
 
 interface Negocio {
     id: number;
@@ -168,9 +167,6 @@ const Negocios: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Panel WhatsApp por Negocio */}
-                            <WhatsAppPanel negocioId={n.id} negocioNombre={n.nombre} />
 
                             <button onClick={() => navigate(`/negocio/${n.id}/dashboard`)} className="w-full mt-3 py-3 rounded-xl bg-slate-50 hover:bg-blue-600 text-slate-700 hover:text-white font-semibold transition-colors flex justify-center items-center gap-2 group-hover:shadow-md">
                                 <Settings size={18} /> Ir al Dashboard <ArrowRight size={16} />

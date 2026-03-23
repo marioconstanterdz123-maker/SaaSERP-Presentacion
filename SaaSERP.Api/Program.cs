@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using SaaSERP.Api.Data;
 using SaaSERP.Api.Services;
 using System.Text;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,17 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddHttpClient<IEvolutionService, EvolutionService>();
 builder.Services.AddHttpClient<IAIService, AIService>();
 builder.Services.AddHttpClient<WhatsAppService>(); // Servicio propio de notificaciones WA
+
+// BACKGROUND WORKERS (DEMONIOS)
+builder.Services.AddHostedService<RecordatoriosWorker>();
+
+// HANGFIRE (BACKGROUND JOBS)
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
 
 // 2. SWAGGER LIMPIO Y CORS
 builder.Services.AddSwaggerGen();
@@ -72,6 +84,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // Hangfire Dashboard (Solo Dev por defecto para seguridad)
+    app.UseHangfireDashboard();
 }
 
 app.UseHttpsRedirection();

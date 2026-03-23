@@ -9,7 +9,7 @@ namespace SaaSERP.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize] // Temporalmente desactivado para desarrollo Frontend
+    [Authorize]
     public class ServiciosController : ControllerBase
     {
         private readonly IAdminService _adminService;
@@ -26,6 +26,7 @@ namespace SaaSERP.Api.Controllers
             return Ok(data);
         }
 
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
         [HttpPost]
         public async Task<ActionResult<Servicio>> Post(Servicio servicio)
         {
@@ -33,6 +34,7 @@ namespace SaaSERP.Api.Controllers
             return Ok(servicio);
         }
 
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Servicio servicio)
         {

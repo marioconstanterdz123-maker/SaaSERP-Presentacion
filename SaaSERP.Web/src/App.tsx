@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -16,6 +15,7 @@ import Historial from './pages/Historial';
 import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
 import Configuracion from './pages/Configuracion';
+import Ajustes from './pages/Ajustes';
 
 function App() {
   return (
@@ -53,41 +53,45 @@ function App() {
             }
           >
             <Route path="dashboard" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo', 'Cocina']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
                 <NegocioDashboard />
               </ProtectedRoute>
             } />
             <Route path="pos" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo', 'Mesero']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio', 'Cajero', 'Mesero']}>
                 <PuntoDeVenta />
               </ProtectedRoute>
             } />
             <Route path="catalogos" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
                 <Catalogos />
               </ProtectedRoute>
             } />
             <Route path="recursos" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
                 <Recursos />
               </ProtectedRoute>
             } />
             <Route path="citas" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio', 'Cajero']}>
                 <Citas />
               </ProtectedRoute>
             } />
             <Route path="historial" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio', 'Cajero']}>
                 <Historial />
               </ProtectedRoute>
             } />
             <Route path="operacion" element={
-              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'Admin', 'Operativo', 'Cocina']}>
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio', 'Cajero', 'Cocinero']}>
                 <Operacion />
               </ProtectedRoute>
             } />
-            <Route path="configuracion" element={<div className="p-8"><h2 className="text-3xl font-black">Ajustes</h2></div>} />
+            <Route path="configuracion" element={
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
+                <Ajustes />
+              </ProtectedRoute>
+            } />
           </Route>
 
           {/* Fallback */}

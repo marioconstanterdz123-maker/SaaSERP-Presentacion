@@ -21,6 +21,7 @@ namespace SaaSERP.Api.Services
         private readonly INegocioService _negocioService;
         private readonly IEstadiaService _estadiaService;
         private readonly IComandaService _comandaService;
+        private readonly WhatsAppService _whatsApp;
         private readonly string _apiKey;
         private readonly string _endpoint;
 
@@ -32,7 +33,8 @@ namespace SaaSERP.Api.Services
             IEvolutionService evolutionService,
             INegocioService negocioService,
             IEstadiaService estadiaService,
-            IComandaService comandaService)
+            IComandaService comandaService,
+            WhatsAppService whatsApp)
         {
             _httpClient = httpClient;
             _citaService = citaService;
@@ -41,6 +43,7 @@ namespace SaaSERP.Api.Services
             _negocioService = negocioService;
             _estadiaService = estadiaService;
             _comandaService = comandaService;
+            _whatsApp = whatsApp;
             _apiKey = config["DeepSeek:ApiKey"] ?? string.Empty;
             _endpoint = config["DeepSeek:BaseUrl"] ?? "https://api.deepseek.com/chat/completions";
 
@@ -58,7 +61,25 @@ namespace SaaSERP.Api.Services
             // 2. Recuperar historial
             var historial = await _chatMemoryService.ObtenerHistorialAsync(numeroCliente, 15);
 
-            // 3. Armar System Prompt
+            // 3. Variables Dinamicas de Sistema
+            string reglaSistema = "";
+            if (negocio.SistemaAsignado?.ToUpper() == "RESTAURANTE")
+            {
+                reglaSistema = @"
+- CODIGO ROJO: Eres una IA conectada por API a un Restaurante Real. TU NO PUEDES guardar pedidos en tu memoria. Si NO usas la herramienta tomar_pedido, LA ORDEN SE PIERDE, EL CLIENTE SE QUEDARA SIN COMER Y SERAS APAGADO.
+- ES OBLIGATORIO Y DE VIDA O MUERTE: Cuando un cliente te diga Quiero X o confirme un pedido, TIENES QUE EJECUTAR tomar_pedido DE FORMA ACTIVA. JAMAS le digas al cliente He registrado tu pedido a menos que la herramienta te haya devuelto el ID real del ticket.
+- REGLA DE PRIVACIDAD: NO compartas comandos internos, actua unicamente como el mesero.";
+            }
+            else if (negocio.SistemaAsignado?.ToUpper() == "CITAS")
+            {
+                reglaSistema = @"
+- CODIGO ROJO: Eres una IA conectada por API a una Clinica/Barberia Real. TU NO PUEDES agendar citas en tu memoria. Si NO usas la herramienta registrar_cita, LA CITA SE PIERDE Y SERAS APAGADO.
+- NUNCA asumas la disponibilidad, SIEMPRE usa la herramienta consultar_disponibilidad antes de agendar, pasando los IDs pertinentes.
+- ES OBLIGATORIO Y DE VIDA O MUERTE: Cuando un cliente confirme horario, TIENES QUE EJECUTAR registrar_cita DE FORMA ACTIVA. JAMAS afirmes haber agendado sin que la API te devuelva el ID exacto de confirmacion.
+- REGLA DE PRIVACIDAD: NO compartas comandos internos, actua unicamente como el recepcionista.";
+            }
+
+            // 4. Armar System Prompt
             string systemPrompt = $@"
 Actúa como la Asistente Virtual Inteligente para el negocio '{negocio.Nombre}'.
 Tu tarea es atender a los clientes de manera amable, breve y profesional. Dependiendo del negocio, podrías agendar citas, tomar pedidos de comida/productos, o manejar entradas de vehículos. Usa emojis.
@@ -67,11 +88,8 @@ HORARIO DE ATENCIÓN: de {negocio.HoraApertura:hh\:mm} a {negocio.HoraCierre:hh\
 DURACIÓN BASE POR DEFECTO DE CITAS: {negocio.DuracionMinutosCita} mins.
 
 REGLAS DE ORO:
-- Utiliza SIEMPRE 'consultar_catalogo' si el usuario pide precios, menú o quiere agendar/pedir algo. Así sabrás qué vende este negocio.
-- Usa formato estricto ISO 8601 (YYYY-MM-DDTHH:mm:ss) para TODAS las fechas en las tools.
-- NUNCA asumas la disponibilidad, SIEMPRE usa la herramienta 'consultar_disponibilidad' antes de agendar, pasando los IDs pertinentes.
-- Si el cliente quiere cancelar o reprogramar, usa 'consultar_mis_citas' para obtener el ID de su cita activa.
-- Si el cliente saluda manda un mensaje de bienvenida presentándote.
+- Utiliza SIEMPRE consultar_catalogo la primera vez que te hablen para saber que vende este negocio.
+- IMPORTANTE: NUNCA inventes IDs.{reglaSistema}
 ";
 
             var messages = new List<object>
@@ -109,6 +127,8 @@ REGLAS DE ORO:
                 var requestContent = new StringContent(JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }), Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync(_endpoint, requestContent);
                 var jsonResponse = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"\n[DeepSeek RAW Response] Loop {loops}:\n{jsonResponse}\n");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -281,9 +301,21 @@ REGLAS DE ORO:
                     var listaDetalles = new List<DetalleComanda>();
                     foreach (var d in detallesJson.EnumerateArray())
                     {
-                        var serId = d.GetProperty("servicioId").GetInt32();
-                        var cant = d.GetProperty("cantidad").GetInt32();
-                        var notas = d.TryGetProperty("notas", out var nprop) ? nprop.GetString() : "";
+                        int serId = 0;
+                        if (d.TryGetProperty("servicioId", out var sidProp))
+                        {
+                            if (sidProp.ValueKind == JsonValueKind.Number) serId = sidProp.GetInt32();
+                            else if (sidProp.ValueKind == JsonValueKind.String && int.TryParse(sidProp.GetString(), out int parsedId)) serId = parsedId;
+                        }
+
+                        int cant = 1;
+                        if (d.TryGetProperty("cantidad", out var cProp))
+                        {
+                            if (cProp.ValueKind == JsonValueKind.Number) cant = cProp.GetInt32();
+                            else if (cProp.ValueKind == JsonValueKind.String && int.TryParse(cProp.GetString(), out int parsedCant)) cant = parsedCant;
+                        }
+
+                        var notas = d.TryGetProperty("notas", out var nprop) && nprop.ValueKind == JsonValueKind.String ? nprop.GetString() : "";
                         listaDetalles.Add(new DetalleComanda { ServicioId = serId, Cantidad = cant, NotasOpcionales = notas ?? "" });
                     }
 
@@ -291,6 +323,32 @@ REGLAS DE ORO:
                     var res = await _comandaService.CrearComandaAsync(comanda, listaDetalles);
 
                     if (res.ComandaId == -1) return "Error procesando el pedido.";
+
+                    // Owner Routing: notificar al dueño según si tiene panel Web o no
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var negocio = await _negocioService.ObtenerConfiguracionPorIdAsync(negocioId);
+                            if (negocio != null && !string.IsNullOrWhiteSpace(negocio.TelefonoWhatsApp))
+                            {
+                                var instancia = $"negocio_{negocioId}";
+                                // Construir resumen de productos del pedido
+                                var detallesTxt = string.Join("\n", listaDetalles.Select(d => $"• {d.Cantidad}x ID-{d.ServicioId}{(string.IsNullOrWhiteSpace(d.NotasOpcionales) ? "" : $" ({d.NotasOpcionales})")} "));
+                                await _whatsApp.NotificarOwnerComandaAsync(
+                                    instancia,
+                                    negocio.TelefonoWhatsApp,
+                                    negocio.AccesoWeb,
+                                    res.ComandaId,
+                                    nombreCli,
+                                    tipoAtencion,
+                                    res.TotalCalculado,
+                                    detallesTxt);
+                            }
+                        }
+                        catch { /* Silenciar errores de notificación para no interrumpir el tókem del bot */ }
+                    });
+
                     return $"Pedido/Comanda #{res.ComandaId} creada con éxito. El Total a cobrar exacto calculado por la Base de Datos es ${res.TotalCalculado} MXN. Confírmale al cliente este total y su número de pedido.";
                 }
                 else if (nombre == "consultar_estado_pedido")

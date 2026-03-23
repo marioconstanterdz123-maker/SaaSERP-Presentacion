@@ -20,11 +20,17 @@ interface NegocioConfig {
     sistemaAsignado: string;
     activo: boolean;
     instanciaWhatsApp: string | null;
+    telefonoWhatsApp: string;
     accesoWeb: boolean;
     accesoMovil: boolean;
     moduloHistorial: boolean;
     moduloWhatsApp: boolean;
     moduloReportes: boolean;
+    horaApertura: string;
+    horaCierre: string;
+    capacidadMaxima: number;
+    duracionMinutosCita: number;
+    usaMesas: boolean;
 }
 
 interface ToggleProps {
@@ -64,9 +70,9 @@ const Configuracion: React.FC = () => {
     const [negocios, setNegocios] = useState<NegocioConfig[]>([]);
     const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState<number | null>(null);
-    const [pendingChanges, setPendingChanges] = useState<Record<number, Partial<Modulos>>>({});
     const [saving, setSaving] = useState<number | null>(null);
     const [savedMsg, setSavedMsg] = useState<number | null>(null);
+    const [ajustesOp, setAjustesOp] = useState<Record<number, any>>({});  // Ajustes operativos locales por negocio
 
     useEffect(() => {
         axiosInstance.get('/negocios').then(r => {
@@ -75,37 +81,51 @@ const Configuracion: React.FC = () => {
     }, []);
 
     const handleToggle = (negocioId: number, field: keyof Modulos, value: boolean) => {
-        setPendingChanges(prev => ({
-            ...prev,
-            [negocioId]: { ...(prev[negocioId] || {}), [field]: value }
-        }));
         setNegocios(prev => prev.map(n =>
             n.id === negocioId ? { ...n, [field]: value } : n
         ));
     };
 
-    const handleSave = async (negocioId: number) => {
+    // Cargar los ajustes operativos desde el negocio al expandirlo
+    const ensureAjustesOp = (n: NegocioConfig) => {
+        if (!ajustesOp[n.id]) {
+            setAjustesOp(prev => ({ ...prev, [n.id]: {
+                telefonoWhatsApp: n.telefonoWhatsApp ?? '',
+                horaApertura: n.horaApertura ?? '08:00:00',
+                horaCierre: n.horaCierre ?? '20:00:00',
+                capacidadMaxima: n.capacidadMaxima ?? 1,
+                duracionMinutosCita: n.duracionMinutosCita ?? 30,
+                usaMesas: n.usaMesas ?? false,
+            }}));
+        }
+    };
+
+    const handleSaveAjustes = async (negocioId: number) => {
         setSaving(negocioId);
         try {
             const n = negocios.find(x => x.id === negocioId)!;
-            await axiosInstance.patch(`/negocios/${negocioId}/modulos`, {
+            const op = ajustesOp[negocioId] || {};
+            await axiosInstance.patch(`/negocios/${negocioId}/ajustes-completos`, {
                 accesoWeb: n.accesoWeb,
                 accesoMovil: n.accesoMovil,
                 moduloHistorial: n.moduloHistorial,
                 moduloWhatsApp: n.moduloWhatsApp,
                 moduloReportes: n.moduloReportes,
+                telefonoWhatsApp: op.telefonoWhatsApp,
+                horaApertura: op.horaApertura,
+                horaCierre: op.horaCierre,
+                capacidadMaxima: parseInt(op.capacidadMaxima),
+                duracionMinutosCita: parseInt(op.duracionMinutosCita),
+                usaMesas: op.usaMesas,
             });
-            setPendingChanges(prev => { const c = { ...prev }; delete c[negocioId]; return c; });
             setSavedMsg(negocioId);
             setTimeout(() => setSavedMsg(null), 2500);
         } catch (e) {
-            alert('Error al guardar los cambios.');
+            alert('Error al guardar la configuración.');
         } finally {
             setSaving(null);
         }
     };
-
-    const hasPending = (id: number) => !!pendingChanges[id] && Object.keys(pendingChanges[id]).length > 0;
 
     return (
         <div className="flex flex-col gap-6 animate-fade-in-up">
@@ -146,7 +166,7 @@ const Configuracion: React.FC = () => {
                         <div key={n.id} className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-lg overflow-hidden">
                             {/* Card Header — click to expand */}
                             <button
-                                onClick={() => setExpanded(expanded === n.id ? null : n.id)}
+                            onClick={() => { setExpanded(expanded === n.id ? null : n.id); ensureAjustesOp(n); }}
                                 className="w-full flex items-center gap-4 p-5 text-left hover:bg-slate-50/50 transition-colors"
                             >
                                 <div className="text-2xl w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl">
@@ -173,10 +193,10 @@ const Configuracion: React.FC = () => {
 
                             {/* Expanded panel */}
                             {expanded === n.id && (
-                                <div className="border-t border-slate-100 p-5 grid md:grid-cols-2 gap-8">
-                                    {/* Toggles */}
+                                <div className="border-t border-slate-100 p-5 grid md:grid-cols-3 gap-8">
+                                    {/* Columna A: Módulos */}
                                     <div>
-                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Acceso y Módulos</p>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Módulos Contratados</p>
                                         <Toggle
                                             label="Acceso Web"
                                             description="El negocio puede iniciar sesión en el panel web"
@@ -226,19 +246,81 @@ const Configuracion: React.FC = () => {
                                                 </p>
                                             ) : (
                                                 <button
-                                                    onClick={() => handleSave(n.id)}
-                                                    disabled={saving === n.id || !hasPending(n.id)}
+                                                    onClick={() => handleSaveAjustes(n.id)}
+                                                    disabled={saving === n.id}
                                                     className="flex items-center gap-2 text-sm font-bold bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white px-5 py-2.5 rounded-xl transition-all active:scale-95"
                                                 >
                                                     {saving === n.id
                                                         ? <><Loader size={15} className="animate-spin" /> Guardando...</>
-                                                        : <><Save size={15} /> Guardar Cambios</>}
+                                                        : <><Save size={15} /> Guardar Todo</>}
                                                 </button>
                                             )}
                                         </div>
                                     </div>
 
-                                    {/* WhatsApp Panel */}
+                                    {/* Columna B: Ajustes Operativos */}
+                                    <div>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Ajustes Operativos</p>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 block mb-1">📞 Teléfono del Dueño (Owner Routing)</label>
+                                                <input
+                                                    type="tel"
+                                                    placeholder="528341234567"
+                                                    value={ajustesOp[n.id]?.telefonoWhatsApp ?? ''}
+                                                    onChange={e => setAjustesOp(prev => ({ ...prev, [n.id]: { ...prev[n.id], telefonoWhatsApp: e.target.value } }))}
+                                                    className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                                                />
+                                                <p className="text-xs text-slate-400 mt-1">Sin panel web: recibe tickets. Con web: resumen diario.</p>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 block mb-1">🕐 Hora Apertura</label>
+                                                    <input type="time"
+                                                        value={(ajustesOp[n.id]?.horaApertura ?? '08:00:00').substring(0, 5)}
+                                                        onChange={e => setAjustesOp(prev => ({ ...prev, [n.id]: { ...prev[n.id], horaApertura: e.target.value + ':00' } }))}
+                                                        className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 block mb-1">🕗 Hora Cierre</label>
+                                                    <input type="time"
+                                                        value={(ajustesOp[n.id]?.horaCierre ?? '20:00:00').substring(0, 5)}
+                                                        onChange={e => setAjustesOp(prev => ({ ...prev, [n.id]: { ...prev[n.id], horaCierre: e.target.value + ':00' } }))}
+                                                        className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 block mb-1">👥 Capacidad Máx.</label>
+                                                    <input type="number" min="1"
+                                                        value={ajustesOp[n.id]?.capacidadMaxima ?? 1}
+                                                        onChange={e => setAjustesOp(prev => ({ ...prev, [n.id]: { ...prev[n.id], capacidadMaxima: e.target.value } }))}
+                                                        className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 block mb-1">⏱️ Duración Cita (min)</label>
+                                                    <input type="number" min="5" step="5"
+                                                        value={ajustesOp[n.id]?.duracionMinutosCita ?? 30}
+                                                        onChange={e => setAjustesOp(prev => ({ ...prev, [n.id]: { ...prev[n.id], duracionMinutosCita: e.target.value } }))}
+                                                        className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <label className="flex items-center gap-3 cursor-pointer text-sm font-bold text-slate-600 select-none">
+                                                <input type="checkbox"
+                                                    checked={ajustesOp[n.id]?.usaMesas ?? false}
+                                                    onChange={e => setAjustesOp(prev => ({ ...prev, [n.id]: { ...prev[n.id], usaMesas: e.target.checked } }))}
+                                                    className="w-4 h-4 rounded"
+                                                />
+                                                🪑 Maneja Mesas
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Columna C: WhatsApp Panel */}
                                     <div>
                                         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">WhatsApp Business</p>
                                         <WhatsAppPanel negocioId={n.id} negocioNombre={n.nombre} />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { Plus, CheckCircle2, XCircle, Scissors, Trash2, Car, Coffee } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import SkuDeliveryPanel from '../components/SkuDeliveryPanel';
 
 interface Servicio {
     id?: number;
@@ -90,10 +91,10 @@ const Catalogos: React.FC = () => {
                         {isParqueadero && <Car className="text-blue-500" size={32} />}
                         {isRestaurante && <Coffee className="text-orange-500" size={32} />}
                         {isCitas && <Scissors className="text-fuchsia-500" size={32} />}
-                        {isParqueadero ? 'Tarifas del Estacionamiento' : isRestaurante ? 'Menú de Platillos' : 'Listado de Servicios'}
+                        {isParqueadero ? 'Tarifas del Estacionamiento' : isRestaurante ? 'Catálogo de Artículos' : 'Listado de Servicios'}
                     </h2>
                     <p className="text-slate-500 mt-1">
-                        {isParqueadero ? 'Configura los cobros por hora, fracción o pensión completa.' : 'Administra los productos, cortes o platillos que venderá este negocio.'}
+                        {isParqueadero ? 'Configura los cobros por hora, fracción o pensión completa.' : 'Administra los productos o servicios que ofrecerá este negocio.'}
                     </p>
                 </div>
                 <div className="flex flex-col items-end gap-3">
@@ -105,7 +106,7 @@ const Catalogos: React.FC = () => {
                             'bg-gradient-to-r from-orange-500 to-rose-500 shadow-orange-500/30 hover:from-orange-600 hover:to-rose-600'
                         }`}
                     >
-                        <Plus size={20} /> {isParqueadero ? 'Nueva Tarifa' : isRestaurante ? 'Nuevo Platillo' : 'Nuevo Servicio'}
+                        <Plus size={20} /> {isParqueadero ? 'Nueva Tarifa' : isRestaurante ? 'Nuevo Artículo' : 'Nuevo Servicio'}
                     </button>
                     <div className="relative">
                         <input
@@ -186,13 +187,13 @@ const Catalogos: React.FC = () => {
                             isCitas ? 'bg-gradient-to-r from-fuchsia-500 to-purple-500' :
                             'bg-gradient-to-r from-orange-500 to-rose-500'
                         }`}>
-                            <h3 className="text-xl font-bold">{isParqueadero ? 'Agregar Tarifa' : isRestaurante ? 'Agregar Platillo' : 'Agregar Servicio'}</h3>
+                            <h3 className="text-xl font-bold">{isParqueadero ? 'Agregar Tarifa' : isRestaurante ? 'Agregar Artículo' : 'Agregar Servicio'}</h3>
                             <button onClick={() => setIsModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors"><XCircle size={24} /></button>
                         </div>
                         <form onSubmit={handleCreate} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre (Concepto)</label>
-                                <input required type="text" placeholder={isParqueadero ? "Ej. 1 Hora o Fracción Inicial" : "Ej. Tacos al Pastor o Corte Clásico"} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all font-medium text-slate-700" 
+                                <input required type="text" placeholder={isParqueadero ? "Ej. 1 Hora o Fracción Inicial" : "Ej. Producto o Consulta General"} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all font-medium text-slate-700" 
                                     value={newServicio.nombre} onChange={e => setNewServicio({...newServicio, nombre: e.target.value})} />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -232,6 +233,10 @@ const Catalogos: React.FC = () => {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {isRestaurante && negocioId && (
+                <SkuDeliveryPanel negocioId={negocioId} catalogo={servicios} />
             )}
         </div>
     );

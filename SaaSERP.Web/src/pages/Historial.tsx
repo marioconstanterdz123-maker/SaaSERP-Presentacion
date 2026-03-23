@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { useParams } from 'react-router-dom';
-import { Archive, Calendar as CalendarIcon, Search, DollarSign, Clock, FileText, CheckCircle } from 'lucide-react';
+import { Archive, Calendar as CalendarIcon, Search, DollarSign, Clock, FileText } from 'lucide-react';
 
 const Historial: React.FC = () => {
     const { negocioId } = useParams();
@@ -78,7 +78,7 @@ const Historial: React.FC = () => {
 
         if (negocio.sistemaAsignado === "TAQUERIA") {
             return (
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[600px] text-left border-collapse">
                     <thead>
                         <tr className="border-b-2 border-slate-200 text-slate-500 text-sm tracking-wider uppercase">
                             <th className="py-4 font-bold">Ref #</th>
@@ -107,7 +107,7 @@ const Historial: React.FC = () => {
 
         if (negocio.sistemaAsignado === "PARQUEADERO") {
             return (
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[600px] text-left border-collapse">
                     <thead>
                         <tr className="border-b-2 border-slate-200 text-slate-500 text-sm tracking-wider uppercase">
                             <th className="py-4 font-bold">Ticket #</th>
@@ -140,7 +140,7 @@ const Historial: React.FC = () => {
 
         if (negocio.sistemaAsignado === "CITAS") {
             return (
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[600px] text-left border-collapse">
                     <thead>
                         <tr className="border-b-2 border-slate-200 text-slate-500 text-sm tracking-wider uppercase">
                             <th className="py-4 font-bold">ID #</th>

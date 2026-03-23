@@ -27,6 +27,8 @@ namespace SaaSERP.Api.Models
         [MaxLength(50)]
         public string Estado { get; set; } = "Confirmada";
 
+        public bool RecordatorioEnviado { get; set; } = false;
+
         // Campos Dinámicos Opcionales
         public int? ServicioId { get; set; }
         public int? RecursoId { get; set; }

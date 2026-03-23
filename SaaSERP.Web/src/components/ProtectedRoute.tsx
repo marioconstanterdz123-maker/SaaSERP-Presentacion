@@ -29,31 +29,40 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
 
     // Zona SuperAdmin: sólo Admins
     if (requiredRole === 'SuperAdmin') {
-        const isAdmin = user.rol === 'SuperAdmin' || user.rol === 'Admin';
+        const isAdmin = user.rol === 'SuperAdmin' || user.rol === 'AdminNegocio';
         if (!isAdmin) {
             // Si es operador, mandarlo a su negocio
-            if (user.negocioId) return <Navigate to={`/negocio/${user.negocioId}/dashboard`} replace />;
+            if (user.negocioId) {
+                if (user.rol === 'Mesero') return <Navigate to={`/negocio/${user.negocioId}/pos`} replace />;
+                if (user.rol === 'Cocinero') return <Navigate to={`/negocio/${user.negocioId}/operacion`} replace />;
+                if (user.rol === 'Cajero') return <Navigate to={`/negocio/${user.negocioId}/operacion`} replace />;
+                return <Navigate to={`/negocio/${user.negocioId}/dashboard`} replace />;
+            }
             return <Navigate to="/login" replace />;
         }
     }
 
     // Zona Tenant: verificar que el negocioId de la URL coincida con el del token
     if (requiredRole === 'Tenant' && negocioId) {
-        const isAdmin = user.rol === 'SuperAdmin' || user.rol === 'Admin';
+        const isAdmin = user.rol === 'SuperAdmin' || user.rol === 'AdminNegocio';
         // SuperAdmins pueden entrar a cualquier negocio
         if (!isAdmin && user.negocioId !== parseInt(negocioId)) {
             // Redirigir a su propio negocio si lo tiene
             if (user.negocioId) {
                 if (user.rol === 'Mesero') return <Navigate to={`/negocio/${user.negocioId}/pos`} replace />;
+                if (user.rol === 'Cocinero') return <Navigate to={`/negocio/${user.negocioId}/operacion`} replace />;
+                if (user.rol === 'Cajero') return <Navigate to={`/negocio/${user.negocioId}/operacion`} replace />;
                 return <Navigate to={`/negocio/${user.negocioId}/dashboard`} replace />;
             }
             return <Navigate to="/login" replace />;
         }
 
-        // Si hay restricción de roles, verificar si el usuario tiene permiso (SuperAdmin o Admin pasan si no están bloqueados explícitamente, pero mejor los incluimos en las rutas)
+        // Si hay restricción de roles, verificar si el usuario tiene permiso
         if (allowedTenantRoles && !allowedTenantRoles.includes(user.rol)) {
-            // Redirigir a la pantalla por defecto según su rol
+            // REDIRECT FALLBACK (Evitar loops asegurando que el destino SÍ permite este rol)
             if (user.rol === 'Mesero') return <Navigate to={`/negocio/${negocioId}/pos`} replace />;
+            if (user.rol === 'Cocinero') return <Navigate to={`/negocio/${negocioId}/operacion`} replace />;
+            if (user.rol === 'Cajero') return <Navigate to={`/negocio/${negocioId}/operacion`} replace />; 
             return <Navigate to={`/negocio/${negocioId}/dashboard`} replace />;
         }
     }

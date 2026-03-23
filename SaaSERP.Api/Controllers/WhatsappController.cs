@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using SaaSERP.Api.Data;
 using System.Text;
 using System.Text.Json;
+using SaaSERP.Api.Models;
+using SaaSERP.Api.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SaaSERP.Api.Controllers
 {
@@ -20,13 +23,15 @@ namespace SaaSERP.Api.Controllers
         private readonly IHttpClientFactory _httpFactory;
         private readonly string _baseUrl;
         private readonly string _apiKey;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public WhatsAppController(SaaSContext context, IHttpClientFactory httpFactory, IConfiguration config)
+        public WhatsAppController(SaaSContext context, IHttpClientFactory httpFactory, IConfiguration config, IServiceScopeFactory scopeFactory)
         {
             _context = context;
             _httpFactory = httpFactory;
             _baseUrl = config["EvolutionApi:BaseUrl"]!.TrimEnd('/');
             _apiKey = config["EvolutionApi:GlobalApiKey"]!;
+            _scopeFactory = scopeFactory;
         }
 
         // ──────────────────────────────────────────
@@ -43,7 +48,7 @@ namespace SaaSERP.Api.Controllers
 
             // Llamar a EvolutionAPI para crear la instancia
             var client = _httpFactory.CreateClient();
-            var payload = new { instanceName = instancia, qrcode = true };
+            var payload = new { instanceName = instancia, integration = "WHATSAPP-BAILEYS", qrcode = true };
             var req = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/instance/create")
             {
                 Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
@@ -56,6 +61,8 @@ namespace SaaSERP.Api.Controllers
                 var err = await res.Content.ReadAsStringAsync();
                 return BadRequest(new { error = "Error al crear instancia en EvolutionAPI.", detalle = err });
             }
+
+            // NOTA: El Webhook se administra Vía Variables de Entorno Globales de EvolutionAPI (docker-compose)
 
             // Guardar el nombre de instancia en el negocio
             negocio.InstanciaWhatsApp = instancia;
@@ -147,6 +154,68 @@ namespace SaaSERP.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { mensaje = "Instancia de WhatsApp desconectada y eliminada." });
+        }
+
+        // ──────────────────────────────────────────
+        // 5. RECEPCIÓN DE MENSAJES (WEBHOOK)
+        //    POST /api/WhatsApp/recepcion
+        // ──────────────────────────────────────────
+        [HttpPost("recepcion")]
+        [AllowAnonymous]
+        public IActionResult WebhookRecepcion([FromBody] JsonElement rawPayload)
+        {
+            try
+            {
+                // Extraemos el evento genéricamente sin forzar tipado para evitar el HTTP 400
+                string ev = rawPayload.TryGetProperty("event", out var evProp) ? evProp.GetString() ?? "" : "";
+                
+                // Si no es un upsert, no nos interesa para la IA. Evitamos casteos propensos a errores.
+                if (ev != "messages.upsert")
+                    return Ok(new { success = true });
+
+                // Ahora sí, convertimos de manera segura
+                var payload = JsonSerializer.Deserialize<EvolutionWebhookPayload>(rawPayload.GetRawText());
+                if (payload == null) return Ok();
+
+                if (payload.Data?.Key?.FromMe == false)
+            {
+                var texto = payload.Data?.Message?.Conversation;
+                if (!string.IsNullOrEmpty(texto))
+                {
+                    Console.WriteLine($"[WhatsApp IA] Mensaje de {payload.Data?.Key?.RemoteJid} en {payload.Instance}: {texto}");
+                    
+                    var instancia = payload.Instance;
+                    var numeroCliente = (payload.Data?.Key?.RemoteJid ?? "").Split('@')[0];
+
+                    // Procesar la IA de manera asíncrona para liberar inmediatamente el Webhook y no dar Timeout
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            using var scope = _scopeFactory.CreateScope();
+                            var dbContext = scope.ServiceProvider.GetRequiredService<SaaSContext>();
+                            var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
+
+                            var negocio = await dbContext.Negocios.FirstOrDefaultAsync(n => n.InstanciaWhatsApp == instancia);
+                            if (negocio != null)
+                            {
+                                await aiService.ProcesarMensajeEntranteAsync(texto, negocio, numeroCliente, instancia);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[WhatsApp IA] Error al procesar IA: {ex.Message}");
+                        }
+                    });
+                }
+            }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WhatsApp Webhook] Parse Error: {ex.Message}");
+            }
+
+            return Ok(new { success = true });
         }
     }
 }

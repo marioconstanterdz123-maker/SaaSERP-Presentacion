@@ -155,7 +155,7 @@ const NegocioDashboard: React.FC = () => {
                                     <Tooltip 
                                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
                                         labelStyle={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '4px' }}
-                                        formatter={(value: number) => [`$${value.toLocaleString('es-MX', {minimumFractionDigits: 2})}`, 'Ingresos']}
+                                        formatter={(value: any) => [`$${Number(value).toLocaleString('es-MX', {minimumFractionDigits: 2})}`, 'Ingresos']}
                                     />
                                     <Area type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorVentas)" animationDuration={1500} />
                                 </AreaChart>

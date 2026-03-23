@@ -49,6 +49,9 @@ namespace SaaSERP.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("RecordatorioEnviado")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("RecursoId")
                         .HasColumnType("int");
 
@@ -111,6 +114,54 @@ namespace SaaSERP.Api.Migrations
                     b.ToTable("Comandas", "Operacion");
                 });
 
+            modelBuilder.Entity("SaaSERP.Api.Models.DeliveryCredencial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ClientSecret")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("NegocioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaisCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Plataforma")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("WebhookSecret")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NegocioId");
+
+                    b.ToTable("DeliveryCredenciales", "Core");
+                });
+
             modelBuilder.Entity("SaaSERP.Api.Models.DetalleComanda", b =>
                 {
                     b.Property<int>("Id")
@@ -139,7 +190,7 @@ namespace SaaSERP.Api.Migrations
 
                     b.HasIndex("ComandaId");
 
-                    b.ToTable("DetalleComanda");
+                    b.ToTable("DetalleComanda", "Operacion");
                 });
 
             modelBuilder.Entity("SaaSERP.Api.Models.KpiComandaActiva", b =>
@@ -190,6 +241,12 @@ namespace SaaSERP.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AccesoMovil")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoWeb")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
@@ -207,6 +264,23 @@ namespace SaaSERP.Api.Migrations
 
                     b.Property<TimeSpan>("HoraCierre")
                         .HasColumnType("time");
+
+                    b.Property<string>("InstanciaWhatsApp")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("MercadoPagoAccessToken")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("ModuloHistorial")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ModuloReportes")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ModuloWhatsApp")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -229,6 +303,117 @@ namespace SaaSERP.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Negocios", "Core");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.Servicio", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("DuracionMinutos")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NegocioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Precio")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Servicios", "Core");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.SkuTercero", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NegocioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Plataforma")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ServicioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SkuExterno")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NegocioId");
+
+                    b.HasIndex("ServicioId");
+
+                    b.ToTable("SkuTerceros", "Core");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.TarifaEstadia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BoletoPerdido")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CostoFraccionAdicional")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CostoPrimeraFraccion")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("FooterTicket")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("HeaderTicket")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("MinutosFraccionAdicional")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinutosPrimeraFraccion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinutosToleranciaEntrada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinutosToleranciaFraccion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NegocioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NegocioId");
+
+                    b.ToTable("TarifaEstadia", "Core");
                 });
 
             modelBuilder.Entity("SaaSERP.Api.Models.TicketParqueadero", b =>
@@ -307,6 +492,17 @@ namespace SaaSERP.Api.Migrations
                     b.ToTable("Usuarios", "Core");
                 });
 
+            modelBuilder.Entity("SaaSERP.Api.Models.DeliveryCredencial", b =>
+                {
+                    b.HasOne("SaaSERP.Api.Models.Negocio", "Negocio")
+                        .WithMany()
+                        .HasForeignKey("NegocioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Negocio");
+                });
+
             modelBuilder.Entity("SaaSERP.Api.Models.DetalleComanda", b =>
                 {
                     b.HasOne("SaaSERP.Api.Models.Comanda", null)
@@ -314,6 +510,34 @@ namespace SaaSERP.Api.Migrations
                         .HasForeignKey("ComandaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.SkuTercero", b =>
+                {
+                    b.HasOne("SaaSERP.Api.Models.Negocio", "Negocio")
+                        .WithMany()
+                        .HasForeignKey("NegocioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SaaSERP.Api.Models.Servicio", "Servicio")
+                        .WithMany()
+                        .HasForeignKey("ServicioId");
+
+                    b.Navigation("Negocio");
+
+                    b.Navigation("Servicio");
+                });
+
+            modelBuilder.Entity("SaaSERP.Api.Models.TarifaEstadia", b =>
+                {
+                    b.HasOne("SaaSERP.Api.Models.Negocio", "Negocio")
+                        .WithMany()
+                        .HasForeignKey("NegocioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Negocio");
                 });
 
             modelBuilder.Entity("SaaSERP.Api.Models.Usuario", b =>

@@ -82,7 +82,7 @@ BEGIN
     SET @ComandaId = SCOPE_IDENTITY();
 
     -- Insertar Detalles calculando sus subtotales reales
-    INSERT INTO Operacion.DetalleComandas (ComandaId, ServicioId, Cantidad, Subtotal, Notas)
+    INSERT INTO Operacion.DetalleComanda (ComandaId, ServicioId, Cantidad, Subtotal, NotasOpcionales)
     SELECT @ComandaId, d.ServicioId, d.Cantidad, (d.Cantidad * s.Precio), d.Notas
     FROM @Detalles d
     INNER JOIN Core.Servicios s ON d.ServicioId = s.Id AND s.NegocioId = @NegocioId;

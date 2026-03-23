@@ -18,8 +18,8 @@ namespace SaaSERP.Api.Controllers
 
         private int ObtenerNegocioId()
         {
-            if (Request.Headers.TryGetValue("X-Negocio-Id", out var val))
-                return int.Parse(val);
+            if (Request.Headers.TryGetValue("X-Negocio-Id", out var val) && int.TryParse(val, out var id))
+                return id;
             return 0;
         }
 

@@ -1,17 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axiosInstance from '../api/axiosConfig';
-import { ListOrdered, Coffee, Car, Scissors, Camera, Keyboard, XSquare, CheckCircle, Video, UploadCloud, Plus } from 'lucide-react';
+import { Plus, CheckCircle, Video, UploadCloud, Coffee, Car, Scissors, Camera, Keyboard, XSquare, ListOrdered } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import Tesseract from 'tesseract.js';
+import { useAuth } from '../context/AuthContext';
 
 const Operacion: React.FC = () => {
     const { negocioId } = useParams();
+    const { user } = useAuth();
     const [negocio, setNegocio] = useState<any>(null);
     const [isPlataModalOpen, setIsPlacaModalOpen] = useState(false);
     const [isCamaraOpen, setIsCamaraOpen] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [nuevaPlaca, setNuevaPlaca] = useState('');
+    const [telefonoPlaca, setTelefonoPlaca] = useState('');
     const [vehiculos, setVehiculos] = useState<any[]>([]);
+    const [modalCobro, setModalCobro] = useState<null | { placa: string; tiempo: string; cobro: number; minutos: number }>(null);
     const [comandas, setComandas] = useState<any[]>([]);
     const [citas, setCitas] = useState<any[]>([]);
     const [isCitaModalOpen, setIsCitaModalOpen] = useState(false);
@@ -32,20 +36,29 @@ const Operacion: React.FC = () => {
     const [stream, setStream] = useState<MediaStream | null>(null);
 
     useEffect(() => {
+        let intervalId: ReturnType<typeof setInterval> | null = null;
+
         axiosInstance.get('/negocios').then(res => {
             const current = res.data.find((n: any) => n.id.toString() === negocioId);
             if(current) {
                 setNegocio(current);
                 if(current.sistemaAsignado === 'PARQUEADERO') {
                     fetchVehiculosInfo();
+                    intervalId = setInterval(fetchVehiculosInfo, 10000);
                 } else if(current.sistemaAsignado === 'TAQUERIA' || current.sistemaAsignado === 'RESTAURANTES') {
                     fetchComandas();
+                    intervalId = setInterval(fetchComandas, 10000);
                 } else if (current.sistemaAsignado === 'CITAS') {
                     fetchCitas();
                     fetchCatalogosCita();
+                    intervalId = setInterval(fetchCitas, 10000);
                 }
             }
         });
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
     }, [negocioId]);
 
     const fetchComandas = async () => {
@@ -53,16 +66,7 @@ const Operacion: React.FC = () => {
             const { data } = await axiosInstance.get('/Comandas/activas', {
                 headers: { 'X-Negocio-Id': negocioId }
             });
-            // Fetch details
-            const comandasWDetails = await Promise.all(
-                data.map(async (c: any) => {
-                    const detRes = await axiosInstance.get(`/Comandas/${c.id}/detalles`, {
-                        headers: { 'X-Negocio-Id': negocioId }
-                    });
-                    return { ...c, detalles: detRes.data };
-                })
-            );
-            setComandas(comandasWDetails);
+            setComandas(data);
         } catch (error) {
             console.error(error);
         }
@@ -94,7 +98,9 @@ const Operacion: React.FC = () => {
 
     const fetchVehiculosInfo = async () => {
         try {
-            const { data } = await axiosInstance.get('/Tickets/activas');
+            const { data } = await axiosInstance.get('/Tickets/activas', {
+                headers: { 'X-Negocio-Id': negocioId }
+            });
             setVehiculos(data);
         } catch (error) {
             console.error(error);
@@ -117,6 +123,24 @@ const Operacion: React.FC = () => {
                 }
             };
 
+            const handleCobrarMP = async (comanda: any) => {
+                try {
+                    const payload = {
+                        titulo: `Consumo ${comanda.nombreCliente || comanda.tipoAtencion}`,
+                        monto: comanda.total,
+                        referencia: `CO_${comanda.id}`
+                    };
+                    const res = await axiosInstance.post('/Pagos/crear-preferencia', payload, {
+                        headers: { 'X-Negocio-Id': negocioId }
+                    });
+                    if (res.data.initPoint) {
+                        window.location.href = res.data.initPoint;
+                    }
+                } catch (e: any) {
+                    alert(e.response?.data?.error || "Error al procesar el pago con MercadoPago");
+                }
+            };
+
             const comandasFiltradas = filtroEstado === 'TODAS' ? comandas : comandas.filter(c => c.estado === filtroEstado);
 
             const getStatusColor = (estado: string) => {
@@ -130,19 +154,19 @@ const Operacion: React.FC = () => {
             };
 
             return (
-                <div className="flex flex-col flex-1 animate-fade-in-up">
-                    <div className="flex justify-between items-center mb-6 bg-white/60 p-4 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md">
-                        <div className="flex items-center gap-4">
+                <div className="flex flex-col flex-1 animate-fade-in-up md:px-2">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white/60 p-4 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md">
+                        <div className="flex items-center gap-4 mb-4 md:mb-0">
                             <Coffee size={32} className="text-orange-500 drop-shadow-sm" />
                             <div>
-                                <h3 className="text-xl font-black text-slate-800 tracking-tight">Comandas Activas</h3>
-                                <p className="text-sm font-medium text-slate-500">{comandas.length} órdenes en curso</p>
+                                <h3 className="text-lg md:text-xl font-black text-slate-800 tracking-tight">Comandas Activas</h3>
+                                <p className="text-xs md:text-sm font-medium text-slate-500">{comandas.length} órdenes en curso</p>
                             </div>
                         </div>
-                        <div className="flex bg-slate-100 p-1 rounded-2xl">
+                        <div className="flex flex-wrap gap-2 md:gap-0 bg-slate-100 p-1 rounded-2xl">
                             {['TODAS', 'Recibida', 'En Preparacion', 'Lista', 'Entregada'].map(estado => (
                                 <button key={estado} onClick={() => setFiltroEstado(estado)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${filtroEstado === estado ? 'bg-white shadow-md text-orange-600' : 'text-slate-500 hover:bg-slate-200'}`}>
+                                    className={`flex-1 md:flex-none text-center px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${filtroEstado === estado ? 'bg-white shadow-md text-orange-600' : 'text-slate-500 hover:bg-slate-200'}`}>
                                     {estado}
                                 </button>
                             ))}
@@ -162,7 +186,6 @@ const Operacion: React.FC = () => {
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(c.estado)}`}>
                                             {c.estado}
                                         </span>
-                                        <span className="font-black text-slate-300 text-xl">#{c.id.toString().padStart(3, '0')}</span>
                                     </div>
                                     
                                     <h4 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-1">{c.nombreCliente}</h4>
@@ -171,35 +194,58 @@ const Operacion: React.FC = () => {
                                     </p>
                                     
                                     <div className="bg-slate-50 rounded-2xl p-4 mb-4 flex-1">
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-slate-500 font-medium">Llegada:</span>
-                                            <span className="font-bold text-slate-700">{new Date(c.fechaCreacion).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-slate-500 font-medium">A cobrar:</span>
-                                            <span className="font-black text-emerald-600">${c.total.toFixed(2)}</span>
+                                        {/* Detalles de la orden */}
+                                        {c.detalles && c.detalles.length > 0 && (
+                                            <div className="mb-3 space-y-1.5">
+                                                {c.detalles.map((d: any, idx: number) => (
+                                                    <div key={idx} className="flex justify-between items-start text-sm">
+                                                        <div className="flex-1">
+                                                            <span className="font-bold text-slate-700">{d.cantidad}x</span>{' '}
+                                                            <span className="text-slate-600">{d.nombreServicio || `Producto #${d.servicioId}`}</span>
+                                                            {d.notasOpcionales && (
+                                                                <p className="text-xs text-red-500 font-bold ml-4 mt-0.5">⚠️ {d.notasOpcionales}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="border-t border-slate-200 pt-2 mt-2">
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="text-slate-500 font-medium">Llegada:</span>
+                                                <span className="font-bold text-slate-700">{new Date(c.fechaCreacion).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-slate-500 font-medium">A cobrar:</span>
+                                                <span className="font-black text-emerald-600">${c.total.toFixed(2)}</span>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 mt-auto">
-                                        {c.estado === 'Recibida' && (
+                                        {c.estado === 'Recibida' && (user?.rol === 'Cocinero' || user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio') && (
                                             <button onClick={() => handleCambiarEstado(c.id, 'En Preparacion')} className="col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95">
                                                 👨‍🍳 Cocinar
                                             </button>
                                         )}
-                                        {c.estado === 'En Preparacion' && (
+                                        {c.estado === 'En Preparacion' && (user?.rol === 'Cocinero' || user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio') && (
                                             <button onClick={() => handleCambiarEstado(c.id, 'Lista')} className="col-span-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95">
-                                                🔔 Marcar Lista
+                                                🔔 Marcar Lista (Avisa por WA)
                                             </button>
                                         )}
-                                        {c.estado === 'Lista' && (
+                                        {c.estado === 'Lista' && c.tipoAtencion === 'Mesas' && (user?.rol !== 'Cocinero') && (
                                             <button onClick={() => handleCambiarEstado(c.id, 'Entregada')} className="col-span-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95 text-lg">
                                                 🍽️ Entregar a Mesa
                                             </button>
                                         )}
-                                        {c.estado === 'Entregada' && (
+                                        {c.estado === 'Lista' && c.tipoAtencion !== 'Mesas' && (user?.rol === 'Cajero' || user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio') && (
                                             <button onClick={() => handleCambiarEstado(c.id, 'Cobrada')} className="col-span-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95 text-lg">
-                                                💳 Cobrar ${c.total}
+                                                🛍️ Entregar y Cobrar ${c.total.toFixed(2)}
+                                            </button>
+                                        )}
+                                        {c.estado === 'Entregada' && (user?.rol === 'Cajero' || user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio') && (
+                                            <button onClick={() => handleCambiarEstado(c.id, 'Cobrada')} className="col-span-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95 text-lg">
+                                                💳 Cobrar ${c.total.toFixed(2)}
                                             </button>
                                         )}
                                     </div>
@@ -214,24 +260,54 @@ const Operacion: React.FC = () => {
             const handleIngresoManual = async (e: React.FormEvent) => {
                 e.preventDefault();
                 try {
-                    await axiosInstance.post('/Tickets/entrada', { placa: nuevaPlaca });
+                    const res = await axiosInstance.post('/Tickets/entrada', {
+                        placa: nuevaPlaca,
+                        telefonoContacto: telefonoPlaca || null
+                    }, { headers: { 'X-Negocio-Id': negocioId } });
+                    if (res.status === 409) { alert('Este vehículo ya está registrado adentro.'); return; }
                     setIsPlacaModalOpen(false);
                     setNuevaPlaca('');
-                    // alert("Ticket generado y vehículo registrado ✅");
+                    setTelefonoPlaca('');
                     fetchVehiculosInfo();
-                } catch (error) {
-                    console.error("Error registrando entrada", error);
-                    alert("Hubo un error al registrar el vehículo.");
+                } catch (error: any) {
+                    const msg = error?.response?.data?.error ?? 'Error al registrar el vehículo.';
+                    alert(msg);
                 }
             };
 
-            const handleDarSalida = async (id: number) => {
+            const handleDarSalida = async (id: number, placa: string) => {
                 try {
-                    const { data } = await axiosInstance.put(`/Tickets/${id}/salida`);
-                    alert(`Cobro estimado: $${data.cobro}\nTiempo: ${data.tiempoTotal}`);
+                    const { data } = await axiosInstance.put(`/Tickets/${id}/salida`, {}, {
+                        headers: { 'X-Negocio-Id': negocioId }
+                    });
+                    setModalCobro({
+                        placa: data.placa ?? placa,
+                        tiempo: data.tiempoTotal,
+                        cobro: data.cobro,
+                        minutos: data.minutos ?? 0,
+                    });
                     fetchVehiculosInfo();
                 } catch (error) {
                     console.error(error);
+                    alert('Error al procesar la salida.');
+                }
+            };
+
+            const handleCobrarParqueaderoMP = async (monto: number, placa: string) => {
+                try {
+                    const payload = {
+                        titulo: `Estadia ${placa}`,
+                        monto: monto,
+                        referencia: `PQ_${placa}`
+                    };
+                    const res = await axiosInstance.post('/Pagos/crear-preferencia', payload, {
+                        headers: { 'X-Negocio-Id': negocioId }
+                    });
+                    if (res.data.initPoint) {
+                        window.location.href = res.data.initPoint;
+                    }
+                } catch (e: any) {
+                    alert(e.response?.data?.error || "Error al procesar con MercadoPago");
                 }
             };
 
@@ -301,13 +377,16 @@ const Operacion: React.FC = () => {
             };
 
             return (
-                <div className="flex flex-col items-center justify-center p-12 text-center bg-white/70 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl flex-1 animate-fade-in-up">
-                    <Car size={64} className="text-blue-500 mb-6 drop-shadow-md" />
-                    <h3 className="text-2xl font-black text-slate-800 mb-2">Caseta de Control Vehícular</h3>
-                    <p className="text-slate-500 max-w-md mx-auto">
-                        Módulo de entrada y salida flash. Aquí podrás activar tu cámara web (o celular) para escanear placas automáticamente usando IA, o registrar accesos manuales con impresión de ticket.
-                    </p>
-                    <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md mx-auto">
+                <div className="flex flex-col p-6 bg-white/70 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl flex-1 animate-fade-in-up overflow-y-auto">
+                    {/* Header + Botones siempre visibles arriba */}
+                    <div className="flex flex-col items-center text-center mb-6">
+                        <Car size={56} className="text-blue-500 mb-4 drop-shadow-md" />
+                        <h3 className="text-2xl font-black text-slate-800 mb-1">Caseta de Control Vehícular</h3>
+                        <p className="text-slate-500 max-w-md text-sm">
+                            Escanea placas con la cámara o regístralas manualmente. Los vehículos activos aparecen abajo.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md mx-auto mb-6">
                         <button onClick={abrirCamara} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
                             <Camera size={20} /> Escanear Placa
                         </button>
@@ -317,45 +396,93 @@ const Operacion: React.FC = () => {
                     </div>
 
                     {vehiculos.length > 0 && (
-                        <div className="mt-12 w-full max-w-2xl mx-auto bg-white/50 rounded-2xl p-6 border border-white max-h-64 overflow-y-auto">
-                            <h4 className="text-left font-bold text-slate-700 mb-4 flex justify-between items-center">
-                                Vehículos Adentro
-                                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">{vehiculos.length} Ocupados</span>
+                        <div className="mt-8 w-full">
+                            <h4 className="text-left font-black text-slate-700 mb-4 flex justify-between items-center text-lg">
+                                <span>🚘 Vehículos Adentro</span>
+                                <span className="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold">{vehiculos.length} Ocupados</span>
                             </h4>
-                            <div className="space-y-3">
-                                {vehiculos.map(v => (
-                                    <div key={v.id} className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:-translate-y-1 transition-transform">
-                                        <div className="text-left">
-                                            <div className="text-xl font-black text-slate-800 tracking-wider mb-1">{v.placa}</div>
-                                            <div className="text-xs text-slate-500 font-medium">Entrada: {new Date(v.horaEntrada).toLocaleTimeString()}</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {vehiculos.map((v: any) => {
+                                    const minutes = Math.floor((Date.now() - new Date(v.horaEntrada).getTime()) / 60000);
+                                    const hh = String(Math.floor(minutes / 60)).padStart(2,'0');
+                                    const mm = String(minutes % 60).padStart(2,'0');
+                                    return (
+                                        <div key={v.id} className="bg-white rounded-3xl shadow-md border border-slate-100 p-5 flex flex-col gap-3 hover:-translate-y-1 transition-transform">
+                                            <div className="flex justify-between items-center">
+                                                <div className="text-3xl font-black text-slate-800 tracking-widest">{v.placa}</div>
+                                                <div className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">{hh}:{mm} h</div>
+                                            </div>
+                                            <div className="text-xs text-slate-400 font-medium">📥 Entrada: {new Date(v.horaEntrada).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                                            {v.telefono && <div className="text-xs text-slate-400">📞 {v.telefono}</div>}
+                                            {(user?.rol === 'Cajero' || user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio') && (
+                                                <button
+                                                    onClick={() => handleDarSalida(v.id, v.placa)}
+                                                    className="w-full bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-2xl shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2"
+                                                >
+                                                    💳 Cobrar y Dar Salida
+                                                </button>
+                                            )}
                                         </div>
-                                        <button onClick={() => handleDarSalida(v.id)} className="bg-red-50 text-red-600 hover:bg-red-500 hover:text-white font-bold py-2 px-4 rounded-xl border border-red-200 transition-colors">
-                                            Cobrar y Salir
-                                        </button>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
 
                     {isPlataModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in text-left">
-                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xs overflow-hidden">
+                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
                                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 flex justify-between items-center text-white">
-                                    <h3 className="font-bold tracking-wide">Captura de Placa</h3>
-                                    <button onClick={() => setIsPlacaModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors"><XSquare size={20} /></button>
+                                    <h3 className="font-bold tracking-wide">🚗 Registrar Entrada</h3>
+                                    <button onClick={() => { setIsPlacaModalOpen(false); setNuevaPlaca(''); setTelefonoPlaca(''); }} className="hover:bg-white/20 p-2 rounded-full transition-colors"><XSquare size={20} /></button>
                                 </div>
-                                <form onSubmit={handleIngresoManual} className="p-6">
-                                    <div className="mb-4">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Folio o Placa del Vehículo</label>
-                                        <input autoFocus required type="text" placeholder="Ej. ABC-123" 
-                                            className="w-full text-center text-3xl tracking-widest uppercase bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 font-black text-slate-800" 
+                                <form onSubmit={handleIngresoManual} className="p-6 space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Folio o Placa del Vehículo *</label>
+                                        <input autoFocus required type="text" placeholder="Ej. ABC-123"
+                                            className="w-full text-center text-3xl tracking-widest uppercase bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 font-black text-slate-800"
                                             value={nuevaPlaca} onChange={e => setNuevaPlaca(e.target.value.toUpperCase())} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">📞 Teléfono cliente (opcional — recibe recibo por WA)</label>
+                                        <input type="tel" placeholder="528341234567"
+                                            className="w-full text-sm bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 font-medium text-slate-700"
+                                            value={telefonoPlaca} onChange={e => setTelefonoPlaca(e.target.value)} />
                                     </div>
                                     <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-colors active:scale-95 flex justify-center items-center gap-2">
                                         <CheckCircle size={20} /> Registrar Entrada
                                     </button>
                                 </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Modal de Cobro al dar Salida */}
+                    {modalCobro && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden text-center">
+                                <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-8 text-white">
+                                    <div className="text-5xl mb-3">✅</div>
+                                    <h3 className="text-2xl font-black tracking-tight">Salida Registrada</h3>
+                                    <p className="text-5xl font-black mt-4 drop-shadow">${modalCobro.cobro.toFixed(2)}</p>
+                                    <p className="text-sm mt-1 text-white/80">Total a cobrar</p>
+                                </div>
+                                <div className="p-6 space-y-3">
+                                    <div className="flex justify-between text-sm font-medium text-slate-600 bg-slate-50 px-4 py-3 rounded-xl">
+                                        <span>Placa</span>
+                                        <span className="font-black text-slate-800 tracking-widest">{modalCobro.placa}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm font-medium text-slate-600 bg-slate-50 px-4 py-3 rounded-xl">
+                                        <span>Tiempo de estadía</span>
+                                        <span className="font-black text-slate-800">{modalCobro.tiempo}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setModalCobro(null)}
+                                        className="w-full mt-2 bg-slate-800 hover:bg-slate-900 text-white font-black py-4 rounded-2xl shadow-lg transition-colors active:scale-95"
+                                    >
+                                        Cerrar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -433,9 +560,11 @@ const Operacion: React.FC = () => {
                                 <p className="text-sm font-medium text-slate-500">{citas.length} citas registradas</p>
                             </div>
                         </div>
-                        <button onClick={() => setIsCitaModalOpen(true)} className="bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-2xl shadow-lg shadow-pink-500/30 transition-transform active:scale-95 flex items-center gap-2">
-                            <Plus size={20} /> Nueva Cita
-                        </button>
+                        {user?.rol !== 'Cocinero' && (
+                            <button onClick={() => setIsCitaModalOpen(true)} className="bg-gradient-to-r from-fuchsia-500 to-pink-500 hover:from-fuchsia-600 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-2xl shadow-lg shadow-pink-500/30 transition-transform active:scale-95 flex items-center gap-2">
+                                <Plus size={20} /> Nueva Cita
+                            </button>
+                        )}
                     </div>
 
                     {citas.length === 0 ? (
@@ -451,7 +580,6 @@ const Operacion: React.FC = () => {
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${c.estado === 'Completada' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>
                                             {c.estado}
                                         </span>
-                                        <span className="font-black text-slate-300 text-xl">#{c.id}</span>
                                     </div>
                                     
                                     <h4 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-1">{c.nombreCliente}</h4>
@@ -467,9 +595,14 @@ const Operacion: React.FC = () => {
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-2 mt-auto">
-                                        {c.estado === 'Pendiente' && (
+                                        {c.estado === 'Pendiente' && (user?.rol === 'Cajero' || user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio') && (
                                             <button onClick={() => handleCambiarEstadoCita(c.id, 'Completada')} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95 text-lg">
                                                 ✅ Terminar y Cobrar
+                                            </button>
+                                        )}
+                                        {c.estado === 'Pendiente' && user?.rol === 'Mesero' && (
+                                            <button onClick={() => handleCambiarEstadoCita(c.id, 'Completada')} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition-transform active:scale-95 text-lg">
+                                                ✅ Marcar Completada
                                             </button>
                                         )}
                                         {c.estado === 'Completada' && (
@@ -556,12 +689,12 @@ const Operacion: React.FC = () => {
 
     return (
         <div className="h-full flex flex-col space-y-6">
-            <header className="flex justify-between items-end mb-4">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                        <ListOrdered className="text-slate-800" size={32} /> Central de Operaciones
+                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                        <ListOrdered className="text-slate-800" size={28} /> Central de Operaciones
                     </h2>
-                    <p className="text-slate-500 mt-1">El corazón del negocio. Gestiona ventas en mostrador en tiempo real.</p>
+                    <p className="text-sm md:text-base text-slate-500 mt-1">El corazón del negocio. Gestiona ventas en mostrador en tiempo real.</p>
                 </div>
             </header>
             
