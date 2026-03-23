@@ -50,7 +50,7 @@ const WhatsAppPanel: React.FC<WhatsAppPanelProps> = ({ negocioId, negocioNombre 
         try {
             const { data } = await axiosInstance.get(`/WhatsApp/${negocioId}/qr`);
             // EvolutionAPI devuelve { base64: "data:image/png;base64,..." } o similar
-            const qr = data.base64 || data.qrcode?.base64 || data.qr;
+            const qr = data.base64 || data.code || data.qrcode?.base64 || data.qr;
             if (qr) setQrBase64(qr);
             else setErrorMsg('El servidor no devolvió un QR. Intenta de nuevo en unos segundos.');
         } catch (e: any) {
