@@ -37,7 +37,13 @@ CREATE PROCEDURE [Core].[usp_Negocios_Actualizar]
     @UsaMesas BIT,
     @HoraApertura TIME,
     @HoraCierre TIME,
-    @Activo BIT
+    @Activo BIT,
+    @AccesoWeb BIT = 1,
+    @AccesoMovil BIT = 0,
+    @ModuloHistorial BIT = 1,
+    @ModuloWhatsApp BIT = 0,
+    @ModuloReportes BIT = 1,
+    @MercadoPagoAccessToken NVARCHAR(255) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -50,7 +56,13 @@ BEGIN
         UsaMesas = @UsaMesas,
         HoraApertura = @HoraApertura,
         HoraCierre = @HoraCierre,
-        Activo = @Activo
+        Activo = @Activo,
+        AccesoWeb = @AccesoWeb,
+        AccesoMovil = @AccesoMovil,
+        ModuloHistorial = @ModuloHistorial,
+        ModuloWhatsApp = @ModuloWhatsApp,
+        ModuloReportes = @ModuloReportes,
+        MercadoPagoAccessToken = @MercadoPagoAccessToken
     WHERE Id = @Id;
 
     SELECT @@ROWCOUNT;

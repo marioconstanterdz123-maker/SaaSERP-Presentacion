@@ -68,6 +68,14 @@ namespace SaaSERP.Api.Services
             parameters.Add("@HoraApertura", n.HoraApertura);
             parameters.Add("@HoraCierre", n.HoraCierre);
             parameters.Add("@Activo", n.Activo);
+            
+            // Nuevos parámetros de Módulos (Feature Flags)
+            parameters.Add("@AccesoWeb", n.AccesoWeb);
+            parameters.Add("@AccesoMovil", n.AccesoMovil);
+            parameters.Add("@ModuloHistorial", n.ModuloHistorial);
+            parameters.Add("@ModuloWhatsApp", n.ModuloWhatsApp);
+            parameters.Add("@ModuloReportes", n.ModuloReportes);
+            parameters.Add("@MercadoPagoAccessToken", n.MercadoPagoAccessToken);
 
             var rows = await connection.ExecuteScalarAsync<int>(
                 "[Core].[usp_Negocios_Actualizar]",
