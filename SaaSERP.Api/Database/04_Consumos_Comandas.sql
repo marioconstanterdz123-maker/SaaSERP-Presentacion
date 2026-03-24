@@ -69,21 +69,23 @@ BEGIN
     
     DECLARE @ComandaId INT;
     DECLARE @TotalCalculado DECIMAL(18,2) = 0;
+    DECLARE @InsertedIds TABLE (Id INT);
 
     -- Pre-Calcular Total leyendo los precios reales de la BD para evitar Fraude de la IA
-    SELECT @TotalCalculado = SUM(d.Cantidad * s.Precio)
+    SELECT @TotalCalculado = ISNULL(SUM(d.Cantidad * s.Precio), 0)
     FROM @Detalles d
     INNER JOIN Core.Servicios s ON d.ServicioId = s.Id AND s.NegocioId = @NegocioId;
 
-    -- Insertar Cabecera
-    INSERT INTO Operacion.Comandas (NegocioId, TelefonoCliente, NombreCliente, TipoAtencion, IdentificadorMesa, Total, Estado)
-    VALUES (@NegocioId, @Telefono, @NombreCliente, @TipoAtencion, @IdentificadorMesa, ISNULL(@TotalCalculado, 0), 'Recibida');
+    -- Insertar Cabecera. FechaCreacion es NOT NULL sin DEFAULT, se pasa explícito.
+    INSERT INTO Operacion.Comandas (NegocioId, TelefonoCliente, NombreCliente, TipoAtencion, IdentificadorMesa, Total, Estado, FechaCreacion)
+    OUTPUT INSERTED.Id INTO @InsertedIds
+    VALUES (@NegocioId, @Telefono, @NombreCliente, @TipoAtencion, ISNULL(@IdentificadorMesa, ''), @TotalCalculado, 'Recibida', GETDATE());
     
-    SET @ComandaId = SCOPE_IDENTITY();
+    SELECT @ComandaId = Id FROM @InsertedIds;
 
     -- Insertar Detalles calculando sus subtotales reales
     INSERT INTO Operacion.DetalleComanda (ComandaId, ServicioId, Cantidad, Subtotal, NotasOpcionales)
-    SELECT @ComandaId, d.ServicioId, d.Cantidad, (d.Cantidad * s.Precio), d.Notas
+    SELECT @ComandaId, d.ServicioId, d.Cantidad, (d.Cantidad * s.Precio), ISNULL(d.Notas, '')
     FROM @Detalles d
     INNER JOIN Core.Servicios s ON d.ServicioId = s.Id AND s.NegocioId = @NegocioId;
 
