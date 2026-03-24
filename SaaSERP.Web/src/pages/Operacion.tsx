@@ -142,8 +142,9 @@ const Operacion: React.FC = () => {
             };
 
             const comandasFiltradas = comandas.filter(c => {
-                // Si es cocinero, no debe ver las que ya están Listas o Entregadas.
-                if ((user?.rol === 'Cocina' || user?.rol === 'Cocinero') && (c.estado === 'Lista' || c.estado === 'Entregada')) return false;
+                // En el KDS central, la vista "TODAS" solo muestra comandas pendientes, sin importar el rol. 
+                // Las terminadas están en su propia pestaña explícita o se van al POS.
+                if (filtroEstado === 'TODAS' && (c.estado === 'Lista' || c.estado === 'Entregada' || c.estado === 'Cobrada')) return false;
                 if (filtroEstado !== 'TODAS' && c.estado !== filtroEstado) return false;
                 return true;
             });
