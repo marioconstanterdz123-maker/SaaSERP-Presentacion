@@ -354,6 +354,7 @@ const PuntoDeVenta: React.FC = () => {
                         </div>
                     )}
                 </div>
+            </div>{/* FIN columna izquierda */}
 
             {/* DERECHA: Carrito y Completar Orden */}
             <div className="w-full lg:w-96 flex flex-col bg-slate-800 rounded-3xl overflow-hidden shadow-2xl relative min-h-[500px] lg:min-h-0">
