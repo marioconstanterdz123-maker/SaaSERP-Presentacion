@@ -61,32 +61,45 @@ const PuntoDeVenta: React.FC = () => {
     const [showOrders, setShowOrders] = useState(true);
 
     useEffect(() => {
-        // Fetch negocio info
-        axiosInstance.get('/negocios').then(res => {
-            const current = res.data.find((n: any) => n.id.toString() === negocioId);
-            if (current) {
-                setNegocio(current);
-                // If business uses tables, fetch them from Recursos
-                if (current.usaMesas) {
-                    axiosInstance.get(`/Recursos/negocio/${negocioId}`).then(r => {
-                        setMesas(r.data);
-                    }).catch(() => {});
+        const isAdmin = user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio';
+        const cargarNegocio = async () => {
+            try {
+                let negocioData: any = null;
+                if (isAdmin) {
+                    // Admins pueden listar todos
+                    const res = await axiosInstance.get('/negocios');
+                    negocioData = res.data.find((n: any) => n.id.toString() === negocioId);
                 } else {
-                    setTipoAtencionPos('Mostrador');
+                    // Meseros/Cajeros/Cocineros: solo su negocio
+                    const res = await axiosInstance.get('/negocios/mio');
+                    negocioData = res.data;
                 }
+                if (negocioData) {
+                    setNegocio(negocioData);
+                    if (negocioData.usaMesas) {
+                        axiosInstance.get(`/Recursos/negocio/${negocioId}`).then(r => {
+                            setMesas(r.data);
+                        }).catch(() => {});
+                    } else {
+                        setTipoAtencionPos('Mostrador');
+                    }
+                }
+            } catch (err) {
+                console.error('Error cargando negocio:', err);
             }
-        });
+        };
+        cargarNegocio();
 
         // Fetch products
         axiosInstance.get(`/Servicios/negocio/${negocioId}`)
-            .then(res => setServicios(res.data))
+            .then(res => setServicios(res.data.filter((s: Servicio) => s.activo)))
             .finally(() => setIsLoading(false));
 
         // Fetch active orders
         fetchComandasActivas();
         const intervalId = setInterval(fetchComandasActivas, 15000);
         return () => clearInterval(intervalId);
-    }, [negocioId]);
+    }, [negocioId, user?.rol]);
 
     const fetchComandasActivas = async () => {
         try {
@@ -267,25 +280,33 @@ const PuntoDeVenta: React.FC = () => {
                 </div>
 
                 {/* Panel de Órdenes Activas (colapsable) */}
+                {/* El Mesero solo ve sus pedidos "En Proceso". El cajero/admin ve TODAS para poder cobrar. */}
                 <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white shadow-sm">
                     <button 
                         onClick={() => setShowOrders(!showOrders)}
                         className="w-full flex items-center justify-between p-4 text-left"
                     >
                         <h3 className="text-sm font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
-                            📋 Órdenes Activas 
-                            <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-bold">{comandasActivas.length}</span>
+                            📋 {user?.rol === 'Mesero' ? 'Mis Pedidos en Curso' : 'Órdenes Activas'}
+                            <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                                {user?.rol === 'Mesero'
+                                    ? comandasActivas.filter(c => c.estado === 'Recibida' || c.estado === 'En Preparacion').length
+                                    : comandasActivas.length}
+                            </span>
                         </h3>
                         {showOrders ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
                     </button>
                     
                     {showOrders && (
                         <div className="px-4 pb-4 max-h-52 overflow-y-auto">
-                            {comandasActivas.length === 0 ? (
-                                <p className="text-sm text-slate-400 text-center py-4">Sin órdenes activas</p>
-                            ) : (
+                            {(() => {
+                                const lista = user?.rol === 'Mesero'
+                                    ? comandasActivas.filter(c => c.estado === 'Recibida' || c.estado === 'En Preparacion')
+                                    : comandasActivas;
+                                if (lista.length === 0) return <p className="text-sm text-slate-400 text-center py-4">Sin órdenes activas</p>;
+                                return (
                                 <div className="space-y-2">
-                                    {comandasActivas.map(c => (
+                                    {lista.map(c => (
                                         <div key={c.id} className="flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm mb-2">
                                             <div className="flex items-center justify-between p-3">
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -328,11 +349,11 @@ const PuntoDeVenta: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                            )}
+                                );
+                            })()}
                         </div>
                     )}
                 </div>
-            </div>
 
             {/* DERECHA: Carrito y Completar Orden */}
             <div className="w-full lg:w-96 flex flex-col bg-slate-800 rounded-3xl overflow-hidden shadow-2xl relative min-h-[500px] lg:min-h-0">
