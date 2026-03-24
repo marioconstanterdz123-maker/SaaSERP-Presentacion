@@ -13,11 +13,21 @@ const NegocioLayout: React.FC = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
-        axiosInstance.get('/negocios').then(res => {
-            const current = res.data.find((n: any) => n.id.toString() === negocioId);
-            if(current) setNegocio(current);
-        });
-    }, [negocioId]);
+        const cargarNegocio = async () => {
+            const isAdmin = user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio';
+            if (isAdmin) {
+                // Los admins pueden listar todos los negocios y filtrar por la URL
+                const res = await axiosInstance.get('/negocios');
+                const current = res.data.find((n: any) => n.id.toString() === negocioId);
+                if (current) setNegocio(current);
+            } else {
+                // Meseros, Cajeros, Cocineros: solo acceden a su propio negocio
+                const res = await axiosInstance.get('/negocios/mio');
+                setNegocio(res.data);
+            }
+        };
+        cargarNegocio();
+    }, [negocioId, user?.rol]);
 
     const basePath = `/negocio/${negocioId}`;
     

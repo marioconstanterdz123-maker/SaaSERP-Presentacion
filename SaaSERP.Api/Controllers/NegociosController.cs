@@ -27,6 +27,22 @@ namespace SaaSERP.Api.Controllers
             return Ok(data);
         }
 
+        /// <summary>
+        /// Endpoint accesible por CUALQUIER ROL autenticado (Mesero, Cajero, Cocinero, etc.)
+        /// Devuelve la info del negocio al que pertenece el usuario según su token JWT.
+        /// </summary>
+        [HttpGet("mio")]
+        public async Task<IActionResult> GetMio()
+        {
+            var negocioIdStr = User.FindFirst("NegocioId")?.Value;
+            if (!int.TryParse(negocioIdStr, out var negocioId) || negocioId == 0)
+                return BadRequest("Este usuario no pertenece a ningún negocio.");
+
+            var negocio = await _adminService.ObtenerNegocioPorIdAsync(negocioId);
+            if (negocio == null) return NotFound("Negocio no encontrado.");
+            return Ok(negocio);
+        }
+
         [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
         public async Task<ActionResult<Negocio>> Post(Negocio negocio)
