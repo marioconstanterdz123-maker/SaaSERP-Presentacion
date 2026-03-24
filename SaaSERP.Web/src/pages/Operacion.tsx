@@ -141,7 +141,12 @@ const Operacion: React.FC = () => {
                 }
             };
 
-            const comandasFiltradas = filtroEstado === 'TODAS' ? comandas : comandas.filter(c => c.estado === filtroEstado);
+            const comandasFiltradas = comandas.filter(c => {
+                // Si es cocinero, no debe ver las que ya están Listas o Entregadas.
+                if ((user?.rol === 'Cocina' || user?.rol === 'Cocinero') && (c.estado === 'Lista' || c.estado === 'Entregada')) return false;
+                if (filtroEstado !== 'TODAS' && c.estado !== filtroEstado) return false;
+                return true;
+            });
 
             const getStatusColor = (estado: string) => {
                 switch(estado) {
@@ -179,7 +184,7 @@ const Operacion: React.FC = () => {
                             <h3 className="text-xl font-bold text-slate-400">Todo limpio en cocina</h3>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 content-start">
                             {comandasFiltradas.map(c => (
                                 <div key={c.id} className="bg-white/80 backdrop-blur-xl rounded-3xl p-5 shadow-lg border border-slate-100 flex flex-col hover:-translate-y-1 transition-transform">
                                     <div className="flex justify-between items-start mb-4">

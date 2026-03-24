@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../api/axiosConfig';
 import { ShoppingCart, Plus, Minus, Trash2, Send, Coffee, CheckCircle, Navigation, LayoutGrid, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface Servicio {
     id: number;
@@ -40,6 +41,7 @@ const ESTADO_COLORS: Record<string, string> = {
 
 const PuntoDeVenta: React.FC = () => {
     const { negocioId } = useParams();
+    const { user } = useAuth();
     const [servicios, setServicios] = useState<Servicio[]>([]);
     const [cart, setCart] = useState<CartItem[]>([]);
     const [identificadorMesa, setIdentificadorMesa] = useState('');
@@ -297,7 +299,7 @@ const PuntoDeVenta: React.FC = () => {
                                                         {c.estado}
                                                     </span>
                                                     <span className="font-black text-slate-700 text-sm ml-3">${c.total.toFixed(2)}</span>
-                                                    {(c.estado === 'Entregada' || c.estado === 'Lista') && (
+                                                    {(c.estado === 'Entregada' || c.estado === 'Lista') && (user?.rol === 'Cajero' || user?.rol === 'AdminNegocio' || user?.rol === 'SuperAdmin') && (
                                                         <button 
                                                             onClick={() => handleCobrar(c.id)}
                                                             className="ml-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 active:scale-95"
