@@ -13,7 +13,8 @@ CREATE PROCEDURE [Core].[usp_Negocios_ObtenerTodos]
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT Id, Nombre, TelefonoWhatsApp, Activo, FechaRegistro, SistemaAsignado, CapacidadMaxima, DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre
+    SELECT Id, Nombre, TelefonoWhatsApp, Activo, FechaRegistro, SistemaAsignado, CapacidadMaxima, DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre,
+           AccesoWeb, AccesoMovil, ModuloHistorial, ModuloWhatsApp, ModuloReportes, MercadoPagoAccessToken
     FROM Core.Negocios;
 END
 GO
@@ -26,7 +27,8 @@ CREATE PROCEDURE [Core].[usp_Negocios_ObtenerConfiguracionPorWhatsapp]
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT Id, Nombre, TelefonoWhatsApp, Activo, FechaRegistro, SistemaAsignado, CapacidadMaxima, DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre
+    SELECT Id, Nombre, TelefonoWhatsApp, Activo, FechaRegistro, SistemaAsignado, CapacidadMaxima, DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre,
+           AccesoWeb, AccesoMovil, ModuloHistorial, ModuloWhatsApp, ModuloReportes, MercadoPagoAccessToken
     FROM Core.Negocios
     WHERE Activo = 1 
     AND (
@@ -45,7 +47,8 @@ CREATE PROCEDURE [Core].[usp_Negocios_ObtenerConfiguracionPorId]
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT Id, Nombre, TelefonoWhatsApp, Activo, FechaRegistro, SistemaAsignado, CapacidadMaxima, DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre
+    SELECT Id, Nombre, TelefonoWhatsApp, Activo, FechaRegistro, SistemaAsignado, CapacidadMaxima, DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre,
+           AccesoWeb, AccesoMovil, ModuloHistorial, ModuloWhatsApp, ModuloReportes, MercadoPagoAccessToken
     FROM Core.Negocios
     WHERE Activo = 1 AND Id = @Id;
 END
