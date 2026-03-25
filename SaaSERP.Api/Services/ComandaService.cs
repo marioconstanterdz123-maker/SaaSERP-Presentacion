@@ -49,7 +49,10 @@ namespace SaaSERP.Api.Services
 
             if (result == null) return (-1, 0);
 
-            return ((int)result.ComandaId, (decimal)result.TotalCobrar);
+            int outId = Convert.ToInt32(result.ComandaId);
+            decimal outTotal = Convert.ToDecimal(result.TotalCobrar);
+
+            return (outId, outTotal);
         }
 
         public async Task<Comanda?> ObtenerEstadoComandaAsync(int negocioId, string telefonoCliente)
