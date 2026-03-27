@@ -12,8 +12,7 @@ const config: CapacitorConfig = {
       enabled: true
     },
     Keyboard: {
-      resize: 'none',
-      resizeOnFullScreen: true
+      resize: 'body'
     }
   }
 };

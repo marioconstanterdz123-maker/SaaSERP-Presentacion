@@ -435,7 +435,7 @@ const PuntoDeVenta: React.FC = () => {
 
     return (
         // pb-36 on mobile: cart bar (64px) + tab bar (56px) + spacing
-        <div className="flex flex-col lg:flex-row gap-3 animate-fade-in-up pb-36 lg:pb-6 relative">
+        <div className="flex flex-col sm:flex-row gap-3 animate-fade-in-up pb-36 sm:pb-6 relative">
 
             {/* LEFT: Catalog + Active Orders */}
             <div className="flex-1 flex flex-col gap-3 min-w-0">
@@ -572,12 +572,13 @@ const PuntoDeVenta: React.FC = () => {
             </div>
 
             {/* RIGHT: Desktop Cart (hidden on mobile) */}
-            <div className="hidden lg:flex w-96 flex-col bg-slate-800 rounded-3xl overflow-hidden shadow-2xl relative flex-shrink-0" style={{ minHeight: '500px' }}>
+            {/* RIGHT: Cart panel visible at sm+ (tablets & landscape) */}
+            <div className="hidden sm:flex w-80 sm:w-96 flex-col bg-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative flex-shrink-0" style={{ minHeight: '500px' }}>
                 <CartPanel />
             </div>
 
-            {/* MOBILE: Fixed bottom bar */}
-            <div className="lg:hidden fixed z-[60] left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.15)]" style={{ bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}>
+            {/* MOBILE: Fixed bottom bar (portrait phones only) */}
+            <div className="sm:hidden fixed z-[60] left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.15)]" style={{ bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}>
                 <button
                     onClick={() => setCartOpen(true)}
                     className="w-full flex items-center justify-between px-5 py-4 active:bg-slate-50 transition-colors"
@@ -606,9 +607,18 @@ const PuntoDeVenta: React.FC = () => {
 
             {/* MOBILE: Cart Bottom Sheet */}
             {cartOpen && (
-                <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end">
-                    {/* Backdrop */}
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setCartOpen(false)} />
+                <div className="sm:hidden fixed inset-0 z-50 flex flex-col justify-end">
+                    {/* Backdrop — solo cierra si el teclado NO está abierto */}
+                    <div
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        onClick={() => {
+                            if (keyboardHeight > 0) {
+                                Keyboard.hide();
+                            } else {
+                                setCartOpen(false);
+                            }
+                        }}
+                    />
                     {/* Sheet */}
                     <div className="relative bg-slate-800 rounded-t-3xl overflow-hidden flex flex-col" style={{ maxHeight: '92vh' }}>
                         {/* Drag handle */}
