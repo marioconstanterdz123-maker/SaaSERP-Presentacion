@@ -42,7 +42,10 @@ echo ""
 if [ "$SKIP_GIT" = false ]; then
   log "📥 git pull..."
   cd "$REPO_DIR"
+  # Reset deploy.sh to avoid conflicts when the script itself is updated
+  git checkout -- deploy.sh 2>/dev/null || true
   git pull origin "$(git rev-parse --abbrev-ref HEAD)"
+  chmod +x deploy.sh
   success "git OK → $(git log -1 --format='%h — %s')"
 else
   warn "Saltando git pull (--skip-git)"
