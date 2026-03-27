@@ -52,8 +52,16 @@ fi
 if [ "$WEB_ONLY" = false ]; then
   log "🔨 dotnet publish → $RUNTIME_DIR"
   cd "$API_DIR"
-  dotnet restore --nologo -q
-  dotnet publish -c Release -o "$RUNTIME_DIR" --nologo -q
+  # Find the .csproj file explicitly (avoids picking up the .slnx solution which doesn't support --output)
+  CSPROJ=$(find . -maxdepth 1 -name "*.csproj" | head -1)
+  if [ -z "$CSPROJ" ]; then
+    error "No se encontró ningún .csproj en $API_DIR"
+  fi
+  log "  Proyecto: $CSPROJ"
+  # Clean stale cache files that can cause MSB3492 errors
+  rm -f obj/Release/net10.0/*.cache 2>/dev/null || true
+  dotnet restore "$CSPROJ" --nologo -q
+  dotnet publish "$CSPROJ" -c Release -o "$RUNTIME_DIR" --nologo -q
   success "API compilada"
 
   log "🔄 Reiniciando $SERVICE_NAME..."
