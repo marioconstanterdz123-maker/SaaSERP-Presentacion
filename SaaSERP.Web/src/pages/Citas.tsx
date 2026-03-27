@@ -132,8 +132,8 @@ const Citas: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    {/* MOBILE: Card list view */}
-                    <div className="md:hidden space-y-3">
+                    {/* MOBILE: Card list view (portrait phones only) */}
+                    <div className="sm:hidden space-y-3">
                         {citas.map((c: any) => (
                             <div
                                 key={c.id}
@@ -155,8 +155,8 @@ const Citas: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* DESKTOP: Big Calendar */}
-                    <div className="hidden md:flex bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex-1 p-5 min-h-[750px] overflow-hidden flex-col">
+                    {/* TABLET+DESKTOP: Calendar (visible at sm+) */}
+                    <div className="hidden sm:flex bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex-1 p-5 min-h-[750px] overflow-hidden flex-col">
                         <Calendar
                             localizer={localizer}
                             events={citas.map((c: any) => ({
