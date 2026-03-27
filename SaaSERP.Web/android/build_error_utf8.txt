@@ -1,0 +1,797 @@
+﻿Initialized native services in: C:\Users\Administrador\.gradle\native
+Initialized jansi services in: C:\Users\Administrador\.gradle\native
+Found daemon DaemonInfo{pid=11808, address=[d16a020f-2092-4a2f-a69c-26a5589ac5d8 port:59708, addresses:[/127.0.0.1]], state=Idle, lastBusy=1774450479799, context=DefaultDaemonContext[uid=56fc27bc-1683-4bea-8c92-9001a7e5d818,javaHome=C:\Users\Administrador\.antigravity\extensions\redhat.java-1.53.0-win32-x64\jre\21.0.10-win32-x86_64,javaVersion=21,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\Administrador\.gradle\daemon,pid=11808,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-Xmx1536m,-Dfile.encoding=UTF-8,-Duser.country=MX,-Duser.language=es,-Duser.variant]} however its context does not match the desired criteria.
+JVM is incompatible.
+Wanted: DaemonRequestContext{jvmCriteria=C:\Program Files\Java\jdk-17 (no JDK specified, using current Java home), daemonOpts=[-Xmx1536m, -Dfile.encoding=windows-1252, -Duser.country=MX, -Duser.language=es, -Duser.variant], applyInstrumentationAgent=true, nativeServicesMode=ENABLED, priority=NORMAL}
+Actual: DefaultDaemonContext[uid=56fc27bc-1683-4bea-8c92-9001a7e5d818,javaHome=C:\Users\Administrador\.antigravity\extensions\redhat.java-1.53.0-win32-x64\jre\21.0.10-win32-x86_64,javaVersion=21,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\Administrador\.gradle\daemon,pid=11808,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-Xmx1536m,-Dfile.encoding=UTF-8,-Duser.country=MX,-Duser.language=es,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 14928). The daemon log file: C:\Users\Administrador\.gradle\daemon\8.14.3\daemon-14928.out.log
+Starting 5th build in daemon [uptime: 1 hrs 25 mins 19.126 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 1.5 GiB]
+Using 4 worker leases.
+Now considering [E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\settings.gradle'.
+Projects loaded. Root project using build file 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\build.gradle'.
+Included projects: [root project 'android', project ':app', project ':capacitor-android', project ':capacitor-cordova-android-plugins']
+
+> Configure project :
+Evaluating root project 'android' using build file 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\build.gradle'.
+
+> Configure project :app
+Evaluating project ':app' using build file 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\build.gradle'.
+Using default execution profile
+google-services.json not found, google-services plugin not applied. Push Notifications won't work
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-android
+Evaluating project ':capacitor-android' using build file 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\build.gradle'.
+Using default execution profile
+
+> Configure project :capacitor-cordova-android-plugins
+Evaluating project ':capacitor-cordova-android-plugins' using build file 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\build.gradle'.
+Using default execution profile
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+All projects evaluated.
+Task name matched 'assembleDebug'
+Selected primary task 'assembleDebug' from project :
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Tasks to be executed: [task ':app:preBuild', task ':app:preDebugBuild', task ':app:mergeDebugNativeDebugMetadata', task ':app:javaPreCompileDebug', task ':capacitor-android:preBuild', task ':capacitor-android:preDebugBuild', task ':capacitor-android:writeDebugAarMetadata', task ':capacitor-cordova-android-plugins:preBuild', task ':capacitor-cordova-android-plugins:preDebugBuild', task ':capacitor-cordova-android-plugins:writeDebugAarMetadata', task ':app:checkDebugAarMetadata', task ':capacitor-android:processDebugNavigationResources', task ':capacitor-cordova-android-plugins:processDebugNavigationResources', task ':app:processDebugNavigationResources', task ':app:compileDebugNavigationResources', task ':app:generateDebugResValues', task ':capacitor-android:generateDebugResValues', task ':capacitor-android:generateDebugResources', task ':capacitor-android:packageDebugResources', task ':capacitor-cordova-android-plugins:generateDebugResValues', task ':capacitor-cordova-android-plugins:generateDebugResources', task ':capacitor-cordova-android-plugins:packageDebugResources', task ':app:mapDebugSourceSetPaths', task ':app:generateDebugResources', task ':app:mergeDebugResources', task ':app:packageDebugResources', task ':app:parseDebugLocalResources', task ':app:createDebugCompatibleScreenManifests', task ':app:extractDeepLinksDebug', task ':capacitor-android:extractDeepLinksDebug', task ':capacitor-android:processDebugManifest', task ':capacitor-cordova-android-plugins:extractDeepLinksDebug', task ':capacitor-cordova-android-plugins:processDebugManifest', task ':app:processDebugMainManifest', task ':app:processDebugManifest', task ':app:processDebugManifestForPackage', task ':capacitor-android:compileDebugLibraryResources', task ':capacitor-android:parseDebugLocalResources', task ':capacitor-android:generateDebugRFile', task ':capacitor-cordova-android-plugins:compileDebugLibraryResources', task ':capacitor-cordova-android-plugins:parseDebugLocalResources', task ':capacitor-cordova-android-plugins:generateDebugRFile', task ':app:processDebugResources', task ':capacitor-android:javaPreCompileDebug', task ':capacitor-android:compileDebugJavaWithJavac', task ':capacitor-android:bundleLibCompileToJarDebug', task ':capacitor-cordova-android-plugins:javaPreCompileDebug', task ':capacitor-cordova-android-plugins:compileDebugJavaWithJavac', task ':capacitor-cordova-android-plugins:bundleLibCompileToJarDebug', task ':app:compileDebugJavaWithJavac', task ':app:mergeDebugShaders', task ':app:compileDebugShaders', task ':app:generateDebugAssets', task ':capacitor-android:mergeDebugShaders', task ':capacitor-android:compileDebugShaders', task ':capacitor-android:generateDebugAssets', task ':capacitor-android:mergeDebugAssets', task ':capacitor-cordova-android-plugins:mergeDebugShaders', task ':capacitor-cordova-android-plugins:compileDebugShaders', task ':capacitor-cordova-android-plugins:generateDebugAssets', task ':capacitor-cordova-android-plugins:mergeDebugAssets', task ':app:mergeDebugAssets', task ':app:compressDebugAssets', task ':capacitor-android:bundleLibRuntimeToJarDebug', task ':capacitor-cordova-android-plugins:bundleLibRuntimeToJarDebug', task ':app:desugarDebugFileDependencies', task ':app:dexBuilderDebug', task ':app:mergeDebugGlobalSynthetics', task ':app:processDebugJavaRes', task ':capacitor-android:processDebugJavaRes', task ':capacitor-cordova-android-plugins:processDebugJavaRes', task ':app:mergeDebugJavaResource', task ':app:checkDebugDuplicateClasses', task ':app:mergeExtDexDebug', task ':capacitor-android:bundleLibRuntimeToDirDebug', task ':capacitor-cordova-android-plugins:bundleLibRuntimeToDirDebug', task ':app:mergeLibDexDebug', task ':app:mergeProjectDexDebug', task ':app:mergeDebugJniLibFolders', task ':capacitor-android:mergeDebugJniLibFolders', task ':capacitor-android:mergeDebugNativeLibs', task ':capacitor-android:copyDebugJniLibsProjectOnly', task ':capacitor-cordova-android-plugins:mergeDebugJniLibFolders', task ':capacitor-cordova-android-plugins:mergeDebugNativeLibs', task ':capacitor-cordova-android-plugins:copyDebugJniLibsProjectOnly', task ':app:mergeDebugNativeLibs', task ':app:stripDebugDebugSymbols', task ':app:validateSigningDebug', task ':app:writeDebugAppMetadata', task ':app:writeDebugSigningConfigVersions', task ':app:packageDebug', task ':app:createDebugApkListingFileRedirect', task ':app:assembleDebug', task ':capacitor-android:checkDebugAarMetadata', task ':capacitor-android:stripDebugDebugSymbols', task ':capacitor-android:copyDebugJniLibsProjectAndLocalJars', task ':capacitor-android:extractDebugAnnotations', task ':capacitor-android:extractDeepLinksForAarDebug', task ':capacitor-android:mergeDebugGeneratedProguardFiles', task ':capacitor-android:mergeDebugConsumerProguardFiles', task ':capacitor-android:prepareDebugArtProfile', task ':capacitor-android:prepareLintJarForPublish', task ':capacitor-android:mergeDebugJavaResource', task ':capacitor-android:syncDebugLibJars', task ':capacitor-android:bundleDebugAar', task ':capacitor-android:assembleDebug', task ':capacitor-cordova-android-plugins:checkDebugAarMetadata', task ':capacitor-cordova-android-plugins:stripDebugDebugSymbols', task ':capacitor-cordova-android-plugins:copyDebugJniLibsProjectAndLocalJars', task ':capacitor-cordova-android-plugins:extractDebugAnnotations', task ':capacitor-cordova-android-plugins:extractDeepLinksForAarDebug', task ':capacitor-cordova-android-plugins:mergeDebugGeneratedProguardFiles', task ':capacitor-cordova-android-plugins:mergeDebugConsumerProguardFiles', task ':capacitor-cordova-android-plugins:prepareDebugArtProfile', task ':capacitor-cordova-android-plugins:prepareLintJarForPublish', task ':capacitor-cordova-android-plugins:mergeDebugJavaResource', task ':capacitor-cordova-android-plugins:syncDebugLibJars', task ':capacitor-cordova-android-plugins:bundleDebugAar', task ':capacitor-cordova-android-plugins:assembleDebug']
+Tasks that were excluded: []
+work action Parameters of IdentityTransform (Thread[Execution worker,5,main]) started.
+work action Parameters of DexingNoClasspathTransform (Thread[Execution worker,5,main]) started.
+work action Parameters of DexingOutputSplitTransform (Thread[included builds,5,main]) started.
+work action Parameters of ClassesDirToClassesTransform (Thread[included builds,5,main]) started.
+work action Parameters of DexingOutputSplitTransform (Thread[included builds,5,main]) started.
+Resolve mutations for :app:preBuild (Thread[included builds,5,main]) started.
+:app:preBuild (Thread[included builds,5,main]) started.
+
+> Task :app:preBuild UP-TO-DATE
+Skipping task ':app:preBuild' as it has no actions.
+Resolve mutations for :app:preDebugBuild (Thread[included builds,5,main]) started.
+:app:preDebugBuild (Thread[included builds,5,main]) started.
+
+> Task :app:preDebugBuild UP-TO-DATE
+Skipping task ':app:preDebugBuild' as it has no actions.
+Resolve mutations for :app:mergeDebugNativeDebugMetadata (Thread[included builds,5,main]) started.
+:app:mergeDebugNativeDebugMetadata (Thread[included builds,5,main]) started.
+
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+Skipping task ':app:mergeDebugNativeDebugMetadata' as it has no source files and no previous output files.
+Resolve mutations for :app:javaPreCompileDebug (Thread[Execution worker,5,main]) started.
+:app:javaPreCompileDebug (Thread[Execution worker,5,main]) started.
+
+> Task :app:javaPreCompileDebug UP-TO-DATE
+Caching disabled for task ':app:javaPreCompileDebug' because:
+  Build cache is disabled
+Skipping task ':app:javaPreCompileDebug' as it is up-to-date.
+Resolve mutations for :capacitor-android:preBuild (Thread[Execution worker,5,main]) started.
+:capacitor-android:preBuild (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-android:preBuild UP-TO-DATE
+Skipping task ':capacitor-android:preBuild' as it has no actions.
+Resolve mutations for :capacitor-android:preDebugBuild (Thread[Execution worker,5,main]) started.
+:capacitor-android:preDebugBuild (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-android:preDebugBuild UP-TO-DATE
+Skipping task ':capacitor-android:preDebugBuild' as it has no actions.
+Resolve mutations for :capacitor-android:writeDebugAarMetadata (Thread[Execution worker,5,main]) started.
+:capacitor-android:writeDebugAarMetadata (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':capacitor-android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':capacitor-android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :capacitor-android) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:preBuild (Thread[Execution worker,5,main]) started.
+:capacitor-cordova-android-plugins:preBuild (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:preBuild UP-TO-DATE
+Skipping task ':capacitor-cordova-android-plugins:preBuild' as it has no actions.
+Resolve mutations for :capacitor-cordova-android-plugins:preDebugBuild (Thread[Execution worker,5,main]) started.
+:capacitor-cordova-android-plugins:preDebugBuild (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:preDebugBuild UP-TO-DATE
+Skipping task ':capacitor-cordova-android-plugins:preDebugBuild' as it has no actions.
+Resolve mutations for :capacitor-cordova-android-plugins:writeDebugAarMetadata (Thread[Execution worker,5,main]) started.
+:capacitor-cordova-android-plugins:writeDebugAarMetadata (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':capacitor-cordova-android-plugins:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :capacitor-cordova-android-plugins) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :app:checkDebugAarMetadata (Thread[Execution worker,5,main]) started.
+:app:checkDebugAarMetadata (Thread[Execution worker,5,main]) started.
+
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for task ':app:checkDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app:checkDebugAarMetadata' as it is up-to-date.
+Resolve mutations for :capacitor-android:processDebugNavigationResources (Thread[Execution worker,5,main]) started.
+:capacitor-android:processDebugNavigationResources (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-android:processDebugNavigationResources UP-TO-DATE
+Caching disabled for task ':capacitor-android:processDebugNavigationResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:processDebugNavigationResources' as it is up-to-date.
+work action resolve debug (project :capacitor-android) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:processDebugNavigationResources (Thread[Execution worker,5,main]) started.
+:capacitor-cordova-android-plugins:processDebugNavigationResources (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:processDebugNavigationResources UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:processDebugNavigationResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:processDebugNavigationResources' as it is up-to-date.
+work action resolve debug (project :capacitor-cordova-android-plugins) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :app:processDebugNavigationResources (Thread[Execution worker,5,main]) started.
+:app:processDebugNavigationResources (Thread[Execution worker,5,main]) started.
+
+> Task :app:processDebugNavigationResources UP-TO-DATE
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for task ':app:processDebugNavigationResources' because:
+  Build cache is disabled
+Skipping task ':app:processDebugNavigationResources' as it is up-to-date.
+Resolve mutations for :app:compileDebugNavigationResources (Thread[Execution worker,5,main]) started.
+:app:compileDebugNavigationResources (Thread[Execution worker,5,main]) started.
+
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+Caching disabled for task ':app:compileDebugNavigationResources' because:
+  Build cache is disabled
+Skipping task ':app:compileDebugNavigationResources' as it is up-to-date.
+Resolve mutations for :app:generateDebugResValues (Thread[Execution worker,5,main]) started.
+:app:generateDebugResValues (Thread[Execution worker,5,main]) started.
+
+> Task :app:generateDebugResValues UP-TO-DATE
+Caching disabled for task ':app:generateDebugResValues' because:
+  Build cache is disabled
+Skipping task ':app:generateDebugResValues' as it is up-to-date.
+Resolve mutations for :capacitor-android:generateDebugResValues (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:generateDebugResValues (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:generateDebugResValues UP-TO-DATE
+Caching disabled for task ':capacitor-android:generateDebugResValues' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:generateDebugResValues' as it is up-to-date.
+Resolve mutations for :capacitor-android:generateDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:generateDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:generateDebugResources UP-TO-DATE
+Caching disabled for task ':capacitor-android:generateDebugResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:generateDebugResources' as it is up-to-date.
+Resolve mutations for :capacitor-android:packageDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:packageDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:packageDebugResources UP-TO-DATE
+Caching disabled for task ':capacitor-android:packageDebugResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:packageDebugResources' as it is up-to-date.
+work action resolve packageDebugResources (project :capacitor-android) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:generateDebugResValues (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-cordova-android-plugins:generateDebugResValues (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:generateDebugResValues UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:generateDebugResValues' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:generateDebugResValues' as it is up-to-date.
+Resolve mutations for :capacitor-cordova-android-plugins:generateDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-cordova-android-plugins:generateDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:generateDebugResources UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:generateDebugResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:generateDebugResources' as it is up-to-date.
+Resolve mutations for :capacitor-cordova-android-plugins:packageDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-cordova-android-plugins:packageDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:packageDebugResources UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:packageDebugResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:packageDebugResources' as it is up-to-date.
+work action resolve packageDebugResources (project :capacitor-cordova-android-plugins) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :app:mapDebugSourceSetPaths (Thread[Execution worker Thread 2,5,main]) started.
+:app:mapDebugSourceSetPaths (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for task ':app:mapDebugSourceSetPaths' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app:mapDebugSourceSetPaths' as it is up-to-date.
+Resolve mutations for :app:generateDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+:app:generateDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:generateDebugResources UP-TO-DATE
+Caching disabled for task ':app:generateDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:generateDebugResources' as it is up-to-date.
+Resolve mutations for :app:mergeDebugResources (Thread[Execution worker Thread 2,5,main]) started.
+:app:mergeDebugResources (Thread[included builds,5,main]) started.
+
+> Task :app:mergeDebugResources UP-TO-DATE
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for task ':app:mergeDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:mergeDebugResources' as it is up-to-date.
+Resolve mutations for :app:packageDebugResources (Thread[included builds,5,main]) started.
+:app:packageDebugResources (Thread[included builds,5,main]) started.
+
+> Task :app:packageDebugResources UP-TO-DATE
+Caching disabled for task ':app:packageDebugResources' because:
+  Build cache is disabled
+Skipping task ':app:packageDebugResources' as it is up-to-date.
+Resolve mutations for :app:parseDebugLocalResources (Thread[included builds,5,main]) started.
+:app:parseDebugLocalResources (Thread[included builds,5,main]) started.
+
+> Task :app:parseDebugLocalResources UP-TO-DATE
+Caching disabled for task ':app:parseDebugLocalResources' because:
+  Build cache is disabled
+Skipping task ':app:parseDebugLocalResources' as it is up-to-date.
+Resolve mutations for :app:createDebugCompatibleScreenManifests (Thread[included builds,5,main]) started.
+:app:createDebugCompatibleScreenManifests (Thread[included builds,5,main]) started.
+
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+Caching disabled for task ':app:createDebugCompatibleScreenManifests' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app:createDebugCompatibleScreenManifests' as it is up-to-date.
+Resolve mutations for :app:extractDeepLinksDebug (Thread[Execution worker Thread 2,5,main]) started.
+:app:extractDeepLinksDebug (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+Caching disabled for task ':app:extractDeepLinksDebug' because:
+  Build cache is disabled
+Skipping task ':app:extractDeepLinksDebug' as it is up-to-date.
+Resolve mutations for :capacitor-android:extractDeepLinksDebug (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:extractDeepLinksDebug (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:extractDeepLinksDebug UP-TO-DATE
+Caching disabled for task ':capacitor-android:extractDeepLinksDebug' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:extractDeepLinksDebug' as it is up-to-date.
+work action resolve navigation.json (project :capacitor-android) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :capacitor-android:processDebugManifest (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:processDebugManifest (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:processDebugManifest UP-TO-DATE
+Caching disabled for task ':capacitor-android:processDebugManifest' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:processDebugManifest' as it is up-to-date.
+work action resolve AndroidManifest.xml (project :capacitor-android) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:extractDeepLinksDebug (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-cordova-android-plugins:extractDeepLinksDebug (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:extractDeepLinksDebug UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:extractDeepLinksDebug' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:extractDeepLinksDebug' as it is up-to-date.
+work action resolve navigation.json (project :capacitor-cordova-android-plugins) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:processDebugManifest (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-cordova-android-plugins:processDebugManifest (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:processDebugManifest UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:processDebugManifest' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:processDebugManifest' as it is up-to-date.
+work action resolve AndroidManifest.xml (project :capacitor-cordova-android-plugins) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :app:processDebugMainManifest (Thread[Execution worker Thread 2,5,main]) started.
+:app:processDebugMainManifest (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:processDebugMainManifest UP-TO-DATE
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for task ':app:processDebugMainManifest' because:
+  Build cache is disabled
+Skipping task ':app:processDebugMainManifest' as it is up-to-date.
+Resolve mutations for :app:processDebugManifest (Thread[included builds,5,main]) started.
+:app:processDebugManifest (Thread[included builds,5,main]) started.
+
+> Task :app:processDebugManifest UP-TO-DATE
+Caching disabled for task ':app:processDebugManifest' because:
+  Build cache is disabled
+Skipping task ':app:processDebugManifest' as it is up-to-date.
+Resolve mutations for :app:processDebugManifestForPackage (Thread[included builds,5,main]) started.
+:app:processDebugManifestForPackage (Thread[included builds,5,main]) started.
+
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+Custom actions are attached to task ':app:processDebugManifestForPackage'.
+Caching disabled for task ':app:processDebugManifestForPackage' because:
+  Build cache is disabled
+Skipping task ':app:processDebugManifestForPackage' as it is up-to-date.
+Resolve mutations for :capacitor-android:compileDebugLibraryResources (Thread[included builds,5,main]) started.
+:capacitor-android:compileDebugLibraryResources (Thread[included builds,5,main]) started.
+
+> Task :capacitor-android:compileDebugLibraryResources UP-TO-DATE
+Caching disabled for task ':capacitor-android:compileDebugLibraryResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:compileDebugLibraryResources' as it is up-to-date.
+work action resolve out (project :capacitor-android) (Thread[included builds,5,main]) started.
+Resolve mutations for :capacitor-android:parseDebugLocalResources (Thread[included builds,5,main]) started.
+:capacitor-android:parseDebugLocalResources (Thread[included builds,5,main]) started.
+
+> Task :capacitor-android:parseDebugLocalResources UP-TO-DATE
+Caching disabled for task ':capacitor-android:parseDebugLocalResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:parseDebugLocalResources' as it is up-to-date.
+Resolve mutations for :capacitor-android:generateDebugRFile (Thread[included builds,5,main]) started.
+:capacitor-android:generateDebugRFile (Thread[included builds,5,main]) started.
+
+> Task :capacitor-android:generateDebugRFile UP-TO-DATE
+Caching disabled for task ':capacitor-android:generateDebugRFile' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:generateDebugRFile' as it is up-to-date.
+work action resolve package-aware-r.txt (project :capacitor-android) (Thread[included builds,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:compileDebugLibraryResources (Thread[included builds,5,main]) started.
+:capacitor-cordova-android-plugins:compileDebugLibraryResources (Thread[included builds,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:compileDebugLibraryResources UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:compileDebugLibraryResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:compileDebugLibraryResources' as it is up-to-date.
+work action resolve out (project :capacitor-cordova-android-plugins) (Thread[included builds,5,main]) started.
+Resolve mutations for :capacitor-cordova-android-plugins:parseDebugLocalResources (Thread[included builds,5,main]) started.
+:capacitor-cordova-android-plugins:parseDebugLocalResources (Thread[included builds,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:parseDebugLocalResources UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:parseDebugLocalResources' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:parseDebugLocalResources' as it is up-to-date.
+Resolve mutations for :capacitor-cordova-android-plugins:generateDebugRFile (Thread[Execution worker,5,main]) started.
+:capacitor-cordova-android-plugins:generateDebugRFile (Thread[Execution worker,5,main]) started.
+
+> Task :capacitor-cordova-android-plugins:generateDebugRFile UP-TO-DATE
+Caching disabled for task ':capacitor-cordova-android-plugins:generateDebugRFile' because:
+  Build cache is disabled
+Skipping task ':capacitor-cordova-android-plugins:generateDebugRFile' as it is up-to-date.
+work action resolve package-aware-r.txt (project :capacitor-cordova-android-plugins) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :app:processDebugResources (Thread[Execution worker,5,main]) started.
+:app:processDebugResources (Thread[Execution worker,5,main]) started.
+
+> Task :app:processDebugResources
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e47013dec160bb8e8e78795049f410c2\transformed\framework-14.0.1 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\bee8f78bb28e6cb788edd05c601f4778\transformed\appcompat-resources-1.7.1 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\bee8f78bb28e6cb788edd05c601f4778\transformed\appcompat-resources-1.7.1\res\drawable\abc_vector_test.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\b0c0f6e5cf8c063ebc46ab02fdd866c0-40e1b9d1-6573-40c9-954e-2dacbc0a3c7f\transformed\androidx.appcompat.resources\drawable_abc_vector_test.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\ef97883a45eaa5cc79115d450cce1dbe\transformed\coordinatorlayout-1.3.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\res\drawable\compat_splash_screen.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c8b11c3b46846ff7b21a9ebd2fa5da5f-7ca1d47d-742c-4f1d-968d-ea136737925c\transformed\androidx.core.splashscreen\drawable_compat_splash_screen.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4ce00e85fb17003296e7add5523825c1\transformed\activity-1.11.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\1e3e5961ccf37b13ee8a7c0a81228664\transformed\cursoradapter-1.0.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\res\drawable\compat_splash_screen_no_icon_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c8b11c3b46846ff7b21a9ebd2fa5da5f-7ca1d47d-742c-4f1d-968d-ea136737925c\transformed\androidx.core.splashscreen\drawable_compat_splash_screen_no_icon_background.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\res\drawable\icon_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c8b11c3b46846ff7b21a9ebd2fa5da5f-7ca1d47d-742c-4f1d-968d-ea136737925c\transformed\androidx.core.splashscreen\drawable_icon_background.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\res\drawable-v23\compat_splash_screen.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c8b11c3b46846ff7b21a9ebd2fa5da5f-7ca1d47d-742c-4f1d-968d-ea136737925c\transformed\androidx.core.splashscreen\drawable-v23_compat_splash_screen.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\res\drawable-v23\compat_splash_screen_no_icon_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c8b11c3b46846ff7b21a9ebd2fa5da5f-7ca1d47d-742c-4f1d-968d-ea136737925c\transformed\androidx.core.splashscreen\drawable-v23_compat_splash_screen_no_icon_background.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\res\layout\splash_screen_view.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c8b11c3b46846ff7b21a9ebd2fa5da5f-7ca1d47d-742c-4f1d-968d-ea136737925c\transformed\androidx.core.splashscreen\layout_splash_screen_view.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\f570623fbaea2df5386d3e48ada25a61\transformed\drawerlayout-1.0.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\anim-v21\fragment_fast_out_extra_slow_in.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\anim-v21_fragment_fast_out_extra_slow_in.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\animator\fragment_close_enter.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\animator_fragment_close_enter.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\animator\fragment_close_exit.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\animator_fragment_close_exit.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\animator\fragment_fade_enter.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\animator_fragment_fade_enter.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\animator\fragment_fade_exit.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\animator_fragment_fade_exit.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\25a881cfd51f0b690442a74b496782fd\transformed\emoji2-views-helper-1.3.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\animator\fragment_open_enter.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\animator_fragment_open_enter.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9\res\animator\fragment_open_exit.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\d7207a9a4a9aaba99fd2d1519cb87e64-2f7698e0-4f79-487c-946c-c56599d79268\transformed\androidx.fragment\animator_fragment_open_exit.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\5c150d65e548acad3954bacf90b47f66\transformed\viewpager-1.0.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\596ab941bf00b590daff3ec7eb267457\transformed\customview-1.0.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c2f70b51baa62bcee94ea5c7e05791a1\transformed\webkit-1.14.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\dbca2f6d95f7d2f69dee86e3f7b328a8\transformed\vectordrawable-animated-1.1.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\98eaa2f86c1e52fdab04ff44c25cd64f\transformed\vectordrawable-1.1.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\6443194ff2cd53b8a19f0de2b31832a0\transformed\core-ktx-1.17.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c0a22850032ed8caa67b3d94a8173736\transformed\loader-1.0.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_fade_in.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_fade_in.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_fade_out.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_fade_out.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_grow_fade_in_from_bottom.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_grow_fade_in_from_bottom.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_popup_enter.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_popup_enter.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_popup_exit.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_popup_exit.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_shrink_fade_out_from_bottom.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_shrink_fade_out_from_bottom.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_slide_in_bottom.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_slide_in_bottom.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_slide_in_top.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_slide_in_top.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_slide_out_bottom.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_slide_out_bottom.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_slide_out_top.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_slide_out_top.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_tooltip_enter.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_tooltip_enter.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\ic_call_answer.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_ic_call_answer.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\abc_tooltip_exit.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_abc_tooltip_exit.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\ic_call_answer_low.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_ic_call_answer_low.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_checkbox_to_checked_box_inner_merged_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_checkbox_to_checked_box_inner_merged_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_checkbox_to_checked_box_outer_merged_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_checkbox_to_checked_box_outer_merged_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\ic_call_answer_video.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_ic_call_answer_video.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_checkbox_to_checked_icon_null_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_checkbox_to_checked_icon_null_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_checkbox_to_unchecked_box_inner_merged_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_checkbox_to_unchecked_box_inner_merged_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_checkbox_to_unchecked_check_path_merged_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_checkbox_to_unchecked_check_path_merged_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\ic_call_answer_video_low.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_ic_call_answer_video_low.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\ic_call_decline.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_ic_call_decline.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_checkbox_to_unchecked_icon_null_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_checkbox_to_unchecked_icon_null_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\ic_call_decline_low.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_ic_call_decline_low.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_radio_to_off_mtrl_dot_group_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_radio_to_off_mtrl_dot_group_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\notification_bg.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_notification_bg.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_radio_to_off_mtrl_ring_outer_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_radio_to_off_mtrl_ring_outer_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\notification_bg_low.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_notification_bg_low.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\notification_icon_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_notification_icon_background.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_radio_to_off_mtrl_ring_outer_path_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_radio_to_off_mtrl_ring_outer_path_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable\notification_tile_bg.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable_notification_tile_bg.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_radio_to_on_mtrl_dot_group_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_radio_to_on_mtrl_dot_group_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_radio_to_on_mtrl_ring_outer_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_radio_to_on_mtrl_ring_outer_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\anim\btn_radio_to_on_mtrl_ring_outer_path_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\anim_btn_radio_to_on_mtrl_ring_outer_path_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_background_cache_hint_selector_material_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_background_cache_hint_selector_material_dark.xml.flat
+AAPT2 aapt2-8.13.0-13719691-windows Daemon #0: starting
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_background_cache_hint_selector_material_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_background_cache_hint_selector_material_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_btn_colored_text_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_btn_colored_text_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_hint_foreground_material_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_hint_foreground_material_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_hint_foreground_material_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_hint_foreground_material_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_primary_text_disable_only_material_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_primary_text_disable_only_material_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_primary_text_disable_only_material_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_primary_text_disable_only_material_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_primary_text_material_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_primary_text_material_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_primary_text_material_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_primary_text_material_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_search_url_text.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_search_url_text.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_secondary_text_material_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_secondary_text_material_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_secondary_text_material_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_secondary_text_material_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_tint_btn_checkable.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_tint_btn_checkable.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_tint_default.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_tint_default.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_tint_edittext.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_tint_edittext.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_tint_seek_thumb.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_tint_seek_thumb.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_tint_spinner.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_tint_spinner.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\abc_tint_switch_track.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_abc_tint_switch_track.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\switch_thumb_material_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_switch_thumb_material_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color\switch_thumb_material_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color_switch_thumb_material_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v21\abc_btn_colored_borderless_text_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v21_abc_btn_colored_borderless_text_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_btn_colored_borderless_text_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_btn_colored_borderless_text_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_btn_colored_text_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_btn_colored_text_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_color_highlight_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_color_highlight_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_tint_btn_checkable.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_tint_btn_checkable.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_tint_default.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_tint_default.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_tint_edittext.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_tint_edittext.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_tint_seek_thumb.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_tint_seek_thumb.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_tint_spinner.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_tint_spinner.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\color-v23\abc_tint_switch_track.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\color-v23_abc_tint_switch_track.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_btn_borderless_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_btn_borderless_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_btn_check_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_btn_check_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_btn_check_material_anim.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_btn_check_material_anim.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_btn_default_mtrl_shape.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_btn_default_mtrl_shape.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_btn_radio_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_btn_radio_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_btn_radio_material_anim.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_btn_radio_material_anim.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_cab_background_internal_bg.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_cab_background_internal_bg.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_cab_background_top_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_cab_background_top_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_ab_back_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_ab_back_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_arrow_drop_right_black_24dp.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_arrow_drop_right_black_24dp.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_clear_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_clear_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_go_search_api_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_go_search_api_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_menu_copy_mtrl_am_alpha.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_menu_copy_mtrl_am_alpha.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_menu_cut_mtrl_alpha.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_menu_cut_mtrl_alpha.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_menu_overflow_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_menu_overflow_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_menu_paste_mtrl_am_alpha.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_menu_paste_mtrl_am_alpha.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_menu_selectall_mtrl_alpha.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_menu_selectall_mtrl_alpha.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_menu_share_mtrl_alpha.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_menu_share_mtrl_alpha.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_search_api_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_search_api_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ic_voice_search_api_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ic_voice_search_api_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_item_background_holo_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_item_background_holo_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_item_background_holo_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_item_background_holo_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_list_selector_background_transition_holo_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_list_selector_background_transition_holo_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_list_selector_background_transition_holo_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_list_selector_background_transition_holo_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_list_selector_holo_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_list_selector_holo_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_list_selector_holo_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_list_selector_holo_light.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ratingbar_indicator_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ratingbar_indicator_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ratingbar_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ratingbar_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_ratingbar_small_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_ratingbar_small_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_seekbar_thumb_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_seekbar_thumb_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_seekbar_tick_mark_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_seekbar_tick_mark_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_seekbar_track_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_seekbar_track_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_spinner_textfield_background_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_spinner_textfield_background_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_star_black_48dp.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_star_black_48dp.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_star_half_black_48dp.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_star_half_black_48dp.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_switch_thumb_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_switch_thumb_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_tab_indicator_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_tab_indicator_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_textfield_search_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_textfield_search_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\abc_text_cursor_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_abc_text_cursor_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_checkbox_checked_mtrl.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_checkbox_checked_mtrl.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_checkbox_checked_to_unchecked_mtrl_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_checkbox_checked_to_unchecked_mtrl_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_checkbox_unchecked_mtrl.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_checkbox_unchecked_mtrl.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_checkbox_unchecked_to_checked_mtrl_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_checkbox_unchecked_to_checked_mtrl_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_radio_off_mtrl.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_radio_off_mtrl.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_radio_off_to_on_mtrl_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_radio_off_to_on_mtrl_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_radio_on_mtrl.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_radio_on_mtrl.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\btn_radio_on_to_off_mtrl_animation.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_btn_radio_on_to_off_mtrl_animation.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\test_level_drawable.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_test_level_drawable.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\tooltip_frame_dark.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_tooltip_frame_dark.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable\tooltip_frame_light.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable_tooltip_frame_light.xml.flat
+AAPT2 aapt2-8.13.0-13719691-windows Daemon #1: starting
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\drawable-v21\notification_action_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\drawable-v21_notification_action_background.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout\custom_dialog.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout_custom_dialog.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout\ime_base_split_test_activity.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout_ime_base_split_test_activity.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout\ime_secondary_split_test_activity.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout_ime_secondary_split_test_activity.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout\notification_template_part_chronometer.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout_notification_template_part_chronometer.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout\notification_template_part_time.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout_notification_template_part_time.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout-v21\notification_action.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout-v21_notification_action.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout-v21\notification_action_tombstone.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout-v21_notification_action_tombstone.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout-v21\notification_template_custom_big.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout-v21_notification_template_custom_big.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\res\layout-v21\notification_template_icon_group.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\2ba6d8368914deab094422c34e740a2d-29d7dfa0-24d7-49be-b936-aac89ad1ed23\transformed\androidx.core\layout-v21_notification_template_icon_group.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\8d83e436f29a9ad9858ae8c630f3448b\transformed\lifecycle-livedata-2.6.2 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\ab32e4c3e2bf096654fd9e14504854dc\transformed\lifecycle-viewmodel-2.6.2 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\b5655c5df44c26433ffde34d45e6b2a4\transformed\lifecycle-livedata-core-2.6.2 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\de2a1b5c01db4d02ef6d13f0f4e2cf96\transformed\lifecycle-viewmodel-savedstate-2.6.2 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\ebf9360ba611f1d20f2bddac6f1045ca\transformed\lifecycle-runtime-2.6.2 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\3f2ab0b27a59a3dfe1466c241ece8334\transformed\savedstate-1.2.1 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\7179ce4c01b9a0b75718a869351620f5\transformed\startup-runtime-1.1.1 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\b26bfd9a484ffd5014f872ac1684c434\transformed\versionedparcelable-1.1.1 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\a927f34fced1647a8adc4ec57dcbe539\transformed\interpolator-1.0.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\dcfd9b438b7b1dc562c63a5efe9cf4a0\transformed\tracing-1.2.0 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\56c299ca5cc1351fb9b11d94695125dc\transformed\core-runtime-2.2.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-v21\abc_action_bar_item_background_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-v21_abc_action_bar_item_background_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-v21\abc_btn_colored_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-v21_abc_btn_colored_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-v21\abc_dialog_material_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-v21_abc_dialog_material_background.xml.flat
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\1d9ef0194f51a6e0da4e440575587814\transformed\annotation-experimental-1.4.1 because:
+  Build cache is disabled
+Caching disabled for AarResourcesCompilerTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\9275faa7fc56368462609e8a34802ec7\transformed\core-viewtree-1.0.0 because:
+  Build cache is disabled
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-v21\abc_edit_text_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-v21_abc_edit_text_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-v21\abc_list_divider_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-v21_abc_list_divider_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-v23\abc_control_background_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-v23_abc_control_background_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\drawable-watch-v20\abc_dialog_material_background.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\drawable-watch-v20_abc_dialog_material_background.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\btn_checkbox_checked_mtrl_animation_interpolator_0.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_btn_checkbox_checked_mtrl_animation_interpolator_0.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\btn_checkbox_checked_mtrl_animation_interpolator_1.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_btn_checkbox_checked_mtrl_animation_interpolator_1.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\btn_checkbox_unchecked_mtrl_animation_interpolator_0.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_btn_checkbox_unchecked_mtrl_animation_interpolator_0.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\btn_checkbox_unchecked_mtrl_animation_interpolator_1.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_btn_checkbox_unchecked_mtrl_animation_interpolator_1.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\btn_radio_to_off_mtrl_animation_interpolator_0.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_btn_radio_to_off_mtrl_animation_interpolator_0.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\btn_radio_to_on_mtrl_animation_interpolator_0.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_btn_radio_to_on_mtrl_animation_interpolator_0.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\interpolator\fast_out_slow_in.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\interpolator_fast_out_slow_in.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_action_bar_title_item.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_action_bar_title_item.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_action_bar_up_container.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_action_bar_up_container.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_action_menu_item_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_action_menu_item_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_action_menu_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_action_menu_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_action_mode_bar.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_action_mode_bar.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_action_mode_close_item_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_action_mode_close_item_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_activity_chooser_view.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_activity_chooser_view.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_activity_chooser_view_list_item.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_activity_chooser_view_list_item.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_alert_dialog_button_bar_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_alert_dialog_button_bar_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_alert_dialog_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_alert_dialog_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_alert_dialog_title_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_alert_dialog_title_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_cascading_menu_item_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_cascading_menu_item_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_dialog_title_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_dialog_title_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_expanded_menu_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_expanded_menu_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_list_menu_item_checkbox.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_list_menu_item_checkbox.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_list_menu_item_icon.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_list_menu_item_icon.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_list_menu_item_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_list_menu_item_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_list_menu_item_radio.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_list_menu_item_radio.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_popup_menu_header_item_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_popup_menu_header_item_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_popup_menu_item_layout.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_popup_menu_item_layout.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_screen_content_include.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_screen_content_include.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_screen_simple.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_screen_simple.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_screen_simple_overlay_action_mode.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_screen_simple_overlay_action_mode.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_screen_toolbar.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_screen_toolbar.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_search_dropdown_item_icons_2line.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_search_dropdown_item_icons_2line.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_search_view.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_search_view.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_select_dialog_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_select_dialog_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\abc_tooltip.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_abc_tooltip.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\select_dialog_item_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_select_dialog_item_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\select_dialog_multichoice_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_select_dialog_multichoice_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\select_dialog_singlechoice_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_select_dialog_singlechoice_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout\support_simple_spinner_dropdown_item.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout_support_simple_spinner_dropdown_item.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout-v26\abc_screen_toolbar.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout-v26_abc_screen_toolbar.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout-watch-v20\abc_alert_dialog_button_bar_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout-watch-v20_abc_alert_dialog_button_bar_material.xml.flat
+Compiling xml file C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1\res\layout-watch-v20\abc_alert_dialog_title_material.xml to C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e5789ef212f5ac5f7388a3f19fcff38c-9b42f30f-1f0a-4953-9ac9-3899efb55df6\transformed\androidx.appcompat\layout-watch-v20_abc_alert_dialog_title_material.xml.flat
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\capacitor-cordova-android-plugins\src\main\libs', not found
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\e47013dec160bb8e8e78795049f410c2\transformed\framework-14.0.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\bee8f78bb28e6cb788edd05c601f4778\transformed\appcompat-resources-1.7.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c3f09e8abd8bb01c9314454bd06bb337\transformed\appcompat-1.7.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\ef97883a45eaa5cc79115d450cce1dbe\transformed\coordinatorlayout-1.3.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\754c4f1b691d2a1223e4f8f413992fee\transformed\fragment-1.8.9 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\4ce00e85fb17003296e7add5523825c1\transformed\activity-1.11.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\1e3e5961ccf37b13ee8a7c0a81228664\transformed\cursoradapter-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\f570623fbaea2df5386d3e48ada25a61\transformed\drawerlayout-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\25a881cfd51f0b690442a74b496782fd\transformed\emoji2-views-helper-1.3.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\5c150d65e548acad3954bacf90b47f66\transformed\viewpager-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\596ab941bf00b590daff3ec7eb267457\transformed\customview-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c2f70b51baa62bcee94ea5c7e05791a1\transformed\webkit-1.14.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\dbca2f6d95f7d2f69dee86e3f7b328a8\transformed\vectordrawable-animated-1.1.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\98eaa2f86c1e52fdab04ff44c25cd64f\transformed\vectordrawable-1.1.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\6443194ff2cd53b8a19f0de2b31832a0\transformed\core-ktx-1.17.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\c0a22850032ed8caa67b3d94a8173736\transformed\loader-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\ab32e4c3e2bf096654fd9e14504854dc\transformed\lifecycle-viewmodel-2.6.2 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\8d83e436f29a9ad9858ae8c630f3448b\transformed\lifecycle-livedata-2.6.2 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\b5655c5df44c26433ffde34d45e6b2a4\transformed\lifecycle-livedata-core-2.6.2 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\ebf9360ba611f1d20f2bddac6f1045ca\transformed\lifecycle-runtime-2.6.2 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\de2a1b5c01db4d02ef6d13f0f4e2cf96\transformed\lifecycle-viewmodel-savedstate-2.6.2 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\3f2ab0b27a59a3dfe1466c241ece8334\transformed\savedstate-1.2.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\7179ce4c01b9a0b75718a869351620f5\transformed\startup-runtime-1.1.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\b26bfd9a484ffd5014f872ac1684c434\transformed\versionedparcelable-1.1.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\a927f34fced1647a8adc4ec57dcbe539\transformed\interpolator-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\dcfd9b438b7b1dc562c63a5efe9cf4a0\transformed\tracing-1.2.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\56c299ca5cc1351fb9b11d94695125dc\transformed\core-runtime-2.2.0 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\1d9ef0194f51a6e0da4e440575587814\transformed\annotation-experimental-1.4.1 because:
+  Build cache is disabled
+  Caching not enabled.
+Caching disabled for LibrarySymbolTableTransform: C:\Users\Administrador\.gradle\caches\8.14.3\transforms\9275faa7fc56368462609e8a34802ec7\transformed\core-viewtree-1.0.0 because:
+  Build cache is disabled
+  Caching not enabled.
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\libs', not found
+Caching disabled for task ':app:processDebugResources' because:
+  Build cache is disabled
+Task ':app:processDebugResources' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':app:processDebugResources'.
+
+Resolve mutations for :capacitor-android:javaPreCompileDebug (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:javaPreCompileDebug (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:javaPreCompileDebug UP-TO-DATE
+Caching disabled for task ':capacitor-android:javaPreCompileDebug' because:
+  Build cache is disabled
+Skipping task ':capacitor-android:javaPreCompileDebug' as it is up-to-date.
+Resolve mutations for :capacitor-android:compileDebugJavaWithJavac (Thread[Execution worker Thread 2,5,main]) started.
+:capacitor-android:compileDebugJavaWithJavac (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :capacitor-android:compileDebugJavaWithJavac FAILED
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+Custom actions are attached to task ':capacitor-android:compileDebugJavaWithJavac'.
+Caching disabled for task ':capacitor-android:compileDebugJavaWithJavac' because:
+  Build cache is disabled
+Task ':capacitor-android:compileDebugJavaWithJavac' is not up-to-date because:
+  Task has failed previously.
+The input changes require a full rebuild for incremental task ':capacitor-android:compileDebugJavaWithJavac'.
+Compilation mode: in-process compilation
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\libs', not found
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain 'C:\Program Files\Java\jdk-17'.
+file or directory 'E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\node_modules\@capacitor\android\capacitor\src\debug\java', not found
+Compiling with JDK Java compiler API.
+
+> Task :app:processDebugResources
+Aapt output file E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android\app\build\intermediates\linked_resources_binary_format\debug\processDebugResources\linked-resources-binary-format-debug.ap_
+AAPT2 aapt2-8.13.0-13719691-windows Daemon #0: shutdown
+AAPT2 aapt2-8.13.0-13719691-windows Daemon #1: shutdown
+
+[Incubating] Problems report is available at: file:///E:/SistemaGit/SaaSERP-Victoria/SaaSERP.Web/android/build/reports/problems/problems-report.html
+38 actionable tasks: 2 executed, 36 up-to-date
+Watched directory hierarchies: [E:\SistemaGit\SaaSERP-Victoria\SaaSERP.Web\android]

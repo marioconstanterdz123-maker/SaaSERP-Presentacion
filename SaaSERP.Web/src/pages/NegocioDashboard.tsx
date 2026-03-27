@@ -45,22 +45,22 @@ const NegocioDashboard: React.FC = () => {
         <div className="h-full flex flex-col space-y-6 animate-fade-in-up">
             <header className="flex justify-between items-end mb-2">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                        <Activity className="text-blue-500" size={32} /> 
-                        Panel de Rendimiento Local
+                    <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                        <Activity className="text-blue-500" size={24} /> 
+                        <span className="leading-tight">Panel de Rendimiento</span>
                     </h2>
-                    <p className="text-slate-500 mt-1">Estadísticas y resumen de la sucursal <b>{negocio?.nombre}</b> al día de hoy.</p>
+                    <p className="text-slate-500 mt-1 text-sm md:text-base">Sucursal: <b>{negocio?.nombre}</b></p>
                 </div>
             </header>
 
             {/* KPI Cards Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-6 shadow-[0_10px_40px_-15px_rgba(16,185,129,0.7)] text-white relative overflow-hidden group hover:scale-[1.02] transition-transform">
                     <div className="absolute -right-8 -top-8 bg-white/10 w-32 h-32 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                     <div className="flex justify-between items-start mb-4 relative z-10">
                         <div>
                             <p className="text-emerald-100 font-bold uppercase tracking-wider text-sm mb-1">Caja del Día</p>
-                            <h3 className="text-4xl font-black tracking-tight">${stats.ingresosHoy.toLocaleString('es-MX', {minimumFractionDigits: 2})}</h3>
+                            <h3 className="text-3xl md:text-4xl font-black tracking-tight">${stats.ingresosHoy.toLocaleString('es-MX', {minimumFractionDigits: 2})}</h3>
                         </div>
                         <div className="bg-emerald-400/50 p-3 rounded-2xl backdrop-blur-sm"><DollarSign size={24} /></div>
                     </div>
@@ -74,7 +74,7 @@ const NegocioDashboard: React.FC = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <p className="text-slate-500 font-bold uppercase tracking-wider text-sm mb-1">Ocupación Actual</p>
-                                <h3 className="text-4xl font-black text-slate-800 tracking-tight">{stats.vehiculosAdentro} <span className="text-lg text-slate-400 font-bold">/ {negocio?.capacidadMaxima}</span></h3>
+                                <h3 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">{stats.vehiculosAdentro} <span className="text-lg text-slate-400 font-bold">/ {negocio?.capacidadMaxima}</span></h3>
                             </div>
                             <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl"><Car size={24} /></div>
                         </div>
@@ -90,7 +90,7 @@ const NegocioDashboard: React.FC = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <p className="text-slate-500 font-bold uppercase tracking-wider text-sm mb-1">Comandas en Cocina</p>
-                                <h3 className="text-4xl font-black text-orange-500 tracking-tight">{stats.comandasActivas}</h3>
+                                <h3 className="text-3xl md:text-4xl font-black text-orange-500 tracking-tight">{stats.comandasActivas}</h3>
                             </div>
                             <div className="bg-orange-50 text-orange-500 p-3 rounded-2xl"><Coffee size={24} /></div>
                         </div>
@@ -120,7 +120,7 @@ const NegocioDashboard: React.FC = () => {
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <p className="text-slate-500 font-bold uppercase tracking-wider text-sm mb-1">Clientes Atendidos</p>
-                            <h3 className="text-4xl font-black text-slate-800 tracking-tight">{stats.clientesRegistrados}</h3>
+                            <h3 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">{stats.clientesRegistrados}</h3>
                         </div>
                         <div className="bg-purple-50 text-purple-500 p-3 rounded-2xl"><Users size={24} /></div>
                     </div>
@@ -132,7 +132,7 @@ const NegocioDashboard: React.FC = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 w-full mt-4 grid grid-cols-1 gap-6 pb-6">
-                <div className="w-full bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all h-[400px] flex flex-col animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                <div className="w-full bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-4 md:p-6 hover:shadow-2xl transition-all h-[220px] md:h-[400px] flex flex-col animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                     <div className="mb-6 flex justify-between items-center px-2">
                         <div>
                             <h3 className="text-xl font-bold text-slate-800">Tendencia de Ingresos</h3>

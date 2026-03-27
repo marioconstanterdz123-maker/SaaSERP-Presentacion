@@ -490,3 +490,31 @@ EvolutionSaaS/redis_data/
 **/mongo_data/
 **/postgres_data/
 **/redis_data/
+
+# Vite / React build output
+dist/
+SaaSERP.Web/dist/
+
+# Android build artifacts
+SaaSERP.Web/android/build/
+SaaSERP.Web/android/app/build/
+SaaSERP.Web/android/.gradle/
+saaserp_mobile/android/build/
+saaserp_mobile/android/app/build/
+saaserp_mobile/android/.gradle/
+
+# APK / AAB binaries
+*.apk
+*.aab
+
+# Flutter build & tool files
+saaserp_mobile/build/
+saaserp_mobile/.dart_tool/
+saaserp_mobile/.flutter-plugins
+saaserp_mobile/.flutter-plugins-dependencies
+
+# TS error scratch files
+ts_errors*.txt
+
+# Android SDK local config (machine-specific)
+local.properties

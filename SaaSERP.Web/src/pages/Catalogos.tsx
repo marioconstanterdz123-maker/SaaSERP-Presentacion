@@ -84,98 +84,94 @@ const Catalogos: React.FC = () => {
     const isRestaurante = negocio?.sistemaAsignado === 'TAQUERIA' || negocio?.sistemaAsignado === 'RESTAURANTES';
 
     return (
-        <div className="h-full flex flex-col space-y-6">
-            <header className="flex justify-between items-end mb-4">
+        <div className="h-full flex flex-col space-y-4">
+            <header className="flex flex-col md:flex-row md:justify-between md:items-end mb-2 gap-3">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                        {isParqueadero && <Car className="text-blue-500" size={32} />}
-                        {isRestaurante && <Coffee className="text-orange-500" size={32} />}
-                        {isCitas && <Scissors className="text-fuchsia-500" size={32} />}
-                        {isParqueadero ? 'Tarifas del Estacionamiento' : isRestaurante ? 'Catálogo de Artículos' : 'Listado de Servicios'}
+                    <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                        {isParqueadero && <Car className="text-blue-500" size={24} />}
+                        {isRestaurante && <Coffee className="text-orange-500" size={24} />}
+                        {isCitas && <Scissors className="text-fuchsia-500" size={24} />}
+                        <span className="leading-tight">{isParqueadero ? 'Tarifas' : isRestaurante ? 'Catálogo' : 'Servicios'}</span>
                     </h2>
-                    <p className="text-slate-500 mt-1">
-                        {isParqueadero ? 'Configura los cobros por hora, fracción o pensión completa.' : 'Administra los productos o servicios que ofrecerá este negocio.'}
+                    <p className="text-slate-500 mt-0.5 text-xs md:text-sm">
+                        {isParqueadero ? 'Configura cobros por hora, fracción o pensión.' : 'Administra los productos o servicios del negocio.'}
                     </p>
                 </div>
-                <div className="flex flex-col items-end gap-3">
+                <div className="flex flex-col gap-2 md:items-end">
                     <button 
                         onClick={() => setIsModalOpen(true)}
-                        className={`text-white font-bold py-3 px-6 rounded-2xl shadow-lg flex items-center gap-2 transition-transform active:scale-95 ${
+                        className={`w-full md:w-auto text-white font-bold py-2.5 px-5 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 ${
                             isParqueadero ? 'bg-gradient-to-r from-blue-500 to-indigo-500 shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-600' :
                             isCitas ? 'bg-gradient-to-r from-fuchsia-500 to-purple-500 shadow-fuchsia-500/30 hover:from-fuchsia-600 hover:to-purple-600' :
                             'bg-gradient-to-r from-orange-500 to-rose-500 shadow-orange-500/30 hover:from-orange-600 hover:to-rose-600'
                         }`}
                     >
-                        <Plus size={20} /> {isParqueadero ? 'Nueva Tarifa' : isRestaurante ? 'Nuevo Artículo' : 'Nuevo Servicio'}
+                        <Plus size={18} /> {isParqueadero ? 'Nueva Tarifa' : isRestaurante ? 'Nuevo Artículo' : 'Nuevo Servicio'}
                     </button>
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Buscar elementos..."
-                            className="bg-white border border-slate-200 rounded-xl px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-slate-400 text-sm font-medium text-slate-700 shadow-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+                    <input
+                        type="text"
+                        placeholder="Buscar elementos..."
+                        className="w-full md:w-64 bg-white border border-slate-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400 text-sm font-medium text-slate-700 shadow-sm"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
             </header>
 
             {loading ? (
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center py-12">
                     <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
+            ) : servicios.filter(s => s.nombre.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 ? (
+                <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-12 text-center text-slate-400 animate-fade-in-up">
+                    <Coffee size={40} className="mx-auto mb-3 opacity-30" />
+                    <p className="font-medium">{searchTerm ? 'Sin resultados.' : 'Aún no hay artículos en el catálogo.'}</p>
+                </div>
             ) : (
-                <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 flex-1 overflow-hidden flex flex-col animate-fade-in-up">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-200 text-slate-500 text-sm uppercase tracking-wider">
-                                    <th className="p-5 font-semibold">Concepto / Nombre</th>
-                                    <th className="p-5 font-semibold">Precio</th>
-                                    {negocio?.sistemaAsignado === 'CITAS' && <th className="p-5 font-semibold">Duración</th>}
-                                    <th className="p-5 font-semibold text-center">Estado</th>
-                                    <th className="p-5 font-semibold text-right">Opciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {servicios.filter(s => s.nombre.toLowerCase().includes(searchTerm.toLowerCase())).map(s => (
-                                    <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="p-5 font-bold text-slate-700">{s.nombre}</td>
-                                        <td className="p-5 text-emerald-600 font-bold">${s.precio.toFixed(2)}</td>
-                                        {negocio?.sistemaAsignado === 'CITAS' && (
-                                            <td className="p-5 text-slate-600 text-sm">
-                                                {s.duracionEstimadaMinutos > 0 ? `${s.duracionEstimadaMinutos} mins` : 'N/A'}
-                                            </td>
-                                        )}
-                                        <td className="p-5 text-center">
-                                            <button onClick={() => handleToggleEstado(s)} className="hover:scale-105 transition-transform">
-                                                {s.activo ? 
-                                                    <span className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
-                                                        <CheckCircle2 size={12} /> Disponible
-                                                    </span> : 
-                                                    <span className="flex items-center gap-1 bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
-                                                        <XCircle size={12} /> Oculto
-                                                    </span>
-                                                }
-                                            </button>
-                                        </td>
-                                        <td className="p-5 text-right">
-                                            <button className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-xl transition-colors">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {servicios.length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className="p-12 text-center text-slate-500">
-                                            Aún no hay servicios registrados en este catálogo.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 animate-fade-in-up">
+                    {servicios.filter(s => s.nombre.toLowerCase().includes(searchTerm.toLowerCase())).map(s => (
+                        <div
+                            key={s.id}
+                            className={`bg-white rounded-2xl border shadow-sm p-3 flex flex-col gap-2.5 transition-all hover:-translate-y-0.5 ${
+                                s.activo ? 'border-slate-100' : 'border-slate-100 opacity-55'
+                            }`}
+                        >
+                            {/* Name + delete */}
+                            <div className="flex items-start justify-between gap-1">
+                                <p className="font-black text-slate-800 text-sm leading-tight flex-1 min-w-0 line-clamp-2">{s.nombre}</p>
+                                <button className="p-1 rounded-xl text-slate-200 hover:text-red-400 hover:bg-red-50 transition-all flex-shrink-0">
+                                    <Trash2 size={13} />
+                                </button>
+                            </div>
+
+                            {/* Price */}
+                            <div className="text-emerald-600 font-black text-lg leading-none">
+                                ${s.precio.toFixed(2)}
+                            </div>
+
+                            {/* Duration (CITAS only) */}
+                            {isCitas && s.duracionEstimadaMinutos > 0 && (
+                                <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg w-fit">
+                                    ⏱ {s.duracionEstimadaMinutos} min
+                                </span>
+                            )}
+
+                            {/* Status toggle */}
+                            <button
+                                onClick={() => handleToggleEstado(s)}
+                                className={`w-full flex items-center justify-center gap-1 py-1.5 rounded-xl text-[11px] font-bold border transition-all active:scale-95 ${
+                                    s.activo
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                        : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+                                }`}
+                            >
+                                {s.activo
+                                    ? <><CheckCircle2 size={11} /> En Menú</>
+                                    : <><XCircle size={11} /> Oculto</>
+                                }
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 

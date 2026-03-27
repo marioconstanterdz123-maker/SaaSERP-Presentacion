@@ -29,7 +29,6 @@ const Recursos: React.FC = () => {
             const current = res.data.find((n: any) => n.id.toString() === negocioId);
             if(current) {
                 setNegocio(current);
-                // Predefinimos el tipo genérico en base al giro
                 setNewRecurso(prev => ({
                     ...prev, 
                     tipo: current.sistemaAsignado === 'TAQUERIA' || current.sistemaAsignado === 'RESTAURANTES' ? 'MESA' : 'COLABORADOR' 
@@ -56,7 +55,7 @@ const Recursos: React.FC = () => {
             await axiosInstance.post('/recursos', newRecurso);
             setIsModalOpen(false);
             fetchRecursos();
-            setNewRecurso(prev => ({ ...prev, nombre: '' })); // Reset solo el nombre para añadir rápido
+            setNewRecurso(prev => ({ ...prev, nombre: '' }));
         } catch (err) {
             console.error("Error creando recurso", err);
         }
@@ -73,123 +72,135 @@ const Recursos: React.FC = () => {
     };
 
     const isMesas = negocio?.sistemaAsignado === 'TAQUERIA' || negocio?.sistemaAsignado === 'RESTAURANTES';
+    const filtrados = recursos.filter(r => r.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-        <div className="h-full flex flex-col space-y-6">
-            <header className="flex justify-between items-end mb-4">
+        <div className="flex flex-col gap-4">
+            {/* ===== HEADER ===== */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                        <Users className="text-blue-500" size={32} /> 
-                        {isMesas ? 'Disposición de Mesas' : 'Personal y Colaboradores'}
+                    <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                        <Users className="text-blue-500 flex-shrink-0" size={22} />
+                        {isMesas ? 'Disposición de Mesas' : 'Colaboradores'}
                     </h2>
-                    <p className="text-slate-500 mt-1">
-                        {isMesas ? 'Administra las mesas disponibles en el local.' : 'Agrega al personal operativo o colaboradores que brindan los servicios.'}
+                    <p className="text-slate-500 mt-0.5 text-sm">
+                        {isMesas ? 'Administra las mesas del local.' : 'Personal operativo del negocio.'}
                     </p>
                 </div>
-                <div className="flex flex-col items-end gap-3">
-                    <button 
-                        onClick={() => setIsModalOpen(true)}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-transform active:scale-95"
-                    >
-                        <Plus size={20} /> {isMesas ? 'Nueva Mesa' : 'Nuevo Colaborador'}
-                    </button>
-                    <input
-                        type="text"
-                        placeholder="Buscar..."
-                        className="bg-white border border-slate-200 text-sm font-medium px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-sm"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
-                </div>
-            </header>
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex-shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 px-5 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-transform active:scale-95"
+                >
+                    <Plus size={18} /> {isMesas ? 'Nueva Mesa' : 'Nuevo'}
+                </button>
+            </div>
 
+            {/* ===== SEARCH ===== */}
+            <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">🔍</span>
+                <input
+                    type="search"
+                    placeholder="Buscar..."
+                    className="w-full bg-white border border-slate-200 text-sm font-medium pl-10 pr-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {/* ===== CONTENT ===== */}
             {loading ? (
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex items-center justify-center py-16">
                     <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
+            ) : filtrados.length === 0 ? (
+                <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-12 text-center text-slate-400">
+                    <Users size={40} className="mx-auto mb-3 opacity-30" />
+                    <p className="font-medium">{searchTerm ? 'Sin resultados para la búsqueda.' : `Sin ${isMesas ? 'mesas' : 'colaboradores'} registrados.`}</p>
+                </div>
             ) : (
-                <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 flex-1 overflow-hidden flex flex-col animate-fade-in-up">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-200 text-slate-500 text-sm uppercase tracking-wider">
-                                    <th className="p-5 font-semibold">Identificador / Nombre</th>
-                                    <th className="p-5 font-semibold">Tipo Clasificación</th>
-                                    <th className="p-5 font-semibold text-center">Estado</th>
-                                    <th className="p-5 font-semibold text-right">Opciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {recursos.filter(r => r.nombre.toLowerCase().includes(searchTerm.toLowerCase())).map(r => (
-                                    <tr key={r.id} className="hover:bg-blue-50/50 transition-colors">
-                                        <td className="p-5 font-bold text-slate-700">{r.nombre}</td>
-                                        <td className="p-5 text-slate-600">
-                                            <span className="bg-slate-100 px-3 py-1 rounded-lg text-xs font-bold border border-slate-200 uppercase">
-                                                {r.tipo}
-                                            </span>
-                                        </td>
-                                        <td className="p-5 text-center">
-                                            <button onClick={() => handleToggleEstado(r)} className="hover:scale-105 transition-transform">
-                                                {r.activo ? 
-                                                    <span className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
-                                                        <CheckCircle2 size={12} /> Disponible
-                                                    </span> : 
-                                                    <span className="flex items-center gap-1 bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
-                                                        <XCircle size={12} /> Baja
-                                                    </span>
-                                                }
-                                            </button>
-                                        </td>
-                                        <td className="p-5 text-right">
-                                            <button className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-xl transition-colors">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {recursos.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4} className="p-12 text-center text-slate-500">
-                                            Aún no hay registros aquí.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 animate-fade-in-up">
+                    {filtrados.map(r => (
+                        <div
+                            key={r.id}
+                            className={`bg-white rounded-2xl border shadow-sm p-4 flex flex-col gap-3 transition-all hover:-translate-y-0.5 ${
+                                r.activo ? 'border-slate-100' : 'border-slate-100 opacity-60'
+                            }`}
+                        >
+                            {/* Name + delete */}
+                            <div className="flex items-start justify-between gap-1">
+                                <div className="min-w-0">
+                                    <p className="font-black text-slate-800 text-base leading-tight truncate">{r.nombre}</p>
+                                    <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-2 py-0.5 rounded-lg uppercase mt-1 inline-block tracking-wider">
+                                        {r.tipo}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => {/* TODO: delete */}}
+                                    className="p-1.5 rounded-xl text-slate-200 hover:text-red-400 hover:bg-red-50 transition-all flex-shrink-0"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+
+                            {/* Status toggle */}
+                            <button
+                                onClick={() => handleToggleEstado(r)}
+                                className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
+                                    r.activo
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                        : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+                                }`}
+                            >
+                                {r.activo
+                                    ? <><CheckCircle2 size={12} /> Disponible</>
+                                    : <><XCircle size={12} /> Sin servicio</>
+                                }
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 
+            {/* ===== MODAL ===== */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-6 flex justify-between items-center text-white">
-                            <h3 className="text-xl font-bold">{isMesas ? 'Agregar Mesa' : 'Agregar Colaborador'}</h3>
-                            <button onClick={() => setIsModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors"><XCircle size={24} /></button>
+                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-5 flex justify-between items-center text-white">
+                            <h3 className="text-lg font-bold">{isMesas ? '🪑 Agregar Mesa' : '👤 Agregar Colaborador'}</h3>
+                            <button onClick={() => setIsModalOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition-colors">
+                                <XCircle size={22} />
+                            </button>
                         </div>
-                        <form onSubmit={handleCreate} className="p-6 space-y-4">
+                        <form onSubmit={handleCreate} className="p-5 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                                    {isMesas ? 'Número o Nombre de la Mesa' : 'Nombre del Colaborador'}
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                                    {isMesas ? 'Número o Nombre' : 'Nombre del Colaborador'}
                                 </label>
-                                <input required type="text" placeholder={isMesas ? "Ej. Mesa 1, Terraza A" : "Ej. Carlos Martínez"} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700" 
-                                    value={newRecurso.nombre} onChange={e => setNewRecurso({...newRecurso, nombre: e.target.value})} />
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder={isMesas ? "Ej. Mesa 1, Terraza A" : "Ej. Carlos Martínez"}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+                                    value={newRecurso.nombre}
+                                    onChange={e => setNewRecurso({...newRecurso, nombre: e.target.value})}
+                                />
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Rol / Clasificación interna</label>
-                                <input required type="text" 
-                                    className={`w-full border rounded-xl px-4 py-3 font-medium transition-all ${isMesas ? 'bg-slate-200 border-slate-300 text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500'}`}
-                                    value={newRecurso.tipo} 
-                                    onChange={e => !isMesas && setNewRecurso({...newRecurso, tipo: e.target.value.toUpperCase()})}
-                                    readOnly={isMesas} 
-                                    placeholder={!isMesas ? "Ej. CAJERO, OPERADOR, ASESOR" : ""}
-                                    title={isMesas ? "Se autocompleta por el sistema" : "Describe la profesión o rol"} />
-                            </div>
-                            <div className="pt-4">
-                                <button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95">
-                                    Registrar
-                                </button>
-                            </div>
+                            {!isMesas && (
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Rol / Clasificación</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+                                        value={newRecurso.tipo}
+                                        onChange={e => setNewRecurso({...newRecurso, tipo: e.target.value.toUpperCase()})}
+                                        placeholder="Ej. CAJERO, ASESOR"
+                                    />
+                                </div>
+                            )}
+                            <button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95">
+                                Registrar
+                            </button>
                         </form>
                     </div>
                 </div>

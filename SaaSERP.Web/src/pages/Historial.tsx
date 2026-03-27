@@ -179,59 +179,59 @@ const Historial: React.FC = () => {
 
     return (
         <div className="flex flex-col flex-1 h-full animate-fade-in-up">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 bg-white/60 p-6 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="bg-slate-800 p-3 rounded-2xl shadow-lg">
-                        <Archive size={32} className="text-white" />
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-8 bg-white/60 p-4 md:p-6 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="bg-slate-800 p-2.5 md:p-3 rounded-2xl shadow-lg flex-shrink-0">
+                        <Archive size={24} className="text-white" />
                     </div>
                     <div>
-                        <h3 className="text-3xl font-black text-slate-800 tracking-tight">Historial Diario</h3>
-                        <p className="text-slate-500 font-medium">Auditoría de las operaciones terminadas o cobradas</p>
+                        <h3 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Historial Diario</h3>
+                        <p className="text-slate-500 font-medium text-xs md:text-base">Auditoría de operaciones terminadas</p>
                     </div>
                 </div>
                 
                 <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 w-full md:w-auto">
-                    <CalendarIcon className="text-slate-400 ml-2" size={20} />
+                    <CalendarIcon className="text-slate-400 ml-2" size={18} />
                     <input 
                         type="date" 
-                        className="bg-transparent border-none focus:ring-0 text-slate-700 font-bold px-2 py-1 outline-none w-full"
+                        className="bg-transparent border-none focus:ring-0 text-slate-700 font-bold px-2 py-1 outline-none w-full text-sm"
                         value={fechaFiltro}
                         onChange={(e) => setFechaFiltro(e.target.value)}
                     />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white flex flex-col justify-between hover:scale-105 transition-transform">
-                    <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-bold text-white/80">Total Movimientos</h4>
-                        <FileText className="text-white/60" size={24} />
+            <div className="grid grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-8">
+                <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-xl shadow-blue-500/20 text-white flex flex-col justify-between">
+                    <div className="flex justify-between items-start mb-1 md:mb-4">
+                        <h4 className="font-bold text-white/80 text-xs md:text-base">Movimientos</h4>
+                        <FileText className="text-white/60 hidden md:block" size={24} />
                     </div>
                     <div>
-                        <span className="text-4xl font-black">{filtrados.length}</span>
-                        <span className="text-white/70 ml-2 font-medium">operaciones</span>
+                        <span className="text-2xl md:text-4xl font-black">{filtrados.length}</span>
+                        <span className="text-white/70 ml-1 font-medium text-xs hidden md:inline">operaciones</span>
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl p-6 shadow-xl shadow-emerald-500/20 text-white flex flex-col justify-between hover:scale-105 transition-transform">
-                    <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-bold text-white/80">Ingreso Facturado</h4>
-                        <DollarSign className="text-white/60" size={24} />
+                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-xl shadow-emerald-500/20 text-white flex flex-col justify-between">
+                    <div className="flex justify-between items-start mb-1 md:mb-4">
+                        <h4 className="font-bold text-white/80 text-xs md:text-base">Facturado</h4>
+                        <DollarSign className="text-white/60 hidden md:block" size={24} />
                     </div>
-                    <div className="flex items-baseline">
-                        <span className="text-4xl font-black">${totalVentas.toFixed(2)}</span>
-                        <span className="text-white/70 ml-2 font-medium">MXN</span>
+                    <div className="flex items-baseline flex-wrap">
+                        <span className="text-lg md:text-4xl font-black">${totalVentas.toFixed(0)}</span>
+                        <span className="text-white/70 ml-1 font-medium text-xs">MXN</span>
                     </div>
                 </div>
 
-                <div className="bg-slate-800 rounded-3xl p-6 shadow-xl shadow-slate-900/20 text-white flex flex-col justify-between hover:scale-105 transition-transform border border-slate-700">
-                    <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-bold text-slate-400">Eficiencia</h4>
-                        <Clock className="text-slate-500" size={24} />
+                <div className="bg-slate-800 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-xl shadow-slate-900/20 text-white flex flex-col justify-between border border-slate-700">
+                    <div className="flex justify-between items-start mb-1 md:mb-4">
+                        <h4 className="font-bold text-slate-400 text-xs md:text-base">Eficiencia</h4>
+                        <Clock className="text-slate-500 hidden md:block" size={24} />
                     </div>
                     <div>
-                        <span className="text-4xl font-black text-amber-400">100</span>
-                        <span className="text-slate-400 ml-2 font-medium">%</span>
+                        <span className="text-2xl md:text-4xl font-black text-amber-400">100</span>
+                        <span className="text-slate-400 ml-1 font-medium text-xs">%</span>
                     </div>
                 </div>
             </div>
@@ -254,7 +254,7 @@ const Historial: React.FC = () => {
                          <p className="text-slate-400 text-sm mt-1">Selecciona otra fecha en el calendario superior</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto flex-1 h-0">
+                    <div className="overflow-x-auto flex-1 overscroll-x-contain -mx-2 px-2" style={{WebkitOverflowScrolling: 'touch'}}>
                         {renderTabla()}
                     </div>
                 )}

@@ -126,53 +126,75 @@ const Citas: React.FC = () => {
             </div>
 
             {citas.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center bg-white/40 rounded-3xl border border-white/20 border-dashed min-h-[400px]">
+                <div className="flex-1 flex flex-col items-center justify-center bg-white/40 rounded-3xl border border-white/20 border-dashed min-h-[300px]">
                     <CheckCircle size={48} className="text-slate-300 mb-4" />
-                    <h3 className="text-xl font-bold text-slate-400">Sin citas para hoy. Agrega una para empezar.</h3>
+                    <h3 className="text-lg md:text-xl font-bold text-slate-400">Sin citas para hoy. Agrega una para empezar.</h3>
                 </div>
             ) : (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex-1 p-3 md:p-5 min-h-[750px] overflow-hidden flex flex-col">
-                    <div className="overflow-x-auto">
-                        <div className="min-w-[800px]">
-                            <Calendar
-                                localizer={localizer}
-                                events={citas.map((c: any) => ({
-                                    id: c.id,
-                                    title: `${c.nombreCliente} - ${c.estado === 'Pendiente' ? '⏳' : '✅'}`,
-                                    start: new Date(c.fechaHoraInicio),
-                                    end: new Date(c.fechaHoraFin || new Date(c.fechaHoraInicio).getTime() + (c.duracionMinutos || 30) * 60000),
-                                    resource: c
-                                }))}
-                                startAccessor="start"
-                                endAccessor="end"
-                                defaultView={window.innerWidth < 768 ? Views.AGENDA : Views.DAY}
-                                views={[Views.DAY, Views.WEEK, Views.MONTH, Views.AGENDA]}
-                        step={15}
-                        timeslots={2}
-                        onSelectEvent={handleEventClick}
-                        min={new Date(new Date().setHours(negocio?.horaApertura ? parseInt(negocio.horaApertura.split(':')[0]) : 8, 0, 0))}
-                        max={new Date(new Date().setHours(negocio?.horaCierre ? parseInt(negocio.horaCierre.split(':')[0]) : 20, 0, 0))}
-                        messages={{
-                            next: "Sig",
-                            previous: "Ant",
-                            today: "Hoy",
-                            month: "Mes",
-                            week: "Semana",
-                            day: "Día",
-                            agenda: "Agenda",
-                            noEventsInRange: "No hay citas en esta ventana de tiempo."
-                        }}
-                        eventPropGetter={(event: any) => {
-                            let backgroundColor = '#d946ef'; // fuchsia-500
-                            if (event.resource.estado === 'Completada') backgroundColor = '#10b981'; // emerald-500
-                            if (event.resource.estado === 'Cancelada') backgroundColor = '#ef4444'; // red-500
-                            return { style: { backgroundColor, borderRadius: '8px', border: 'none', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' } };
-                        }}
-                        className="font-sans text-slate-700 CalendarOverwrites"
-                    />
-                </div>
-            </div>
-        </div>
+                <>
+                    {/* MOBILE: Card list view */}
+                    <div className="md:hidden space-y-3">
+                        {citas.map((c: any) => (
+                            <div
+                                key={c.id}
+                                onClick={() => setSelectedCita(c)}
+                                className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 shadow-md border border-slate-100 flex items-center gap-4 active:scale-[0.98] transition-transform cursor-pointer"
+                            >
+                                <div className={`w-1.5 self-stretch rounded-full flex-shrink-0 ${c.estado === 'Completada' ? 'bg-emerald-400' : 'bg-fuchsia-400'}`} />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-black text-slate-800 truncate">{c.nombreCliente}</p>
+                                    <p className="text-xs text-slate-500 font-medium">
+                                        {new Date(c.fechaHoraInicio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        {c.telefonoCliente && ` · ${c.telefonoCliente}`}
+                                    </p>
+                                </div>
+                                <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${
+                                    c.estado === 'Completada' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                                }`}>{c.estado}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* DESKTOP: Big Calendar */}
+                    <div className="hidden md:flex bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex-1 p-5 min-h-[750px] overflow-hidden flex-col">
+                        <Calendar
+                            localizer={localizer}
+                            events={citas.map((c: any) => ({
+                                id: c.id,
+                                title: `${c.nombreCliente} - ${c.estado === 'Pendiente' ? '⏳' : '✅'}`,
+                                start: new Date(c.fechaHoraInicio),
+                                end: new Date(c.fechaHoraFin || new Date(c.fechaHoraInicio).getTime() + (c.duracionMinutos || 30) * 60000),
+                                resource: c
+                            }))}
+                            startAccessor="start"
+                            endAccessor="end"
+                            defaultView={Views.DAY}
+                            views={[Views.DAY, Views.WEEK, Views.MONTH, Views.AGENDA]}
+                            step={15}
+                            timeslots={2}
+                            onSelectEvent={handleEventClick}
+                            min={new Date(new Date().setHours(negocio?.horaApertura ? parseInt(negocio.horaApertura.split(':')[0]) : 8, 0, 0))}
+                            max={new Date(new Date().setHours(negocio?.horaCierre ? parseInt(negocio.horaCierre.split(':')[0]) : 20, 0, 0))}
+                            messages={{
+                                next: "Sig",
+                                previous: "Ant",
+                                today: "Hoy",
+                                month: "Mes",
+                                week: "Semana",
+                                day: "Día",
+                                agenda: "Agenda",
+                                noEventsInRange: "No hay citas en esta ventana de tiempo."
+                            }}
+                            eventPropGetter={(event: any) => {
+                                let backgroundColor = '#d946ef';
+                                if (event.resource.estado === 'Completada') backgroundColor = '#10b981';
+                                if (event.resource.estado === 'Cancelada') backgroundColor = '#ef4444';
+                                return { style: { backgroundColor, borderRadius: '8px', border: 'none', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' } };
+                            }}
+                            className="font-sans text-slate-700 CalendarOverwrites"
+                        />
+                    </div>
+                </>
             )}
 
             {isCitaModalOpen && (

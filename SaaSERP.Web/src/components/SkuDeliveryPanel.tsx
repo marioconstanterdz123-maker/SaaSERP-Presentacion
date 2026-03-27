@@ -72,35 +72,33 @@ const SkuDeliveryPanel: React.FC<SkuDeliveryProps> = ({ negocioId, catalogo }) =
                 </button>
             </div>
 
-            {loading ? <p className="text-slate-500 text-sm">Cargando...</p> : (
-                <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                                <th className="p-4 font-semibold">Plataforma</th>
-                                <th className="p-4 font-semibold">SKU Externo</th>
-                                <th className="p-4 font-semibold">Platillo Interno</th>
-                                <th className="p-4 font-semibold text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {skus.map(s => (
-                                <tr key={s.id} className="hover:bg-slate-50/50">
-                                    <td className="p-4 font-bold text-slate-700">{s.plataforma}</td>
-                                    <td className="p-4 text-slate-600 font-mono text-sm">{s.skuExterno}</td>
-                                    <td className="p-4 text-slate-600 font-bold">{s.servicioNombre}</td>
-                                    <td className="p-4 text-right">
-                                        <button onClick={() => handleDelete(s.id)} className="text-red-400 hover:text-red-600 transition-colors bg-red-50 p-2 rounded-lg">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {skus.length === 0 && (
-                                <tr><td colSpan={4} className="p-8 text-center text-slate-500">No hay mapeos registrados.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+            {loading ? <p className="text-slate-500 text-sm py-4">Cargando...</p> : skus.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-2xl">
+                    Sin mapeos registrados.
+                </div>
+            ) : (
+                <div className="flex flex-col gap-2">
+                    {skus.map(s => (
+                        <div key={s.id} className="flex items-center gap-3 bg-slate-50 rounded-2xl border border-slate-100 p-3">
+                            {/* Platform badge */}
+                            <span className={`flex-shrink-0 text-[10px] font-black px-2 py-1 rounded-lg ${
+                                s.plataforma === 'RAPPI' ? 'bg-orange-100 text-orange-700' :
+                                s.plataforma === 'UBEREATS' ? 'bg-emerald-100 text-emerald-700' :
+                                'bg-slate-200 text-slate-600'
+                            }`}>
+                                {s.plataforma}
+                            </span>
+                            {/* SKU + Product */}
+                            <div className="flex-1 min-w-0">
+                                <p className="font-mono text-xs font-bold text-slate-500">{s.skuExterno}</p>
+                                <p className="font-bold text-slate-800 text-sm truncate">→ {s.servicioNombre}</p>
+                            </div>
+                            {/* Delete */}
+                            <button onClick={() => handleDelete(s.id)} className="flex-shrink-0 text-slate-300 hover:text-red-400 hover:bg-red-50 p-1.5 rounded-lg transition-all">
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 

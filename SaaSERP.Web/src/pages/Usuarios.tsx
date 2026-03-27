@@ -128,95 +128,78 @@ const Usuarios: React.FC = () => {
             )}
 
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
                 {['SuperAdmin', 'Admin', 'Operativo', 'Mesero', 'Cocina'].map(rol => (
-                    <div key={rol} className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-white shadow-sm">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{rol}</p>
-                        <p className="text-3xl font-black text-slate-800">{usuarios.filter(u => u.rol === rol).length}</p>
+                    <div key={rol} className="bg-white/70 backdrop-blur-sm rounded-2xl p-3 border border-white shadow-sm text-center">
+                        <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5 truncate">{rol}</p>
+                        <p className="text-2xl md:text-3xl font-black text-slate-800">{usuarios.filter(u => u.rol === rol).length}</p>
                     </div>
                 ))}
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-white shadow-sm">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total</p>
-                    <p className="text-3xl font-black text-indigo-600">{usuarios.length}</p>
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-3 border border-white shadow-sm text-center">
+                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total</p>
+                    <p className="text-2xl md:text-3xl font-black text-indigo-600">{usuarios.length}</p>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white p-6">
-                <div className="mb-5">
-                    <input
-                        type="text"
-                        placeholder="Buscar por nombre, correo o negocio..."
-                        value={filterBusqueda}
-                        onChange={e => setFilterBusqueda(e.target.value)}
-                        className="w-full md:w-80 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    />
-                </div>
+            {/* Search + User List */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white p-4 md:p-6">
+                <input
+                    type="text"
+                    placeholder="🔍 Buscar por nombre, correo o negocio..."
+                    value={filterBusqueda}
+                    onChange={e => setFilterBusqueda(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4"
+                />
 
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-16">
+                    <div className="flex items-center justify-center py-12">
                         <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
                     </div>
+                ) : filtrados.length === 0 ? (
+                    <div className="text-center py-10 text-slate-400">
+                        <Users size={36} className="mx-auto mb-3 opacity-30" />
+                        <p className="font-medium">No se encontraron usuarios</p>
+                    </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b-2 border-slate-100 text-slate-400 text-xs tracking-widest uppercase">
-                                    <th className="pb-3 font-bold">Usuario</th>
-                                    <th className="pb-3 font-bold">Negocio Asignado</th>
-                                    <th className="pb-3 font-bold text-center">Rol</th>
-                                    <th className="pb-3 font-bold text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {filtrados.map(u => (
-                                    <tr key={u.id} className="hover:bg-slate-50/60 transition-colors">
-                                        <td className="py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
-                                                    {u.nombre.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-800">{u.nombre}</p>
-                                                    <p className="text-xs text-slate-400">{u.correo}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-4">
-                                            {u.negocioNombre ? (
-                                                <span className="flex items-center gap-1.5 text-sm font-medium text-slate-600">
-                                                    <Store size={14} className="text-slate-400" /> {u.negocioNombre}
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center gap-1.5 text-sm font-medium text-violet-600">
-                                                    <Shield size={14} /> Acceso Global
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <span className={`text-xs font-bold px-3 py-1 rounded-full border ${ROL_COLORS[u.rol] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                                                {u.rol}
+                    <div className="flex flex-col divide-y divide-slate-100">
+                        {filtrados.map(u => (
+                            <div key={u.id} className="flex items-center gap-3 py-3 hover:bg-slate-50 rounded-2xl px-2 transition-colors">
+                                {/* Avatar */}
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                                    {u.nombre.charAt(0).toUpperCase()}
+                                </div>
+
+                                {/* Name + email + negocio */}
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-slate-800 text-sm truncate">{u.nombre}</p>
+                                    <p className="text-xs text-slate-400 truncate">{u.correo}</p>
+                                    <div className="flex items-center gap-1 mt-0.5">
+                                        {u.negocioNombre ? (
+                                            <span className="text-[10px] font-bold text-slate-500 flex items-center gap-0.5">
+                                                <Store size={10} /> {u.negocioNombre}
                                             </span>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <button
-                                                onClick={() => handleEliminar(u.id, u.nombre)}
-                                                className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                                                title="Eliminar usuario"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {filtrados.length === 0 && (
-                            <div className="text-center py-12 text-slate-400">
-                                <Users size={36} className="mx-auto mb-3 opacity-30" />
-                                <p className="font-medium">No se encontraron usuarios</p>
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-violet-500 flex items-center gap-0.5">
+                                                <Shield size={10} /> Acceso Global
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Role badge + delete */}
+                                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${ROL_COLORS[u.rol] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                        {u.rol}
+                                    </span>
+                                    <button
+                                        onClick={() => handleEliminar(u.id, u.nombre)}
+                                        className="p-1 rounded-lg text-slate-200 hover:text-red-400 hover:bg-red-50 transition-all"
+                                    >
+                                        <Trash2 size={13} />
+                                    </button>
+                                </div>
                             </div>
-                        )}
+                        ))}
                     </div>
                 )}
             </div>

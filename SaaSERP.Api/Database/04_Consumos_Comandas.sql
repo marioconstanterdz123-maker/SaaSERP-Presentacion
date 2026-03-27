@@ -84,7 +84,7 @@ BEGIN
     SELECT @ComandaId = Id FROM @InsertedIds;
 
     -- Insertar Detalles calculando sus subtotales reales
-    INSERT INTO Operacion.DetalleComanda (ComandaId, ServicioId, Cantidad, Subtotal, NotasOpcionales)
+    INSERT INTO Operacion.DetalleComandas (ComandaId, ServicioId, Cantidad, Subtotal, Notas)
     SELECT @ComandaId, d.ServicioId, d.Cantidad, (d.Cantidad * s.Precio), ISNULL(d.Notas, '')
     FROM @Detalles d
     INNER JOIN Core.Servicios s ON d.ServicioId = s.Id AND s.NegocioId = @NegocioId;

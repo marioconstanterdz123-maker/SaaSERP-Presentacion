@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
@@ -16,8 +17,46 @@ import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
 import Configuracion from './pages/Configuracion';
 import Ajustes from './pages/Ajustes';
+import { App as CapApp } from '@capacitor/app';
 
 function App() {
+  // ── Bug Fix 1: Android back button should navigate back, not exit the app ──
+  useEffect(() => {
+    let listenerHandle: { remove: () => void } | null = null;
+
+    const registerBackButton = async () => {
+      listenerHandle = await CapApp.addListener('backButton', () => {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          // Only exit if there is no history to go back to
+          CapApp.exitApp();
+        }
+      });
+    };
+
+    registerBackButton();
+
+    // ── Bug Fix 2: Request camera permission at startup (triggers Android dialog) ──
+    const requestCameraPermission = async () => {
+      try {
+        if (navigator.mediaDevices?.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          // Immediately release — we only needed to trigger the permission dialog
+          stream.getTracks().forEach(t => t.stop());
+        }
+      } catch {
+        // Permission denied or no camera — non-fatal, just continue
+      }
+    };
+
+    requestCameraPermission();
+
+    return () => {
+      listenerHandle?.remove();
+    };
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
