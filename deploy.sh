@@ -61,13 +61,12 @@ if [ "$WEB_ONLY" = false ]; then
     error "No se encontró ningún .csproj en $API_DIR"
   fi
   log "  Proyecto: $CSPROJ"
-  # Clean stale cache files that can cause MSB3492 errors
-  rm -f obj/Release/net10.0/*.cache 2>/dev/null || true
   dotnet restore "$CSPROJ" --nologo -q
-  # Step 1: Build (compila código, genera AssemblyInfo, etc.)
-  dotnet build "$CSPROJ" -c Release --nologo -q
-  # Step 2: Publish con --no-build para evitar bug de StaticWebAssets en .NET 10
-  dotnet publish "$CSPROJ" -c Release -o "$RUNTIME_DIR" --no-build --nologo -q
+  # StaticWebAssetsEnabled=false: la API no necesita assets estáticos
+  # Esto omite el target problemático en .NET 10 sin afectar el comportamiento
+  dotnet publish "$CSPROJ" -c Release -o "$RUNTIME_DIR" \
+    -p:StaticWebAssetsEnabled=false \
+    --nologo -q
   success "API compilada"
 
   log "🔄 Reiniciando $SERVICE_NAME..."
