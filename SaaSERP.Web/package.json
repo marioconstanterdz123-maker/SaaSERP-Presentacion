@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
     "@capacitor/ios": "^8.2.0",
+    "@capacitor/keyboard": "^8.0.2",
     "axios": "^1.13.6",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.577.0",

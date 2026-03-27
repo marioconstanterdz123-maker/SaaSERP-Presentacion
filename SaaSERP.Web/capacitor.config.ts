@@ -3,7 +3,19 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.saaserp.victoria',
   appName: 'SaaSERP Victoria',
-  webDir: 'dist'
+  webDir: 'dist',
+  server: {
+    cleartext: true
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true
+    },
+    Keyboard: {
+      resize: 'none',
+      resizeOnFullScreen: true
+    }
+  }
 };
 
 export default config;

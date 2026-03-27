@@ -10,18 +10,16 @@ const NegocioLayout: React.FC = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const [negocio, setNegocio] = useState<any>(null);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         const cargarNegocio = async () => {
             const isAdmin = user?.rol === 'SuperAdmin' || user?.rol === 'AdminNegocio';
             if (isAdmin) {
-                // Los admins pueden listar todos los negocios y filtrar por la URL
                 const res = await axiosInstance.get('/negocios');
                 const current = res.data.find((n: any) => n.id.toString() === negocioId);
                 if (current) setNegocio(current);
             } else {
-                // Meseros, Cajeros, Cocineros: solo acceden a su propio negocio
                 const res = await axiosInstance.get('/negocios/mio');
                 setNegocio(res.data);
             }
@@ -30,84 +28,88 @@ const NegocioLayout: React.FC = () => {
     }, [negocioId, user?.rol]);
 
     const basePath = `/negocio/${negocioId}`;
-    
-    const menuItems: { path: string; name: string; icon: React.ReactNode }[] = [];
+    const menuItems: { path: string; name: string; shortName: string; icon: React.ReactNode }[] = [];
     const rol = user?.rol;
 
-    // Solo los Administradores ven el Dashboard por defecto
     if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-        menuItems.push({ path: `${basePath}/dashboard`, name: 'Resumen Local', icon: <LayoutDashboard size={20} /> });
+        menuItems.push({ path: `${basePath}/dashboard`, name: 'Resumen Local', shortName: 'Inicio', icon: <LayoutDashboard size={22} /> });
     }
 
-    // Distribución lógica de módulos según el Sistema Asignado
     if (negocio?.sistemaAsignado === 'TAQUERIA' || negocio?.sistemaAsignado === 'RESTAURANTES') {
         if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-            menuItems.push({ path: `${basePath}/catalogos`, name: 'Menú (Platillos)', icon: <Coffee size={20} /> });
+            menuItems.push({ path: `${basePath}/catalogos`, name: 'Menú (Platillos)', shortName: 'Menú', icon: <Coffee size={22} /> });
             if (negocio.usaMesas) {
-                menuItems.push({ path: `${basePath}/recursos`, name: 'Control de Mesas', icon: <Users size={20} /> });
+                menuItems.push({ path: `${basePath}/recursos`, name: 'Control de Mesas', shortName: 'Mesas', icon: <Users size={22} /> });
             }
         }
-        
-        // Cualesquiera excepto Cocinero ven POS
         if (rol !== 'Cocinero') {
-            menuItems.push({ path: `${basePath}/pos`, name: 'Punto de Venta', icon: <ListOrdered size={20} /> });
+            menuItems.push({ path: `${basePath}/pos`, name: 'Punto de Venta', shortName: 'POS', icon: <ListOrdered size={22} /> });
         }
-        
-        // Cualesquiera excepto Mesero ven KDS
         if (rol !== 'Mesero') {
-            menuItems.push({ path: `${basePath}/operacion`, name: 'Cocina (KDS)', icon: <div className="relative"><ListOrdered size={20} /><div className="absolute -bottom-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></div></div> });
+            menuItems.push({
+                path: `${basePath}/operacion`, name: 'Cocina (KDS)', shortName: 'Cocina',
+                icon: <div className="relative"><Coffee size={22} /><div className="absolute -bottom-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></div></div>
+            });
         }
     } else if (negocio?.sistemaAsignado === 'CITAS') {
         if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', icon: <Scissors size={20} /> });
-            menuItems.push({ path: `${basePath}/recursos`, name: 'Especialistas', icon: <Users size={20} /> });
+            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', shortName: 'Servicios', icon: <Scissors size={22} /> });
+            menuItems.push({ path: `${basePath}/recursos`, name: 'Especialistas', shortName: 'Equipo', icon: <Users size={22} /> });
         }
-        menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', icon: <Calendar size={20} /> });
+        menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
     } else if (negocio?.sistemaAsignado === 'PARQUEADERO') {
-        menuItems.push({ path: `${basePath}/operacion`, name: 'Caseta Vehículos', icon: <Car size={20} /> });
+        menuItems.push({ path: `${basePath}/operacion`, name: 'Caseta Vehículos', shortName: 'Caseta', icon: <Car size={22} /> });
     } else {
-        // Fallback genérico si no tiene sistema definido o es un giro mixto
         if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', icon: <Briefcase size={20} /> });
-            menuItems.push({ path: `${basePath}/recursos`, name: 'Recursos Físicos', icon: <Users size={20} /> });
+            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', shortName: 'Servicios', icon: <Briefcase size={22} /> });
+            menuItems.push({ path: `${basePath}/recursos`, name: 'Recursos Físicos', shortName: 'Recursos', icon: <Users size={22} /> });
         }
-        menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', icon: <Calendar size={20} /> });
-        menuItems.push({ path: `${basePath}/operacion`, name: 'Punto de Venta', icon: <ListOrdered size={20} /> });
+        menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
+        menuItems.push({ path: `${basePath}/operacion`, name: 'Punto de Venta', shortName: 'POS', icon: <ListOrdered size={22} /> });
     }
 
-    // Configuración y reportes
     if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-        menuItems.push({ path: `${basePath}/historial`, name: 'Historial', icon: <Archive size={20} /> });
-        menuItems.push({ path: `${basePath}/configuracion`, name: 'Ajustes', icon: <Settings size={20} /> });
+        menuItems.push({ path: `${basePath}/historial`, name: 'Historial', shortName: 'Historial', icon: <Archive size={22} /> });
+        menuItems.push({ path: `${basePath}/configuracion`, name: 'Ajustes', shortName: 'Ajustes', icon: <Settings size={22} /> });
     } else if (rol === 'Cajero') {
-        // El cajero puede ver el historial para cortes de caja
-        menuItems.push({ path: `${basePath}/historial`, name: 'Historial de Caja', icon: <Archive size={20} /> });
+        menuItems.push({ path: `${basePath}/historial`, name: 'Historial de Caja', shortName: 'Historial', icon: <Archive size={22} /> });
     }
 
-
+    // Bottom tab items: show max 5, rest overflow in sidebar (desktop only)
+    const bottomTabItems = menuItems.slice(0, 5);
 
     return (
         <div className="flex h-screen bg-slate-50 relative overflow-hidden text-slate-900 font-sans">
-            {/* Background Decorations Específicos del Negocio (Tono Naranja/Rosa) */}
-            <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-            <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-rose-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+            {/* Background Decorations */}
+            <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-rose-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 pointer-events-none"></div>
 
-            {/* Mobile Top Navbar */}
-            <div className="md:hidden absolute top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex items-center justify-between px-4 z-50">
-                <h1 className="text-xl font-black tracking-tight leading-tight text-slate-800 truncate">{negocio?.nombre || 'SaaSERP'}</h1>
-                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-600 bg-slate-100 rounded-xl">
-                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {/* ===== MOBILE TOP HEADER ===== */}
+            <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 z-50 shadow-sm">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => navigate('/negocios')}
+                        className="p-2 text-slate-500 bg-slate-100 rounded-xl active:scale-95 transition-transform"
+                        aria-label="Volver"
+                    >
+                        <ArrowLeft size={18} />
+                    </button>
+                    <h1 className="text-base font-black tracking-tight text-slate-800 truncate max-w-[180px]">
+                        {negocio?.nombre || 'SaaSERP'}
+                    </h1>
+                </div>
+                <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="p-2 text-slate-600 bg-slate-100 rounded-xl active:scale-95 transition-transform"
+                    aria-label="Más opciones"
+                >
+                    <Menu size={20} />
                 </button>
             </div>
 
-            {/* Overlay for mobile */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden" onClick={() => setMobileMenuOpen(false)}></div>
-            )}
-
-            {/* Glassmorphism Sidebar del Negocio */}
-            <aside className={`fixed md:relative w-64 h-[calc(100vh-2rem)] flex flex-col backdrop-blur-xl bg-white/90 border-r border-white/20 shadow-2xl md:shadow-xl z-40 m-4 rounded-3xl overflow-hidden transition-transform duration-300 left-0 top-0 md:top-auto ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-[120%] md:translate-x-0'}`}>
-                <div className="p-6 border-b border-slate-200/50 bg-white/80 md:bg-white/50 text-slate-800">
+            {/* ===== DESKTOP SIDEBAR ===== */}
+            <aside className="hidden md:flex w-64 h-[calc(100vh-2rem)] flex-col backdrop-blur-xl bg-white/90 border-r border-white/20 shadow-xl z-40 m-4 rounded-3xl overflow-hidden flex-shrink-0">
+                <div className="p-6 border-b border-slate-200/50 bg-white/50 text-slate-800">
                     <button onClick={() => navigate('/negocios')} className="flex items-center text-xs font-bold text-slate-400 hover:text-orange-500 mb-2 transition-colors">
                         <ArrowLeft size={14} className="mr-1" /> Volver a Global
                     </button>
@@ -116,7 +118,6 @@ const NegocioLayout: React.FC = () => {
                         Workspace {negocio?.sistemaAsignado ? `· ${negocio.sistemaAsignado}` : ''}
                     </p>
                 </div>
-
                 <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
                     {menuItems.map((item) => {
                         const isActive = location.pathname.startsWith(item.path);
@@ -124,25 +125,22 @@ const NegocioLayout: React.FC = () => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={`flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-300 ease-in-out ${
-                                    isActive 
-                                        ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-orange-500/30 font-semibold scale-105' 
+                                className={`flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-200 ${
+                                    isActive
+                                        ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-orange-500/30 font-semibold scale-105'
                                         : 'text-slate-500 hover:bg-white hover:text-orange-500 hover:shadow-md'
                                 }`}
                             >
                                 {item.icon}
-                                <span>{item.name}</span>
+                                <span className="text-sm">{item.name}</span>
                             </Link>
-                        )
+                        );
                     })}
                 </nav>
-
-                {/* User Info + Logout */}
                 {user && (
                     <div className="p-4 border-t border-slate-200/50 bg-white/30">
                         <div className="flex items-center gap-3 mb-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-black text-sm">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
                                 {user.email.charAt(0).toUpperCase()}
                             </div>
                             <div className="overflow-hidden">
@@ -160,12 +158,113 @@ const NegocioLayout: React.FC = () => {
                 )}
             </aside>
 
-            {/* Main Content Area */}
-            <main className="flex-1 w-full md:w-auto h-screen overflow-y-auto relative z-10 pt-16 md:pt-0">
-                <div className="max-w-7xl mx-auto h-full p-4 md:p-8 animate-fade-in-up">
+            {/* ===== MOBILE FULL-SCREEN SIDEBAR DRAWER ===== */}
+            {sidebarOpen && (
+                <div className="md:hidden fixed inset-0 z-[60] flex">
+                    <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+                    <aside className="relative ml-auto w-72 h-full bg-white shadow-2xl flex flex-col overflow-y-auto">
+                        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h2 className="font-black text-slate-800">{negocio?.nombre}</h2>
+                                <p className="text-xs text-orange-500 font-bold mt-0.5 uppercase tracking-wider">{negocio?.sistemaAsignado}</p>
+                            </div>
+                            <button onClick={() => setSidebarOpen(false)} className="p-2 bg-slate-100 rounded-xl text-slate-500">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <nav className="flex-1 p-4 space-y-1">
+                            {menuItems.map((item) => {
+                                const isActive = location.pathname.startsWith(item.path);
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={() => setSidebarOpen(false)}
+                                        className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
+                                            isActive
+                                                ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-orange-500/30 font-semibold'
+                                                : 'text-slate-600 hover:bg-orange-50 hover:text-orange-600'
+                                        }`}
+                                    >
+                                        {item.icon}
+                                        <span className="font-semibold text-sm">{item.name}</span>
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+                        {user && (
+                            <div className="p-4 border-t border-slate-100 space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                                        {user.email.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="text-xs font-bold text-slate-700 truncate">{user.email}</p>
+                                        <p className="text-xs text-orange-500 font-bold">{user.rol}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => { logout(); navigate('/login'); }}
+                                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm text-red-500 bg-red-50 font-bold"
+                                >
+                                    <LogOut size={16} /> Cerrar Sesión
+                                </button>
+                            </div>
+                        )}
+                    </aside>
+                </div>
+            )}
+
+            {/* ===== MAIN CONTENT ===== */}
+            <main
+                className="flex-1 w-full h-screen overflow-y-auto relative z-10 pt-14 md:pt-0 md:pb-0"
+                style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}
+            >
+                <div className="max-w-7xl mx-auto h-full p-3 md:p-8 animate-fade-in-up">
                     <Outlet />
                 </div>
             </main>
+
+            {/* ===== MOBILE BOTTOM TAB BAR ===== */}
+            <nav
+                className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
+                style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+            >
+                <div className="flex items-stretch">
+                    {bottomTabItems.map((item) => {
+                        const isActive = location.pathname.startsWith(item.path);
+                        return (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all duration-200 active:scale-95 min-w-0 ${
+                                    isActive ? 'text-orange-500' : 'text-slate-400'
+                                }`}
+                            >
+                                <div className={`transition-all duration-200 ${isActive ? 'scale-110' : ''}`}>
+                                    {item.icon}
+                                </div>
+                                <span className={`text-[10px] font-bold truncate w-full text-center leading-tight ${isActive ? 'text-orange-500' : 'text-slate-400'}`}>
+                                    {item.shortName}
+                                </span>
+                                {isActive && (
+                                    <div className="absolute top-0 w-8 h-0.5 bg-orange-500 rounded-full" />
+                                )}
+                            </Link>
+                        );
+                    })}
+                    {/* "More" button if there are more than 5 items */}
+                    {menuItems.length > 5 && (
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all active:scale-95 min-w-0 ${sidebarOpen ? 'text-orange-500' : 'text-slate-400'}`}
+                        >
+                            <Menu size={22} />
+                            <span className="text-[10px] font-bold">Más</span>
+                        </button>
+                    )}
+                </div>
+            </nav>
         </div>
     );
 };

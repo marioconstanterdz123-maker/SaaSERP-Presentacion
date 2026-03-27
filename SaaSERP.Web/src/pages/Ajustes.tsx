@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../api/axiosConfig';
-import { Settings, Save, Clock, Phone, Store, Users, MapPin, CheckCircle, MessageSquare, DollarSign } from 'lucide-react';
+import {
+    Settings, Save, Clock, Phone, Store, Users, MapPin, CheckCircle,
+    MessageSquare, ChevronDown, ChevronUp, Printer, FileText, DollarSign
+} from 'lucide-react';
 import WhatsAppPanel from '../components/WhatsAppPanel';
 import { useAuth } from '../context/AuthContext';
 import TarifasParqueaderoPanel from '../components/TarifasParqueaderoPanel';
 import DeliveryIntegrationsPanel from '../components/DeliveryIntegrationsPanel';
+import PrinterManager from '../components/PrinterManager';
+import { TICKET_CONFIG_KEY, defaultTicketConfig } from '../types/ticketConfig';
+import type { TicketConfig } from '../types/ticketConfig';
 
 const Ajustes: React.FC = () => {
     const { user } = useAuth();
@@ -25,6 +31,13 @@ const Ajustes: React.FC = () => {
     const [usaMesas, setUsaMesas] = useState(false);
     const [mpToken, setMpToken] = useState('');
 
+    // Collapsible sections
+    const [showPrinters, setShowPrinters] = useState(false);
+    const [showTicketConfig, setShowTicketConfig] = useState(false);
+
+    // Ticket configuration (Issue 5)
+    const [ticketConfig, setTicketConfig] = useState<TicketConfig | null>(null);
+
     useEffect(() => {
         axiosInstance.get('/negocios').then(res => {
             const current = res.data.find((n: any) => n.id.toString() === negocioId);
@@ -38,6 +51,11 @@ const Ajustes: React.FC = () => {
                 setDuracionCita(current.duracionMinutosCita || 30);
                 setUsaMesas(current.usaMesas || false);
                 setMpToken(current.mercadoPagoAccessToken || '');
+
+                // Cargar config de ticket desde localStorage, pre-poblando del negocio
+                const configKey = TICKET_CONFIG_KEY(current.id.toString());
+                const raw = localStorage.getItem(configKey);
+                setTicketConfig(raw ? JSON.parse(raw) : defaultTicketConfig(current));
             }
         }).finally(() => setIsLoading(false));
     }, [negocioId]);
@@ -66,6 +84,19 @@ const Ajustes: React.FC = () => {
         }
     };
 
+    // Auto-guardar ticket config en localStorage al salir de cada campo
+    const saveTicketConfig = (updated: TicketConfig) => {
+        if (!negocio) return;
+        const key = TICKET_CONFIG_KEY(negocio.id.toString());
+        localStorage.setItem(key, JSON.stringify(updated));
+        setTicketConfig(updated);
+    };
+
+    const updateTicket = (field: keyof TicketConfig, value: any) => {
+        if (!ticketConfig) return;
+        saveTicketConfig({ ...ticketConfig, [field]: value });
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-[70vh]">
@@ -78,6 +109,8 @@ const Ajustes: React.FC = () => {
 
     const isCitas = negocio.sistemaAsignado === 'CITAS';
     const isRestaurante = negocio.sistemaAsignado === 'TAQUERIA' || negocio.sistemaAsignado === 'RESTAURANTES';
+
+    const inputCls = "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent";
 
     return (
         <div className="p-6 max-w-3xl mx-auto animate-fade-in-up">
@@ -107,24 +140,13 @@ const Ajustes: React.FC = () => {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Nombre del Negocio</label>
-                        <input
-                            type="text"
-                            value={nombre}
-                            onChange={e => setNombre(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                        />
+                        <input type="text" value={nombre} onChange={e => setNombre(e.target.value)} className={inputCls} />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider flex items-center gap-1">
                             <Phone size={12} /> WhatsApp del Negocio
                         </label>
-                        <input
-                            type="text"
-                            value={telefono}
-                            onChange={e => setTelefono(e.target.value)}
-                            placeholder="Ej. 5212345678"
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                        />
+                        <input type="text" value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="Ej. 5212345678" className={inputCls} />
                     </div>
                 </div>
             </div>
@@ -137,21 +159,11 @@ const Ajustes: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Hora Apertura</label>
-                        <input
-                            type="time"
-                            value={horaApertura}
-                            onChange={e => setHoraApertura(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                        />
+                        <input type="time" value={horaApertura} onChange={e => setHoraApertura(e.target.value)} className={inputCls} />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Hora Cierre</label>
-                        <input
-                            type="time"
-                            value={horaCierre}
-                            onChange={e => setHoraCierre(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                        />
+                        <input type="time" value={horaCierre} onChange={e => setHoraCierre(e.target.value)} className={inputCls} />
                     </div>
                 </div>
             </div>
@@ -176,21 +188,11 @@ const Ajustes: React.FC = () => {
                                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider flex items-center gap-1">
                                     <Users size={12} /> Capacidad Máxima (sillas/espacios)
                                 </label>
-                                <input
-                                    type="number"
-                                    value={capacidad}
-                                    onChange={e => setCapacidad(parseInt(e.target.value) || 0)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                />
+                                <input type="number" value={capacidad} onChange={e => setCapacidad(parseInt(e.target.value) || 0)} className={inputCls} />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Duración de Cita (minutos)</label>
-                                <input
-                                    type="number"
-                                    value={duracionCita}
-                                    onChange={e => setDuracionCita(parseInt(e.target.value) || 30)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                                />
+                                <input type="number" value={duracionCita} onChange={e => setDuracionCita(parseInt(e.target.value) || 30)} className={inputCls} />
                             </div>
                         </>
                     )}
@@ -199,7 +201,7 @@ const Ajustes: React.FC = () => {
                         <div className="flex items-center justify-between bg-slate-50 rounded-xl p-4 border border-slate-100">
                             <div>
                                 <p className="font-bold text-slate-700 text-sm">¿Maneja Mesas o Puntos Físicos?</p>
-                                <p className="text-xs text-slate-400">Habilita el control visual de Puntos de Atención (Mesas, Cajones, etc)</p>
+                                <p className="text-xs text-slate-400">Habilita el control visual de Puntos de Atención</p>
                             </div>
                             <button
                                 onClick={() => setUsaMesas(!usaMesas)}
@@ -212,26 +214,111 @@ const Ajustes: React.FC = () => {
                 </div>
             </div>
 
-            {/* MercadoPago Config (Desactivado temporalmente - El cliente requiere integraciones de terminales físicas despúes)
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white shadow-sm p-6 mb-6">
-                <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <DollarSign size={16} className="text-blue-500" /> Pasarela de Pagos (MercadoPago)
-                </h3>
-                <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Access Token de Producción</label>
-                    <input
-                        type="password"
-                        value={mpToken}
-                        onChange={e => setMpToken(e.target.value)}
-                        placeholder="APP_USR-..."
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                    <p className="text-xs text-slate-500 mt-2">Crea tus credenciales de Producción en el <a href="https://www.mercadopago.com.mx/developers/panel/app" target="_blank" rel="noreferrer" className="text-blue-500 underline">Panel de Developers</a> y pega aquí el Access Token.</p>
+            {/* ─── IMPRESORAS DE CALOR (Issue 4) ─── */}
+            {(isRestaurante || true) && (
+                <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white shadow-sm mb-6 overflow-hidden">
+                    <button
+                        onClick={() => setShowPrinters(!showPrinters)}
+                        className="w-full flex items-center justify-between p-6 text-left"
+                    >
+                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <Printer size={16} className="text-indigo-600" /> 🖨️ Impresoras de Calor
+                        </h3>
+                        {showPrinters ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
+                    </button>
+                    {showPrinters && (
+                        <div className="px-6 pb-6">
+                            <p className="text-xs text-slate-500 mb-4">Conecta impresoras térmicas por USB o Bluetooth (SPP) para imprimir tickets desde el POS.</p>
+                            <PrinterManager negocioId={negocio.id.toString()} negocio={negocio} />
+                        </div>
+                    )}
                 </div>
-            </div>
-            */}
+            )}
 
-            {/* Integration Card: WhatsApp EvolutionAPI (Visible by Dueño y SuperAdmin solo) */}
+            {/* ─── CONFIGURACIÓN DE TICKET (Issue 5) ─── */}
+            {ticketConfig && (
+                <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white shadow-sm mb-6 overflow-hidden">
+                    <button
+                        onClick={() => setShowTicketConfig(!showTicketConfig)}
+                        className="w-full flex items-center justify-between p-6 text-left"
+                    >
+                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <FileText size={16} className="text-indigo-600" /> 🧾 Configuración de Ticket
+                        </h3>
+                        {showTicketConfig ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
+                    </button>
+                    {showTicketConfig && (
+                        <div className="px-6 pb-6 space-y-4">
+                            <p className="text-xs text-slate-500">Los cambios se guardan automáticamente. Se aplican en el próximo ticket impreso.</p>
+
+                            {[
+                                { label: 'Nombre del Negocio en Ticket', key: 'nombreNegocio', placeholder: 'Ej. Tacos El Güero' },
+                                { label: 'Dirección', key: 'direccion', placeholder: 'Ej. Calle Principal #123, Ciudad' },
+                                { label: 'RFC / NIT', key: 'rfc', placeholder: 'Ej. XAXX010101000' },
+                                { label: 'Teléfono en Ticket', key: 'telefono', placeholder: 'Ej. 55 1234 5678' },
+                                { label: 'Mensaje Footer Línea 1', key: 'footerLinea1', placeholder: '¡Gracias por su visita!' },
+                                { label: 'Mensaje Footer Línea 2', key: 'footerLinea2', placeholder: 'Vuelve pronto' },
+                            ].map(({ label, key, placeholder }) => (
+                                <div key={key}>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">{label}</label>
+                                    <input
+                                        type="text"
+                                        value={(ticketConfig as any)[key]}
+                                        onChange={e => updateTicket(key as keyof TicketConfig, e.target.value)}
+                                        onBlur={e => updateTicket(key as keyof TicketConfig, e.target.value)}
+                                        placeholder={placeholder}
+                                        className={inputCls}
+                                    />
+                                </div>
+                            ))}
+
+                            {/* IVA toggle */}
+                            <div className="flex items-center justify-between bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <div>
+                                    <p className="font-bold text-slate-700 text-sm">Mostrar IVA en Ticket</p>
+                                    <p className="text-xs text-slate-400">Desglosará subtotal + IVA + total</p>
+                                </div>
+                                <button
+                                    onClick={() => updateTicket('mostrarIva', !ticketConfig.mostrarIva)}
+                                    className={`w-12 h-7 rounded-full transition-colors relative ${ticketConfig.mostrarIva ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                                >
+                                    <div className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform ${ticketConfig.mostrarIva ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                                </button>
+                            </div>
+
+                            {ticketConfig.mostrarIva && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider flex items-center gap-1">
+                                            <DollarSign size={12} /> Tasa IVA (%)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min={0} max={100}
+                                            value={ticketConfig.tasaIva}
+                                            onChange={e => updateTicket('tasaIva', parseFloat(e.target.value) || 0)}
+                                            className={inputCls}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Moneda (símbolo)</label>
+                                        <input
+                                            type="text"
+                                            maxLength={3}
+                                            value={ticketConfig.moneda}
+                                            onChange={e => updateTicket('moneda', e.target.value)}
+                                            placeholder="$"
+                                            className={inputCls}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Integration Card: WhatsApp */}
             {negocio && (user?.rol === 'SuperAdmin' || user?.rol === 'Admin') && (
                 <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-white shadow-sm p-6 mb-6">
                     <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -261,9 +348,7 @@ const Ajustes: React.FC = () => {
                 {isSaving ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : (
-                    <>
-                        <Save size={20} /> Guardar Cambios
-                    </>
+                    <><Save size={20} /> Guardar Cambios</>
                 )}
             </button>
         </div>
