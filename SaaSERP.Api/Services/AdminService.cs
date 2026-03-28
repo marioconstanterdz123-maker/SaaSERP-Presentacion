@@ -22,10 +22,8 @@ namespace SaaSERP.Api.Services
         public async Task<IEnumerable<Negocio>> ObtenerTodosNegociosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            // SP actualizado (migr. 09) — devuelve todas las columnas, filtra EliminadoLogico=0
             return await connection.QueryAsync<Negocio>(
-                "[Core].[usp_Negocios_ObtenerTodos]",
-                commandType: CommandType.StoredProcedure);
+                "SELECT * FROM [Core].[Negocios] WHERE EliminadoLogico = 0 ORDER BY Id");
         }
 
         public async Task<Negocio?> ObtenerNegocioPorIdAsync(int id)
@@ -39,51 +37,57 @@ namespace SaaSERP.Api.Services
         public async Task<int> CrearNegocioAsync(Negocio negocio)
         {
             using var connection = new SqlConnection(_connectionString);
-            var parameters = new DynamicParameters();
-            parameters.Add("@Nombre", negocio.Nombre);
-            parameters.Add("@TelefonoWhatsApp", negocio.TelefonoWhatsApp);
-            parameters.Add("@SistemaAsignado", negocio.SistemaAsignado);
-            parameters.Add("@CapacidadMaxima", negocio.CapacidadMaxima);
-            parameters.Add("@DuracionMinutosCita", negocio.DuracionMinutosCita);
-            parameters.Add("@UsaMesas", negocio.UsaMesas);
-            parameters.Add("@HoraApertura", negocio.HoraApertura);
-            parameters.Add("@HoraCierre", negocio.HoraCierre);
-
-            return await connection.ExecuteScalarAsync<int>(
-                "[Core].[usp_Negocios_Crear]",
-                parameters,
-                commandType: CommandType.StoredProcedure);
+            var id = await connection.ExecuteScalarAsync<int>(
+                @"INSERT INTO [Core].[Negocios]
+                    (Nombre, TelefonoWhatsApp, SistemaAsignado, CapacidadMaxima,
+                     DuracionMinutosCita, UsaMesas, HoraApertura, HoraCierre,
+                     FechaVencimientoSuscripcion)
+                  OUTPUT INSERTED.Id
+                  VALUES
+                    (@Nombre, @TelefonoWhatsApp, @SistemaAsignado, @CapacidadMaxima,
+                     @DuracionMinutosCita, @UsaMesas, @HoraApertura, @HoraCierre,
+                     DATEADD(DAY, 30, GETUTCDATE()))",
+                new {
+                    negocio.Nombre, negocio.TelefonoWhatsApp, negocio.SistemaAsignado,
+                    negocio.CapacidadMaxima, negocio.DuracionMinutosCita,
+                    negocio.UsaMesas, negocio.HoraApertura, negocio.HoraCierre
+                });
+            return id;
         }
 
         public async Task<bool> ActualizarNegocioAsync(Negocio n)
         {
             using var connection = new SqlConnection(_connectionString);
-            // SP actualizado (migr. 09) — incluye todos los campos con parámetros tipados
-            var parameters = new DynamicParameters();
-            parameters.Add("@Id",                     n.Id);
-            parameters.Add("@Nombre",                 n.Nombre);
-            parameters.Add("@TelefonoWhatsApp",       n.TelefonoWhatsApp);
-            parameters.Add("@SistemaAsignado",        n.SistemaAsignado);
-            parameters.Add("@CapacidadMaxima",        n.CapacidadMaxima);
-            parameters.Add("@DuracionMinutosCita",    n.DuracionMinutosCita);
-            parameters.Add("@UsaMesas",               n.UsaMesas);
-            parameters.Add("@HoraApertura",           n.HoraApertura);
-            parameters.Add("@HoraCierre",             n.HoraCierre);
-            parameters.Add("@Activo",                 n.Activo);
-            parameters.Add("@AccesoWeb",              n.AccesoWeb);
-            parameters.Add("@AccesoMovil",            n.AccesoMovil);
-            parameters.Add("@ModuloHistorial",        n.ModuloHistorial);
-            parameters.Add("@ModuloWhatsApp",         n.ModuloWhatsApp);
-            parameters.Add("@ModuloWhatsAppIA",       n.ModuloWhatsAppIA);
-            parameters.Add("@ModuloCRM",              n.ModuloCRM);
-            parameters.Add("@ModuloReportes",         n.ModuloReportes);
-            parameters.Add("@MercadoPagoAccessToken", n.MercadoPagoAccessToken);
-            parameters.Add("@TiempoSilencioMinutos",  n.TiempoSilencioMinutos);
-
-            var rows = await connection.ExecuteScalarAsync<int>(
-                "[Core].[usp_Negocios_Actualizar]",
-                parameters,
-                commandType: CommandType.StoredProcedure);
+            var rows = await connection.ExecuteAsync(
+                @"UPDATE [Core].[Negocios] SET
+                    Nombre                 = @Nombre,
+                    TelefonoWhatsApp       = @TelefonoWhatsApp,
+                    SistemaAsignado        = @SistemaAsignado,
+                    CapacidadMaxima        = @CapacidadMaxima,
+                    DuracionMinutosCita    = @DuracionMinutosCita,
+                    UsaMesas               = @UsaMesas,
+                    HoraApertura           = @HoraApertura,
+                    HoraCierre             = @HoraCierre,
+                    Activo                 = @Activo,
+                    AccesoWeb              = @AccesoWeb,
+                    AccesoMovil            = @AccesoMovil,
+                    ModuloHistorial        = @ModuloHistorial,
+                    ModuloWhatsApp         = @ModuloWhatsApp,
+                    ModuloWhatsAppIA       = @ModuloWhatsAppIA,
+                    ModuloCRM              = @ModuloCRM,
+                    ModuloReportes         = @ModuloReportes,
+                    MercadoPagoAccessToken = @MercadoPagoAccessToken,
+                    TiempoSilencioMinutos  = @TiempoSilencioMinutos
+                  WHERE Id = @Id",
+                new {
+                    n.Nombre, n.TelefonoWhatsApp, n.SistemaAsignado,
+                    n.CapacidadMaxima, n.DuracionMinutosCita, n.UsaMesas,
+                    n.HoraApertura, n.HoraCierre, n.Activo,
+                    n.AccesoWeb, n.AccesoMovil, n.ModuloHistorial,
+                    n.ModuloWhatsApp, n.ModuloWhatsAppIA, n.ModuloCRM,
+                    n.ModuloReportes, n.MercadoPagoAccessToken,
+                    n.TiempoSilencioMinutos, n.Id
+                });
             return rows > 0;
         }
 
