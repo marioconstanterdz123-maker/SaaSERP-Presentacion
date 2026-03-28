@@ -304,8 +304,24 @@ const Recursos: React.FC = () => {
 
                                 {/* Tip si WA no está activo para este negocio */}
                                 {!isMesas && isExpanded && !trabajador && (
-                                    <div className="border-t border-slate-50 px-4 pb-4 pt-3">
-                                        <p className="text-xs text-slate-400">Cargando perfil del especialista...</p>
+                                    <div className="border-t border-slate-50 px-4 pb-4 pt-3 space-y-2">
+                                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Perfil del especialista</p>
+                                        <p className="text-xs text-slate-400">Este especialista aún no tiene perfil de horarios creado.</p>
+                                        <button
+                                            onClick={async () => {
+                                                const rec = filtrados.find(r => r.id === expandedId);
+                                                if (!rec) return;
+                                                await axiosInstance.post('/Trabajadores', {
+                                                    negocioId: Number(negocioId),
+                                                    nombre: rec.nombre,
+                                                    telefono: null,
+                                                }).catch(() => {});
+                                                fetchAll();
+                                            }}
+                                            className="w-full flex items-center justify-center gap-1.5 text-xs bg-blue-600 text-white px-3 py-2 rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                                        >
+                                            <Plus size={12} /> Inicializar perfil
+                                        </button>
                                     </div>
                                 )}
                             </div>

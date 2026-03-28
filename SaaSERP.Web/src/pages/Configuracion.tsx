@@ -11,6 +11,8 @@ interface Modulos {
     accesoMovil: boolean;
     moduloHistorial: boolean;
     moduloWhatsApp: boolean;
+    moduloWhatsAppIA: boolean;
+    moduloCRM: boolean;
     moduloReportes: boolean;
 }
 
@@ -25,6 +27,8 @@ interface NegocioConfig {
     accesoMovil: boolean;
     moduloHistorial: boolean;
     moduloWhatsApp: boolean;
+    moduloWhatsAppIA: boolean;
+    moduloCRM: boolean;
     moduloReportes: boolean;
     horaApertura: string;
     horaCierre: string;
@@ -110,6 +114,8 @@ const Configuracion: React.FC = () => {
                 accesoMovil: n.accesoMovil,
                 moduloHistorial: n.moduloHistorial,
                 moduloWhatsApp: n.moduloWhatsApp,
+                moduloWhatsAppIA: n.moduloWhatsAppIA,
+                moduloCRM: n.moduloCRM,
                 moduloReportes: n.moduloReportes,
                 telefonoWhatsApp: op.telefonoWhatsApp,
                 horaApertura: op.horaApertura,
@@ -228,6 +234,22 @@ const Configuracion: React.FC = () => {
                                             value={n.moduloWhatsApp}
                                             onChange={v => handleToggle(n.id, 'moduloWhatsApp', v)}
                                             color="bg-emerald-500"
+                                        />
+                                        <Toggle
+                                            label="📱 WhatsApp IA por Trabajador"
+                                            description="Instancias individuales, handoff, silencio"
+                                            icon={<MessageCircle size={15} />}
+                                            value={n.moduloWhatsAppIA ?? false}
+                                            onChange={v => handleToggle(n.id, 'moduloWhatsAppIA', v)}
+                                            color="bg-violet-500"
+                                        />
+                                        <Toggle
+                                            label="⭐ CRM + Lealtad"
+                                            description="Perfiles de clientes, visitas, bonificación"
+                                            icon={<BarChart2 size={15} />}
+                                            value={n.moduloCRM ?? false}
+                                            onChange={v => handleToggle(n.id, 'moduloCRM', v)}
+                                            color="bg-amber-500"
                                         />
                                         <Toggle
                                             label="Módulo: Reportes"
