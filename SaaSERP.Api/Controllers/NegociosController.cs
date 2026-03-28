@@ -27,6 +27,15 @@ namespace SaaSERP.Api.Controllers
             return Ok(data);
         }
 
+        [AllowAnonymous]
+        [HttpGet("debug")]
+        public async Task<ActionResult<IEnumerable<Negocio>>> GetDebug()
+        {
+            var data = await _adminService.ObtenerTodosNegociosAsync();
+            return Ok(data);
+        }
+
+
         /// <summary>
         /// Endpoint accesible por CUALQUIER ROL autenticado (Mesero, Cajero, Cocinero, etc.)
         /// Devuelve la info del negocio al que pertenece el usuario según su token JWT.

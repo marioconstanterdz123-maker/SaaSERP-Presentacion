@@ -196,13 +196,13 @@ const Catalogos: React.FC = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Precio ($)</label>
                                     <input required type="number" min="0" step="0.5" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-medium text-slate-700" 
-                                        value={newServicio.precio} onChange={e => setNewServicio({...newServicio, precio: Number(e.target.value)})} />
+                                        value={newServicio.precio} onChange={e => setNewServicio({...newServicio, precio: e.target.value === '' ? '' as any : Number(e.target.value)})} />
                                 </div>
                                 {negocio?.sistemaAsignado === 'CITAS' && (
                                     <div>
                                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Duración (Mins)</label>
                                         <input required type="number" min="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all font-medium text-slate-700" 
-                                            value={newServicio.duracionEstimadaMinutos} onChange={e => setNewServicio({...newServicio, duracionEstimadaMinutos: Number(e.target.value)})} />
+                                            value={newServicio.duracionEstimadaMinutos} onChange={e => setNewServicio({...newServicio, duracionEstimadaMinutos: e.target.value === '' ? '' as any : Number(e.target.value)})} />
                                     </div>
                                 )}
                             </div>

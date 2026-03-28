@@ -197,11 +197,11 @@ const Ajustes: React.FC = () => {
                                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider flex items-center gap-1">
                                     <Users size={12} /> Capacidad Máxima (sillas/espacios)
                                 </label>
-                                <input type="number" value={capacidad} onChange={e => setCapacidad(parseInt(e.target.value) || 0)} className={inputCls} />
+                                <input type="number" value={capacidad} onChange={e => setCapacidad(e.target.value === '' ? '' as any : parseInt(e.target.value))} className={inputCls} />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Duración de Cita (minutos)</label>
-                                <input type="number" value={duracionCita} onChange={e => setDuracionCita(parseInt(e.target.value) || 30)} className={inputCls} />
+                                <input type="number" value={duracionCita} onChange={e => setDuracionCita(e.target.value === '' ? '' as any : parseInt(e.target.value))} className={inputCls} />
                             </div>
                         </>
                     )}

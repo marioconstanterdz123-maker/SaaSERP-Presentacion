@@ -213,7 +213,7 @@ const Negocios: React.FC = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Duración Base por Cita (Mins)</label>
                                     <input required type="number" min="5" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700" 
-                                        value={newNegocio.duracionMinutosCita} onChange={e => setNewNegocio({...newNegocio, duracionMinutosCita: Number(e.target.value)})} />
+                                        value={newNegocio.duracionMinutosCita} onChange={e => setNewNegocio({...newNegocio, duracionMinutosCita: e.target.value === '' ? '' as any : Number(e.target.value)})} />
                                 </div>
                             )}
 
@@ -229,7 +229,7 @@ const Negocios: React.FC = () => {
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Capacidad Máxima (Vehículos)</label>
                                     <input required type="number" min="1" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700" 
-                                        value={newNegocio.capacidadMaxima} onChange={e => setNewNegocio({...newNegocio, capacidadMaxima: Number(e.target.value)})} />
+                                        value={newNegocio.capacidadMaxima} onChange={e => setNewNegocio({...newNegocio, capacidadMaxima: e.target.value === '' ? '' as any : Number(e.target.value)})} />
                                 </div>
                             )}
 

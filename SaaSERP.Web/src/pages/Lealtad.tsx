@@ -124,19 +124,19 @@ export default function Lealtad() {
               <div>
                 <label className="text-xs text-slate-500 block mb-1">Citas necesarias</label>
                 <input type="number" min={1} value={reglaEnEdicion.citasRequeridas}
-                  onChange={e => setEditando({ ...reglaEnEdicion, citasRequeridas: +e.target.value })}
+                  onChange={e => setEditando({ ...reglaEnEdicion, citasRequeridas: e.target.value === '' ? '' as any : +e.target.value })}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
               </div>
               <div>
                 <label className="text-xs text-slate-500 block mb-1">Ventana (meses)</label>
                 <input type="number" min={1} value={reglaEnEdicion.ventanaMeses}
-                  onChange={e => setEditando({ ...reglaEnEdicion, ventanaMeses: +e.target.value })}
+                  onChange={e => setEditando({ ...reglaEnEdicion, ventanaMeses: e.target.value === '' ? '' as any : +e.target.value })}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
               </div>
               <div>
                 <label className="text-xs text-slate-500 block mb-1">Descuento %</label>
                 <input type="number" min={0} max={100} value={reglaEnEdicion.descuento}
-                  onChange={e => setEditando({ ...reglaEnEdicion, descuento: +e.target.value })}
+                  onChange={e => setEditando({ ...reglaEnEdicion, descuento: e.target.value === '' ? '' as any : +e.target.value })}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
               </div>
             </div>
