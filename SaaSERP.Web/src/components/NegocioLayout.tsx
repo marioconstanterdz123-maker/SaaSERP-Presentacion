@@ -56,7 +56,6 @@ const NegocioLayout: React.FC = () => {
             const serviciosLabel = negocio?.sistemaAsignado === 'TATTOO' ? 'Servicios / Tatuajes' : 'Servicios';
             menuItems.push({ path: `${basePath}/catalogos`, name: serviciosLabel, shortName: 'Servicios', icon: <Scissors size={22} /> });
             menuItems.push({ path: `${basePath}/recursos`, name: 'Especialistas', shortName: 'Especialistas', icon: <Users size={22} /> });
-            menuItems.push({ path: `${basePath}/trabajadores`, name: 'Trabajadores WA', shortName: 'Equipo WA', icon: <BookUser size={22} /> });
         }
         menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
     } else if (negocio?.sistemaAsignado === 'PARQUEADERO') {
@@ -65,7 +64,6 @@ const NegocioLayout: React.FC = () => {
         if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
             menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', shortName: 'Servicios', icon: <Briefcase size={22} /> });
             menuItems.push({ path: `${basePath}/recursos`, name: 'Recursos Físicos', shortName: 'Recursos', icon: <Users size={22} /> });
-            menuItems.push({ path: `${basePath}/trabajadores`, name: 'Trabajadores WA', shortName: 'Equipo WA', icon: <BookUser size={22} /> });
         }
         menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
         menuItems.push({ path: `${basePath}/operacion`, name: 'Punto de Venta', shortName: 'POS', icon: <ListOrdered size={22} /> });
