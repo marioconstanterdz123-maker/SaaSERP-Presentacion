@@ -22,9 +22,10 @@ namespace SaaSERP.Api.Services
         public async Task<IEnumerable<Negocio>> ObtenerTodosNegociosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            // Direct query — returns ALL columns including new ones (no SP dependency)
+            // SP actualizado (migr. 09) — devuelve todas las columnas, filtra EliminadoLogico=0
             return await connection.QueryAsync<Negocio>(
-                "SELECT * FROM [Core].[Negocios] WHERE EliminadoLogico = 0 ORDER BY Id");
+                "[Core].[usp_Negocios_ObtenerTodos]",
+                commandType: CommandType.StoredProcedure);
         }
 
         public async Task<Negocio?> ObtenerNegocioPorIdAsync(int id)
@@ -57,37 +58,32 @@ namespace SaaSERP.Api.Services
         public async Task<bool> ActualizarNegocioAsync(Negocio n)
         {
             using var connection = new SqlConnection(_connectionString);
-            // Direct UPDATE — incluye TODAS las columnas (sin dependencia del SP)
-            var rows = await connection.ExecuteAsync(
-                @"UPDATE [Core].[Negocios] SET
-                    Nombre                    = @Nombre,
-                    TelefonoWhatsApp          = @TelefonoWhatsApp,
-                    SistemaAsignado           = @SistemaAsignado,
-                    CapacidadMaxima           = @CapacidadMaxima,
-                    DuracionMinutosCita       = @DuracionMinutosCita,
-                    UsaMesas                  = @UsaMesas,
-                    HoraApertura              = @HoraApertura,
-                    HoraCierre                = @HoraCierre,
-                    Activo                    = @Activo,
-                    AccesoWeb                 = @AccesoWeb,
-                    AccesoMovil               = @AccesoMovil,
-                    ModuloHistorial           = @ModuloHistorial,
-                    ModuloWhatsApp            = @ModuloWhatsApp,
-                    ModuloWhatsAppIA          = @ModuloWhatsAppIA,
-                    ModuloCRM                 = @ModuloCRM,
-                    ModuloReportes            = @ModuloReportes,
-                    MercadoPagoAccessToken    = @MercadoPagoAccessToken,
-                    TiempoSilencioMinutos     = @TiempoSilencioMinutos
-                  WHERE Id = @Id",
-                new {
-                    n.Nombre, n.TelefonoWhatsApp, n.SistemaAsignado,
-                    n.CapacidadMaxima, n.DuracionMinutosCita, n.UsaMesas,
-                    n.HoraApertura, n.HoraCierre, n.Activo,
-                    n.AccesoWeb, n.AccesoMovil, n.ModuloHistorial,
-                    n.ModuloWhatsApp, n.ModuloWhatsAppIA, n.ModuloCRM,
-                    n.ModuloReportes, n.MercadoPagoAccessToken,
-                    n.TiempoSilencioMinutos, n.Id
-                });
+            // SP actualizado (migr. 09) — incluye todos los campos con parámetros tipados
+            var parameters = new DynamicParameters();
+            parameters.Add("@Id",                     n.Id);
+            parameters.Add("@Nombre",                 n.Nombre);
+            parameters.Add("@TelefonoWhatsApp",       n.TelefonoWhatsApp);
+            parameters.Add("@SistemaAsignado",        n.SistemaAsignado);
+            parameters.Add("@CapacidadMaxima",        n.CapacidadMaxima);
+            parameters.Add("@DuracionMinutosCita",    n.DuracionMinutosCita);
+            parameters.Add("@UsaMesas",               n.UsaMesas);
+            parameters.Add("@HoraApertura",           n.HoraApertura);
+            parameters.Add("@HoraCierre",             n.HoraCierre);
+            parameters.Add("@Activo",                 n.Activo);
+            parameters.Add("@AccesoWeb",              n.AccesoWeb);
+            parameters.Add("@AccesoMovil",            n.AccesoMovil);
+            parameters.Add("@ModuloHistorial",        n.ModuloHistorial);
+            parameters.Add("@ModuloWhatsApp",         n.ModuloWhatsApp);
+            parameters.Add("@ModuloWhatsAppIA",       n.ModuloWhatsAppIA);
+            parameters.Add("@ModuloCRM",              n.ModuloCRM);
+            parameters.Add("@ModuloReportes",         n.ModuloReportes);
+            parameters.Add("@MercadoPagoAccessToken", n.MercadoPagoAccessToken);
+            parameters.Add("@TiempoSilencioMinutos",  n.TiempoSilencioMinutos);
+
+            var rows = await connection.ExecuteScalarAsync<int>(
+                "[Core].[usp_Negocios_Actualizar]",
+                parameters,
+                commandType: CommandType.StoredProcedure);
             return rows > 0;
         }
 
