@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useParams, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Scissors, Calendar, ListOrdered, ArrowLeft, Settings, Car, Coffee, Briefcase, Users, Archive, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Scissors, Calendar, ListOrdered, ArrowLeft, Settings, Car, Coffee, Briefcase, Users, Archive, LogOut, Menu, X, BookUser, Star } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
@@ -51,16 +51,12 @@ const NegocioLayout: React.FC = () => {
                 icon: <div className="relative"><Coffee size={22} /><div className="absolute -bottom-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></div></div>
             });
         }
-    } else if (negocio?.sistemaAsignado === 'CITAS') {
+    } else if (negocio?.sistemaAsignado === 'CITAS' || negocio?.sistemaAsignado === 'TATTOO') {
         if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', shortName: 'Servicios', icon: <Scissors size={22} /> });
-            menuItems.push({ path: `${basePath}/recursos`, name: 'Especialistas', shortName: 'Equipo', icon: <Users size={22} /> });
-        }
-        menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
-    } else if (negocio?.sistemaAsignado === 'TATTOO') {
-        if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
-            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios / Tatuajes', shortName: 'Servicios', icon: <Scissors size={22} /> });
-            menuItems.push({ path: `${basePath}/trabajadores`, name: 'Tatuadores', shortName: 'Equipo', icon: <Users size={22} /> });
+            const serviciosLabel = negocio?.sistemaAsignado === 'TATTOO' ? 'Servicios / Tatuajes' : 'Servicios';
+            menuItems.push({ path: `${basePath}/catalogos`, name: serviciosLabel, shortName: 'Servicios', icon: <Scissors size={22} /> });
+            menuItems.push({ path: `${basePath}/recursos`, name: 'Especialistas', shortName: 'Especialistas', icon: <Users size={22} /> });
+            menuItems.push({ path: `${basePath}/trabajadores`, name: 'Trabajadores WA', shortName: 'Equipo WA', icon: <BookUser size={22} /> });
         }
         menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
     } else if (negocio?.sistemaAsignado === 'PARQUEADERO') {
@@ -69,6 +65,7 @@ const NegocioLayout: React.FC = () => {
         if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
             menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios', shortName: 'Servicios', icon: <Briefcase size={22} /> });
             menuItems.push({ path: `${basePath}/recursos`, name: 'Recursos Físicos', shortName: 'Recursos', icon: <Users size={22} /> });
+            menuItems.push({ path: `${basePath}/trabajadores`, name: 'Trabajadores WA', shortName: 'Equipo WA', icon: <BookUser size={22} /> });
         }
         menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
         menuItems.push({ path: `${basePath}/operacion`, name: 'Punto de Venta', shortName: 'POS', icon: <ListOrdered size={22} /> });
@@ -76,8 +73,8 @@ const NegocioLayout: React.FC = () => {
 
     if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
         menuItems.push({ path: `${basePath}/historial`, name: 'Historial', shortName: 'Historial', icon: <Archive size={22} /> });
-        menuItems.push({ path: `${basePath}/crm`, name: 'CRM Clientes', shortName: 'CRM', icon: <ListOrdered size={22} /> });
-        menuItems.push({ path: `${basePath}/lealtad`, name: 'Lealtad', shortName: 'Lealtad', icon: <Scissors size={22} /> });
+        menuItems.push({ path: `${basePath}/crm`, name: 'CRM Clientes', shortName: 'CRM', icon: <BookUser size={22} /> });
+        menuItems.push({ path: `${basePath}/lealtad`, name: 'Lealtad', shortName: 'Lealtad', icon: <Star size={22} /> });
         menuItems.push({ path: `${basePath}/configuracion`, name: 'Ajustes', shortName: 'Ajustes', icon: <Settings size={22} /> });
     } else if (rol === 'Cajero') {
         menuItems.push({ path: `${basePath}/historial`, name: 'Historial de Caja', shortName: 'Historial', icon: <Archive size={22} /> });
