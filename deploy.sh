@@ -61,14 +61,16 @@ if [ "$WEB_ONLY" = false ]; then
     error "No se encontró ningún .csproj en $API_DIR"
   fi
   log "  Proyecto: $CSPROJ"
-  # Paso 1: build (restaura + compila)
+  # Paso 1: build (restaura + compila). --disable-build-servers evita el bug de daemon corrupto en .NET 10
   dotnet build "$CSPROJ" -c Release \
     -p:StaticWebAssetsEnabled=false \
+    --disable-build-servers \
     --nologo -q
-  # Paso 2: publish sin re-build (evita conflicto GenerateTargetFrameworkMonikerAttribute en .NET 10)
+  # Paso 2: publish sin re-build
   dotnet publish "$CSPROJ" -c Release -o "$RUNTIME_DIR" \
     -p:StaticWebAssetsEnabled=false \
     --no-build \
+    --disable-build-servers \
     --nologo -q
   success "API compilada"
 
