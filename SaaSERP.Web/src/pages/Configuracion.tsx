@@ -73,9 +73,9 @@ const SISTEMA_ICON: Record<string, string> = {
 };
 
 const getSuscripcionInfo = (fechaStr: string | null) => {
-    if (!fechaStr) return { dias: 0, estado: 'expired' as const, label: 'Sin fecha' };
+    if (!fechaStr) return { dias: 999, estado: 'active' as const, label: 'Sin límite' };
     const diff = Math.ceil((new Date(fechaStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    if (diff <= 0) return { dias: 0, estado: 'expired' as const, label: 'Vencida' };
+    if (isNaN(diff) || diff <= 0) return { dias: 0, estado: 'expired' as const, label: 'Vencida' };
     if (diff <= 5)  return { dias: diff, estado: 'warning' as const, label: `${diff}d` };
     return { dias: diff, estado: 'active' as const, label: `${diff}d` };
 };
