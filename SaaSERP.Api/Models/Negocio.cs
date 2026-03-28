@@ -42,6 +42,12 @@ namespace SaaSERP.Api.Models
         /// <summary>Mensajes automáticos por WhatsApp habilitados.</summary>
         public bool ModuloWhatsApp { get; set; } = false;
 
+        /// <summary>WhatsApp IA por trabajador: instancias individuales, handoff, silencio. (SuperAdmin)</summary>
+        public bool ModuloWhatsAppIA { get; set; } = false;
+
+        /// <summary>CRM de clientes + motor de lealtad/bonificación. (SuperAdmin)</summary>
+        public bool ModuloCRM { get; set; } = false;
+
         /// <summary>Analítica avanzada y gráficos habilitados.</summary>
         public bool ModuloReportes { get; set; } = true;
 

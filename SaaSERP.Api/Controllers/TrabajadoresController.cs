@@ -155,6 +155,39 @@ namespace SaaSERP.Api.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { mensaje = "Trabajador desactivado." });
         }
+
+        // POST /api/Trabajadores/{id}/horarios — agregar un horario individual
+        [HttpPost("{id}/horarios")]
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
+        public async Task<IActionResult> AgregarHorario(int id, [FromBody] HorarioDto dto)
+        {
+            var trabajador = await _context.Trabajadores.FindAsync(id);
+            if (trabajador == null) return NotFound();
+
+            var horario = new HorarioTrabajador
+            {
+                TrabajadorId = id,
+                DiaSemana = dto.DiaSemana,
+                HoraInicio = dto.HoraInicio,
+                HoraFin = dto.HoraFin
+            };
+            _context.HorariosTrabajadores.Add(horario);
+            await _context.SaveChangesAsync();
+            return Ok(new { horario.Id, horario.DiaSemana, horario.HoraInicio, horario.HoraFin });
+        }
+
+        // DELETE /api/Trabajadores/{id}/horarios/{horarioId} — eliminar un horario individual
+        [HttpDelete("{id}/horarios/{horarioId}")]
+        [Authorize(Roles = "SuperAdmin,AdminNegocio")]
+        public async Task<IActionResult> EliminarHorario(int id, int horarioId)
+        {
+            var horario = await _context.HorariosTrabajadores
+                .FirstOrDefaultAsync(h => h.Id == horarioId && h.TrabajadorId == id);
+            if (horario == null) return NotFound();
+            _context.HorariosTrabajadores.Remove(horario);
+            await _context.SaveChangesAsync();
+            return Ok(new { mensaje = "Horario eliminado." });
+        }
     }
 
     // DTOs

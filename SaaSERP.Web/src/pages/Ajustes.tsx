@@ -31,6 +31,10 @@ const Ajustes: React.FC = () => {
     const [usaMesas, setUsaMesas] = useState(false);
     const [mpToken, setMpToken] = useState('');
 
+    // Feature flags (SuperAdmin only)
+    const [moduloWhatsAppIA, setModuloWhatsAppIA] = useState(false);
+    const [moduloCRM, setModuloCRM] = useState(false);
+
     // Collapsible sections
     const [showPrinters, setShowPrinters] = useState(false);
     const [showTicketConfig, setShowTicketConfig] = useState(false);
@@ -51,6 +55,8 @@ const Ajustes: React.FC = () => {
                 setDuracionCita(current.duracionMinutosCita || 30);
                 setUsaMesas(current.usaMesas || false);
                 setMpToken(current.mercadoPagoAccessToken || '');
+                setModuloWhatsAppIA(current.moduloWhatsAppIA || false);
+                setModuloCRM(current.moduloCRM || false);
 
                 // Cargar config de ticket desde localStorage, pre-poblando del negocio
                 const configKey = TICKET_CONFIG_KEY(current.id.toString());
@@ -73,7 +79,9 @@ const Ajustes: React.FC = () => {
                 capacidadMaxima: capacidad,
                 duracionMinutosCita: duracionCita,
                 usaMesas,
-                mercadoPagoAccessToken: mpToken
+                mercadoPagoAccessToken: mpToken,
+                moduloWhatsAppIA,
+                moduloCRM,
             });
             setSuccessMsg('¡Cambios guardados exitosamente!');
             setTimeout(() => setSuccessMsg(''), 3000);
@@ -83,6 +91,7 @@ const Ajustes: React.FC = () => {
             setIsSaving(false);
         }
     };
+
 
     // Auto-guardar ticket config en localStorage al salir de cada campo
     const saveTicketConfig = (updated: TicketConfig) => {
@@ -315,6 +324,45 @@ const Ajustes: React.FC = () => {
                             )}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* ─── MÓDULOS AVANZADOS (SuperAdmin) ─── */}
+            {user?.rol === 'SuperAdmin' && (
+                <div className="bg-gradient-to-br from-violet-50 to-indigo-50 backdrop-blur-xl rounded-2xl border border-violet-100 shadow-sm p-6 mb-6">
+                    <h3 className="text-sm font-black text-violet-700 uppercase tracking-widest mb-1 flex items-center gap-2">
+                        ⚙️ Módulos Avanzados
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-4">Solo visible para SuperAdmin. Activa funcionalidades premium por negocio.</p>
+                    <div className="space-y-3">
+                        {/* WhatsApp IA */}
+                        <div className="flex items-center justify-between bg-white/80 rounded-xl p-4 border border-violet-100">
+                            <div>
+                                <p className="font-bold text-slate-700 text-sm">📱 WhatsApp IA por Trabajador</p>
+                                <p className="text-xs text-slate-400">Instancias individuales, handoff humano, silencio automático</p>
+                            </div>
+                            <button
+                                onClick={() => setModuloWhatsAppIA(!moduloWhatsAppIA)}
+                                className={`w-12 h-7 rounded-full transition-colors relative flex-shrink-0 ${moduloWhatsAppIA ? 'bg-violet-600' : 'bg-slate-300'}`}
+                            >
+                                <div className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform ${moduloWhatsAppIA ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            </button>
+                        </div>
+                        {/* CRM */}
+                        <div className="flex items-center justify-between bg-white/80 rounded-xl p-4 border border-violet-100">
+                            <div>
+                                <p className="font-bold text-slate-700 text-sm">⭐ CRM + Lealtad de Clientes</p>
+                                <p className="text-xs text-slate-400">Perfiles de clientes, historial de visitas, reglas de bonificación</p>
+                            </div>
+                            <button
+                                onClick={() => setModuloCRM(!moduloCRM)}
+                                className={`w-12 h-7 rounded-full transition-colors relative flex-shrink-0 ${moduloCRM ? 'bg-amber-500' : 'bg-slate-300'}`}
+                            >
+                                <div className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform ${moduloCRM ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            </button>
+                        </div>
+                    </div>
+                    <p className="text-xs text-violet-500 mt-3">💾 Recuerda guardar para aplicar los cambios.</p>
                 </div>
             )}
 
