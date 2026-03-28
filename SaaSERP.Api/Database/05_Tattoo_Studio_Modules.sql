@@ -1,7 +1,8 @@
 -- =====================================================================
 -- 05_Tattoo_Studio_Modules.sql
 -- Módulos avanzados para estudio de tatuajes con IA WhatsApp
--- Ejecutar después de los scripts 01-04
+-- Syntax: SQL Server (T-SQL)
+-- Ejecutar con: sqlcmd -S localhost -U sa -P 'pass' -i este_archivo.sql
 -- =====================================================================
 
 -- Schema Studio
@@ -10,7 +11,8 @@ IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Studio')
 GO
 
 -- ── Trabajadores ──────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Studio.Trabajadores (
+IF NOT EXISTS (SELECT * FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='Studio' AND t.name='Trabajadores')
+CREATE TABLE Studio.Trabajadores (
     Id                  INT IDENTITY(1,1) PRIMARY KEY,
     NegocioId           INT NOT NULL,
     Nombre              NVARCHAR(100) NOT NULL,
@@ -23,17 +25,19 @@ CREATE TABLE IF NOT EXISTS Studio.Trabajadores (
 GO
 
 -- ── Horarios Trabajadores ─────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Studio.HorariosTrabajadores (
+IF NOT EXISTS (SELECT * FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='Studio' AND t.name='HorariosTrabajadores')
+CREATE TABLE Studio.HorariosTrabajadores (
     Id              INT IDENTITY(1,1) PRIMARY KEY,
     TrabajadorId    INT NOT NULL REFERENCES Studio.Trabajadores(Id) ON DELETE CASCADE,
-    DiaSemana       INT NOT NULL,  -- 0=Dom, 1=Lun ... 6=Sáb
+    DiaSemana       INT NOT NULL,  -- 0=Dom, 1=Lun ... 6=Sab
     HoraInicio      TIME NOT NULL,
     HoraFin         TIME NOT NULL
 );
 GO
 
 -- ── Chat Sessions (WhatsApp Silencio / Handoff) ───────────────────────
-CREATE TABLE IF NOT EXISTS Studio.ChatSessions (
+IF NOT EXISTS (SELECT * FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='Studio' AND t.name='ChatSessions')
+CREATE TABLE Studio.ChatSessions (
     Id                              INT IDENTITY(1,1) PRIMARY KEY,
     NegocioId                       INT NOT NULL,
     TrabajadorId                    INT NULL REFERENCES Studio.Trabajadores(Id) ON DELETE SET NULL,
@@ -49,7 +53,8 @@ CREATE TABLE IF NOT EXISTS Studio.ChatSessions (
 GO
 
 -- ── CRM Clientes ──────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Studio.ClientesCRM (
+IF NOT EXISTS (SELECT * FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='Studio' AND t.name='ClientesCRM')
+CREATE TABLE Studio.ClientesCRM (
     Id                      INT IDENTITY(1,1) PRIMARY KEY,
     NegocioId               INT NOT NULL,
     Telefono                NVARCHAR(30) NOT NULL,
@@ -64,7 +69,8 @@ CREATE TABLE IF NOT EXISTS Studio.ClientesCRM (
 GO
 
 -- ── Reglas de Bonificación ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS Studio.ReglasBonificacion (
+IF NOT EXISTS (SELECT * FROM sys.tables t JOIN sys.schemas s ON t.schema_id=s.schema_id WHERE s.name='Studio' AND t.name='ReglasBonificacion')
+CREATE TABLE Studio.ReglasBonificacion (
     Id              INT IDENTITY(1,1) PRIMARY KEY,
     NegocioId       INT NOT NULL,
     Nombre          NVARCHAR(100) NOT NULL,
@@ -91,4 +97,7 @@ IF NOT EXISTS (
     WHERE TABLE_SCHEMA='Core' AND TABLE_NAME='Negocios' AND COLUMN_NAME='TiempoSilencioMinutos'
 )
     ALTER TABLE Core.Negocios ADD TiempoSilencioMinutos INT NOT NULL DEFAULT 60;
+GO
+
+PRINT 'Migracion 05_Tattoo_Studio_Modules completada exitosamente.';
 GO
