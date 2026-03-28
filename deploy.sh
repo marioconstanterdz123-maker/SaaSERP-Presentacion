@@ -61,11 +61,14 @@ if [ "$WEB_ONLY" = false ]; then
     error "No se encontró ningún .csproj en $API_DIR"
   fi
   log "  Proyecto: $CSPROJ"
-  dotnet restore "$CSPROJ" --nologo -q
-  # StaticWebAssetsEnabled=false: la API no necesita assets estáticos
-  # Esto omite el target problemático en .NET 10 sin afectar el comportamiento
+  # Paso 1: build (restaura + compila)
+  dotnet build "$CSPROJ" -c Release \
+    -p:StaticWebAssetsEnabled=false \
+    --nologo -q
+  # Paso 2: publish sin re-build (evita conflicto GenerateTargetFrameworkMonikerAttribute en .NET 10)
   dotnet publish "$CSPROJ" -c Release -o "$RUNTIME_DIR" \
     -p:StaticWebAssetsEnabled=false \
+    --no-build \
     --nologo -q
   success "API compilada"
 
