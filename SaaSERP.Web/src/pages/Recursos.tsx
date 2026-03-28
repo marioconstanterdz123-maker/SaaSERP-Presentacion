@@ -132,8 +132,41 @@ const Recursos: React.FC = () => {
         fetchAll();
     };
 
-    const getTrabajador = (nombre: string) =>
-        trabajadores.find(t => t.nombre.toLowerCase() === nombre.toLowerCase());
+    const getTrabajador = (r: Recurso) => {
+        const matches = trabajadores.filter(t => t.nombre.toLowerCase() === r.nombre.toLowerCase());
+        const recursoMatches = recursos.filter(rec => rec.nombre.toLowerCase() === r.nombre.toLowerCase());
+        const myIndex = recursoMatches.findIndex(rec => rec.id === r.id);
+        return matches[myIndex] || matches[0];
+    };
+
+    const handleLocalTimeChange = (trabajadorId: number, horarioId: number, field: 'horaInicio' | 'horaFin', val: string) => {
+        setTrabajadores(prev => prev.map(t => {
+            if (t.id !== trabajadorId) return t;
+            return {
+                ...t,
+                horarios: t.horarios.map(h => h.id === horarioId ? { ...h, [field]: val + ':00' } : h)
+            };
+        }));
+    };
+
+    const syncHorarioConBackend = async (trabajadorId: number) => {
+        const t = trabajadores.find(x => x.id === trabajadorId);
+        if (!t) return;
+        try {
+            await axiosInstance.put(`/Trabajadores/${trabajadorId}`, {
+                nombre: t.nombre,
+                telefono: t.telefono,
+                horarios: t.horarios.map(h => ({
+                    diaSemana: h.diaSemana,
+                    horaInicio: h.horaInicio,
+                    horaFin: h.horaFin
+                }))
+            });
+        } catch (err) {
+            console.error('Error syncing schedule', err);
+            fetchAll(); // revert on error
+        }
+    };
 
     const isMesas = negocio?.sistemaAsignado === 'TAQUERIA' || negocio?.sistemaAsignado === 'RESTAURANTES';
     const tieneWAIA = negocio?.moduloWhatsAppIA === true;
@@ -185,7 +218,7 @@ const Recursos: React.FC = () => {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filtrados.map(r => {
-                        const trabajador = !isMesas ? getTrabajador(r.nombre) : undefined;
+                        const trabajador = !isMesas ? getTrabajador(r) : undefined;
                         const isExpanded = expandedId === r.id;
                         const conectado = trabajador ? waStatus[trabajador.id] : false;
 
@@ -259,12 +292,27 @@ const Recursos: React.FC = () => {
                                                     );
                                                 })}
                                             </div>
-                                            <div className="space-y-1">
+                                            <div className="space-y-1.5 mt-3">
                                                 {trabajador.horarios.map(h => (
-                                                    <div key={h.id} className="flex items-center justify-between bg-slate-50 rounded-lg px-2 py-1.5 text-[11px]">
-                                                        <span className="font-medium text-slate-700">{DIAS[h.diaSemana]}: {h.horaInicio.slice(0, 5)} – {h.horaFin.slice(0, 5)}</span>
-                                                        <button onClick={() => eliminarHorario(trabajador.id, h.id)} className="text-red-400 hover:text-red-600">
-                                                            <Trash2 size={11} />
+                                                    <div key={h.id} className="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 text-[11px]">
+                                                        <span className="font-bold text-slate-500 w-8">{DIAS[h.diaSemana]}</span>
+                                                        <input 
+                                                            type="time" 
+                                                            value={h.horaInicio.slice(0, 5)} 
+                                                            onChange={e => handleLocalTimeChange(trabajador.id, h.id, 'horaInicio', e.target.value)}
+                                                            onBlur={() => syncHorarioConBackend(trabajador.id)}
+                                                            className="flex-1 bg-white border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400"
+                                                        />
+                                                        <span className="text-slate-400 font-medium">–</span>
+                                                        <input 
+                                                            type="time" 
+                                                            value={h.horaFin.slice(0, 5)} 
+                                                            onChange={e => handleLocalTimeChange(trabajador.id, h.id, 'horaFin', e.target.value)}
+                                                            onBlur={() => syncHorarioConBackend(trabajador.id)}
+                                                            className="flex-1 bg-white border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400"
+                                                        />
+                                                        <button onClick={() => eliminarHorario(trabajador.id, h.id)} className="text-red-400 hover:text-red-600 ml-1">
+                                                            <Trash2 size={12} />
                                                         </button>
                                                     </div>
                                                 ))}
