@@ -33,8 +33,14 @@ namespace SaaSERP.Api.Models
         public int? ServicioId { get; set; }
         public int? RecursoId { get; set; }
 
+        /// <summary>Tatuador/trabajador asignado a esta cita</summary>
+        public int? TrabajadorId { get; set; }
+
         // Campos auxiliares (no se persisten en la BD)
         [NotMapped]
         public string? ServicioNombre { get; set; }
+
+        [NotMapped]
+        public string? TrabajadorNombre { get; set; }
     }
-}
+}

@@ -156,6 +156,96 @@ namespace SaaSERP.Api.Controllers
             return Ok(new { mensaje = "Instancia de WhatsApp desconectada y eliminada." });
         }
 
+        // ──────────────────────────────────────────────────────────────────
+        // ENDPOINTS POR TRABAJADOR (instancia individual)
+        // ──────────────────────────────────────────────────────────────────
+
+        // POST /api/WhatsApp/trabajador/{trabajadorId}/crear
+        [HttpPost("trabajador/{trabajadorId}/crear")]
+        public async Task<IActionResult> CrearInstanciaTrabajador(int trabajadorId)
+        {
+            var trabajador = await _context.Trabajadores.FindAsync(trabajadorId);
+            if (trabajador == null) return NotFound(new { error = "Trabajador no encontrado." });
+
+            string instancia = $"trabajador_{trabajadorId}";
+            var client = _httpFactory.CreateClient();
+            var payload = new { instanceName = instancia, integration = "WHATSAPP-BAILEYS", qrcode = true };
+            var req = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/instance/create")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+            };
+            req.Headers.Add("apikey", _apiKey);
+
+            var res = await client.SendAsync(req);
+            if (!res.IsSuccessStatusCode)
+            {
+                var err = await res.Content.ReadAsStringAsync();
+                return BadRequest(new { error = "Error al crear instancia.", detalle = err });
+            }
+
+            trabajador.InstanciaWhatsApp = instancia;
+            await _context.SaveChangesAsync();
+            return Ok(new { instancia, mensaje = "Instancia creada. Solicita el QR para conectar el teléfono del tatuador." });
+        }
+
+        // GET /api/WhatsApp/trabajador/{trabajadorId}/qr
+        [HttpGet("trabajador/{trabajadorId}/qr")]
+        public async Task<IActionResult> QrTrabajador(int trabajadorId)
+        {
+            var trabajador = await _context.Trabajadores.FindAsync(trabajadorId);
+            if (trabajador == null || string.IsNullOrEmpty(trabajador.InstanciaWhatsApp))
+                return NotFound(new { error = "No hay instancia configurada para este trabajador." });
+
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Get,
+                $"{_baseUrl}/instance/connect/{trabajador.InstanciaWhatsApp}");
+            req.Headers.Add("apikey", _apiKey);
+
+            var res = await client.SendAsync(req);
+            return Content(await res.Content.ReadAsStringAsync(), "application/json");
+        }
+
+        // GET /api/WhatsApp/trabajador/{trabajadorId}/estado
+        [HttpGet("trabajador/{trabajadorId}/estado")]
+        public async Task<IActionResult> EstadoTrabajador(int trabajadorId)
+        {
+            var trabajador = await _context.Trabajadores.FindAsync(trabajadorId);
+            if (trabajador == null || string.IsNullOrEmpty(trabajador.InstanciaWhatsApp))
+                return Ok(new { estado = "SIN_INSTANCIA", conectado = false });
+
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Get,
+                $"{_baseUrl}/instance/connectionState/{trabajador.InstanciaWhatsApp}");
+            req.Headers.Add("apikey", _apiKey);
+
+            var res = await client.SendAsync(req);
+            if (!res.IsSuccessStatusCode) return Ok(new { estado = "ERROR", conectado = false });
+
+            var body = await res.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(body);
+            var state = doc.RootElement.GetProperty("instance").GetProperty("state").GetString() ?? "DESCONOCIDO";
+            return Ok(new { instancia = trabajador.InstanciaWhatsApp, estado = state, conectado = state == "open" });
+        }
+
+        // DELETE /api/WhatsApp/trabajador/{trabajadorId}
+        [HttpDelete("trabajador/{trabajadorId}")]
+        public async Task<IActionResult> EliminarInstanciaTrabajador(int trabajadorId)
+        {
+            var trabajador = await _context.Trabajadores.FindAsync(trabajadorId);
+            if (trabajador == null || string.IsNullOrEmpty(trabajador.InstanciaWhatsApp))
+                return NotFound();
+
+            var client = _httpFactory.CreateClient();
+            var req = new HttpRequestMessage(HttpMethod.Delete,
+                $"{_baseUrl}/instance/delete/{trabajador.InstanciaWhatsApp}");
+            req.Headers.Add("apikey", _apiKey);
+            await client.SendAsync(req);
+
+            trabajador.InstanciaWhatsApp = null;
+            await _context.SaveChangesAsync();
+            return Ok(new { mensaje = "Instancia del trabajador eliminada." });
+        }
+
         // ──────────────────────────────────────────
         // 5. RECEPCIÓN DE MENSAJES (WEBHOOK)
         //    POST /api/WhatsApp/recepcion
@@ -166,49 +256,56 @@ namespace SaaSERP.Api.Controllers
         {
             try
             {
-                // Extraemos el evento genéricamente sin forzar tipado para evitar el HTTP 400
                 string ev = rawPayload.TryGetProperty("event", out var evProp) ? evProp.GetString() ?? "" : "";
-                
-                // Si no es un upsert, no nos interesa para la IA. Evitamos casteos propensos a errores.
                 if (ev != "messages.upsert")
                     return Ok(new { success = true });
 
-                // Ahora sí, convertimos de manera segura
                 var payload = JsonSerializer.Deserialize<EvolutionWebhookPayload>(rawPayload.GetRawText());
                 if (payload == null) return Ok();
 
                 if (payload.Data?.Key?.FromMe == false)
-            {
-                var texto = payload.Data?.Message?.Conversation;
-                if (!string.IsNullOrEmpty(texto))
                 {
-                    Console.WriteLine($"[WhatsApp IA] Mensaje de {payload.Data?.Key?.RemoteJid} en {payload.Instance}: {texto}");
-                    
-                    var instancia = payload.Instance;
-                    var numeroCliente = (payload.Data?.Key?.RemoteJid ?? "").Split('@')[0];
-
-                    // Procesar la IA de manera asíncrona para liberar inmediatamente el Webhook y no dar Timeout
-                    Task.Run(async () =>
+                    var texto = payload.Data?.Message?.Conversation;
+                    if (!string.IsNullOrEmpty(texto))
                     {
-                        try
-                        {
-                            using var scope = _scopeFactory.CreateScope();
-                            var dbContext = scope.ServiceProvider.GetRequiredService<SaaSContext>();
-                            var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
+                        var instancia = payload.Instance;
+                        var numeroCliente = (payload.Data?.Key?.RemoteJid ?? "").Split('@')[0];
+                        Console.WriteLine($"[WhatsApp IA] Mensaje de {numeroCliente} en {instancia}: {texto}");
 
-                            var negocio = await dbContext.Negocios.FirstOrDefaultAsync(n => n.InstanciaWhatsApp == instancia);
-                            if (negocio != null)
-                            {
-                                await aiService.ProcesarMensajeEntranteAsync(texto, negocio, numeroCliente, instancia);
-                            }
-                        }
-                        catch (Exception ex)
+                        Task.Run(async () =>
                         {
-                            Console.WriteLine($"[WhatsApp IA] Error al procesar IA: {ex.Message}");
-                        }
-                    });
+                            try
+                            {
+                                using var scope = _scopeFactory.CreateScope();
+                                var dbContext = scope.ServiceProvider.GetRequiredService<SaaSContext>();
+                                var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
+
+                                // Buscar negocio: primero por trabajador, luego por instancia global
+                                Negocio? negocio = null;
+                                var trabajador = await dbContext.Trabajadores
+                                    .FirstOrDefaultAsync(t => t.InstanciaWhatsApp == instancia);
+                                if (trabajador != null)
+                                {
+                                    negocio = await dbContext.Negocios.FindAsync(trabajador.NegocioId);
+                                }
+                                else
+                                {
+                                    negocio = await dbContext.Negocios
+                                        .FirstOrDefaultAsync(n => n.InstanciaWhatsApp == instancia);
+                                }
+
+                                if (negocio != null)
+                                {
+                                    await aiService.ProcesarMensajeEntranteAsync(texto, negocio, numeroCliente, instancia);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"[WhatsApp IA] Error: {ex.Message}");
+                            }
+                        });
+                    }
                 }
-            }
             }
             catch (Exception ex)
             {

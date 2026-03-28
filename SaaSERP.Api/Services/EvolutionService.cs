@@ -24,19 +24,27 @@ namespace SaaSERP.Api.Services
             }
         }
 
-        public async Task EnviarMensajeTextoAsync(string instancia, string numeroDestino, string texto)
+        public async Task EnviarMensajeTextoAsync(string instancia, string numeroDestino, string texto, string? apiKey = null)
         {
-            var payload = new
-            {
-                number = numeroDestino,
-                text = texto
-            };
-
+            var payload = new { number = numeroDestino, text = texto };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_baseUrl}/message/sendText/{instancia}", content);
-            
-            // Si falla, lanza excepción que será atrapada en el log
-            response.EnsureSuccessStatusCode(); 
+
+            HttpResponseMessage response;
+            if (!string.IsNullOrEmpty(apiKey) && apiKey != _globalApiKey)
+            {
+                var req = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/message/sendText/{instancia}")
+                {
+                    Content = content
+                };
+                req.Headers.Add("apikey", apiKey);
+                response = await _httpClient.SendAsync(req);
+            }
+            else
+            {
+                response = await _httpClient.PostAsync($"{_baseUrl}/message/sendText/{instancia}", content);
+            }
+
+            response.EnsureSuccessStatusCode();
         }
     }
 }

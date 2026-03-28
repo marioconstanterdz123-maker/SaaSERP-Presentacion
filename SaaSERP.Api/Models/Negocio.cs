@@ -47,6 +47,9 @@ namespace SaaSERP.Api.Models
 
         [MaxLength(255)]
         public string? MercadoPagoAccessToken { get; set; }
+
+        /// <summary>Minutos de inactividad antes de reactivar la IA automáticamente (default 60)</summary>
+        public int TiempoSilencioMinutos { get; set; } = 60;
     }
 }
 

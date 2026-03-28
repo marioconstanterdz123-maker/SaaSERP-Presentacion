@@ -17,6 +17,9 @@ import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
 import Configuracion from './pages/Configuracion';
 import Ajustes from './pages/Ajustes';
+import Trabajadores from './pages/Trabajadores';
+import CRM from './pages/CRM';
+import Lealtad from './pages/Lealtad';
 import { App as CapApp } from '@capacitor/app';
 
 function App() {
@@ -129,6 +132,21 @@ function App() {
             <Route path="configuracion" element={
               <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
                 <Ajustes />
+              </ProtectedRoute>
+            } />
+            <Route path="trabajadores" element={
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
+                <Trabajadores />
+              </ProtectedRoute>
+            } />
+            <Route path="crm" element={
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
+                <CRM />
+              </ProtectedRoute>
+            } />
+            <Route path="lealtad" element={
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
+                <Lealtad />
               </ProtectedRoute>
             } />
           </Route>

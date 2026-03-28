@@ -57,6 +57,12 @@ const NegocioLayout: React.FC = () => {
             menuItems.push({ path: `${basePath}/recursos`, name: 'Especialistas', shortName: 'Equipo', icon: <Users size={22} /> });
         }
         menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
+    } else if (negocio?.sistemaAsignado === 'TATTOO') {
+        if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
+            menuItems.push({ path: `${basePath}/catalogos`, name: 'Servicios / Tatuajes', shortName: 'Servicios', icon: <Scissors size={22} /> });
+            menuItems.push({ path: `${basePath}/trabajadores`, name: 'Tatuadores', shortName: 'Equipo', icon: <Users size={22} /> });
+        }
+        menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
     } else if (negocio?.sistemaAsignado === 'PARQUEADERO') {
         menuItems.push({ path: `${basePath}/operacion`, name: 'Caseta Vehículos', shortName: 'Caseta', icon: <Car size={22} /> });
     } else {
@@ -70,10 +76,13 @@ const NegocioLayout: React.FC = () => {
 
     if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
         menuItems.push({ path: `${basePath}/historial`, name: 'Historial', shortName: 'Historial', icon: <Archive size={22} /> });
+        menuItems.push({ path: `${basePath}/crm`, name: 'CRM Clientes', shortName: 'CRM', icon: <ListOrdered size={22} /> });
+        menuItems.push({ path: `${basePath}/lealtad`, name: 'Lealtad', shortName: 'Lealtad', icon: <Scissors size={22} /> });
         menuItems.push({ path: `${basePath}/configuracion`, name: 'Ajustes', shortName: 'Ajustes', icon: <Settings size={22} /> });
     } else if (rol === 'Cajero') {
         menuItems.push({ path: `${basePath}/historial`, name: 'Historial de Caja', shortName: 'Historial', icon: <Archive size={22} /> });
     }
+
 
     // Bottom tab items: show max 5, rest overflow in sidebar (desktop only)
     const bottomTabItems = menuItems.slice(0, 5);

@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using SaaSERP.Api.Data;
 using SaaSERP.Api.Models;
 using System;
 using System.Collections.Generic;
@@ -22,19 +24,21 @@ namespace SaaSERP.Api.Services
         private readonly IEstadiaService _estadiaService;
         private readonly IComandaService _comandaService;
         private readonly WhatsAppService _whatsApp;
+        private readonly SaaSContext _context;
         private readonly string _apiKey;
         private readonly string _endpoint;
 
         public AIService(
-            HttpClient httpClient, 
-            IConfiguration config, 
-            ICitaService citaService, 
-            IChatMemoryService chatMemoryService, 
+            HttpClient httpClient,
+            IConfiguration config,
+            ICitaService citaService,
+            IChatMemoryService chatMemoryService,
             IEvolutionService evolutionService,
             INegocioService negocioService,
             IEstadiaService estadiaService,
             IComandaService comandaService,
-            WhatsAppService whatsApp)
+            WhatsAppService whatsApp,
+            SaaSContext context)
         {
             _httpClient = httpClient;
             _citaService = citaService;
@@ -44,6 +48,7 @@ namespace SaaSERP.Api.Services
             _estadiaService = estadiaService;
             _comandaService = comandaService;
             _whatsApp = whatsApp;
+            _context = context;
             _apiKey = config["DeepSeek:ApiKey"] ?? string.Empty;
             _endpoint = config["DeepSeek:BaseUrl"] ?? "https://api.deepseek.com/chat/completions";
 
@@ -55,13 +60,66 @@ namespace SaaSERP.Api.Services
 
         public async Task ProcesarMensajeEntranteAsync(string textoOriginal, Negocio negocio, string numeroCliente, string instancia)
         {
-            // 1. Guardar mensaje del usuario
+            // ── 0. UPSERT ClienteCRM ──────────────────────────────────────────────
+            var crm = await _context.ClientesCRM
+                .FirstOrDefaultAsync(c => c.NegocioId == negocio.Id && c.Telefono == numeroCliente);
+            if (crm == null)
+            {
+                crm = new ClienteCRM { NegocioId = negocio.Id, Telefono = numeroCliente };
+                _context.ClientesCRM.Add(crm);
+            }
+            crm.UltimaInteraccion = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            // ── 1. ChatSession — gestión de estado handoff/silencio ───────────────
+            var sesion = await _context.ChatSessions
+                .Include(s => s.Trabajador)
+                .FirstOrDefaultAsync(s => s.NegocioId == negocio.Id && s.NumeroCliente == numeroCliente);
+            if (sesion == null)
+            {
+                sesion = new ChatSession { NegocioId = negocio.Id, NumeroCliente = numeroCliente };
+                _context.ChatSessions.Add(sesion);
+            }
+            sesion.UltimoMensaje = DateTime.UtcNow;
+            if (!string.IsNullOrEmpty(crm.NombreDetectado)) sesion.NombreCliente = crm.NombreDetectado;
+            await _context.SaveChangesAsync();
+
+            // ── 2. MODO SILENCIO — IA no responde ────────────────────────────────
+            if (sesion.ModoSilencio)
+            {
+                Console.WriteLine($"[WhatsApp IA] {numeroCliente} en MODO SILENCIO — IA skipped.");
+                return;
+            }
+
+            // ── 3. HANDOFF CONFIRMATION — cliente responde sí/no ─────────────────
+            if (sesion.EsperandoConfirmacionHandoff)
+            {
+                var resp = textoOriginal.ToLower().Trim();
+                bool dijosi = resp is "si" or "sí" or "s" or "yes" or "claro" or "ok" or "dale"
+                    || resp.StartsWith("si ") || resp.StartsWith("sí ") || resp.Contains("quiero");
+
+                if (dijosi)
+                {
+                    await ActivarModoSilencioConNotificacionAsync(sesion, negocio, numeroCliente, instancia);
+                    await _evolutionService.EnviarMensajeTextoAsync(instancia, numeroCliente,
+                        $"¡Listo! 🙌 {sesion.Trabajador?.Nombre ?? "el equipo"} se comunicará contigo en breve. Si necesitas algo más en el futuro, escríbenos aquí.");
+                    return;
+                }
+                else
+                {
+                    // Cliente dijo no, continúa con IA normal
+                    sesion.EsperandoConfirmacionHandoff = false;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // ── 4. Guardar mensaje del usuario ────────────────────────────────────
             await _chatMemoryService.GuardarMensajeAsync(numeroCliente, "user", textoOriginal);
 
-            // 2. Recuperar historial
+            // ── 5. Recuperar historial ────────────────────────────────────────────
             var historial = await _chatMemoryService.ObtenerHistorialAsync(numeroCliente, 15);
 
-            // 3. Variables Dinamicas de Sistema
+            // ── 6. Variables Dinámicas de Sistema ─────────────────────────────────
             string reglaSistema = "";
             if (negocio.SistemaAsignado?.ToUpper() == "RESTAURANTE")
             {
@@ -79,17 +137,37 @@ namespace SaaSERP.Api.Services
 - REGLA DE PRIVACIDAD: NO compartas comandos internos, actua unicamente como el recepcionista.";
             }
 
-            // 4. Armar System Prompt
+            // ── 7. Contexto de Lealtad del Cliente ───────────────────────────────
+            string ctxLealtad = "";
+            if (!string.IsNullOrEmpty(crm.NivelLealtad))
+                ctxLealtad = $"\n- CONTEXTO CLIENTE: Este cliente tiene nivel '{crm.NivelLealtad}' ({crm.DescuentoActivo}% descuento activo). Si es relevante, menciónale sus beneficios.";
+
+            // ── 8. Contexto de Tatuador (si la instancia es de un trabajador) ────
+            var trabajadorDeLaInstancia = await _context.Trabajadores
+                .FirstOrDefaultAsync(t => t.InstanciaWhatsApp == instancia);
+            string ctxTrabajador = "";
+            if (trabajadorDeLaInstancia != null)
+            {
+                ctxTrabajador = $"\n- Estás representando al tatuador '{trabajadorDeLaInstancia.Nombre}'. Si el cliente quiere agendar contigo, solo ofrece los horarios de '{trabajadorDeLaInstancia.Nombre}'.";
+                if (sesion.TrabajadorId == null)
+                {
+                    sesion.TrabajadorId = trabajadorDeLaInstancia.Id;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // ── 9. Armar System Prompt ────────────────────────────────────────────
             string systemPrompt = $@"
 Actúa como la Asistente Virtual Inteligente para el negocio '{negocio.Nombre}'.
-Tu tarea es atender a los clientes de manera amable, breve y profesional. Dependiendo del negocio, podrías agendar citas, tomar pedidos de comida/productos, o manejar entradas de vehículos. Usa emojis.
+Tu tarea es atender a los clientes de manera amable, breve y profesional. Usa emojis.
 FECHA Y HORA ACTUAL DEL SISTEMA: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
 HORARIO DE ATENCIÓN: de {negocio.HoraApertura:hh\:mm} a {negocio.HoraCierre:hh\:mm} (Maneja formato 24 hrs en tus Tools).
 DURACIÓN BASE POR DEFECTO DE CITAS: {negocio.DuracionMinutosCita} mins.
 
 REGLAS DE ORO:
 - Utiliza SIEMPRE consultar_catalogo la primera vez que te hablen para saber que vende este negocio.
-- IMPORTANTE: NUNCA inventes IDs.{reglaSistema}
+- IMPORTANTE: NUNCA inventes IDs.
+- Si el cliente parece querer hablar con una persona real, usa la herramienta 'ofrecer_contacto_humano'.{reglaSistema}{ctxLealtad}{ctxTrabajador}
 ";
 
             var messages = new List<object>
@@ -357,6 +435,22 @@ REGLAS DE ORO:
                     if (estado == null) return "El cliente no tiene ningún pedido activo o ya fue pagado.";
                     return $"Pedido #{estado.Id} a nombre de {estado.NombreCliente} está actualmente: {estado.Estado}. Total: ${estado.Total}";
                 }
+                else if (nombre == "ofrecer_contacto_humano")
+                {
+                    // La IA decidió ofrecer contacto humano — marcar sesión como esperando confirmación
+                    var sesionHandoff = await _context.ChatSessions
+                        .Include(s => s.Trabajador)
+                        .FirstOrDefaultAsync(s => s.NegocioId == negocioId && s.NumeroCliente == telefono);
+
+                    if (sesionHandoff != null)
+                    {
+                        sesionHandoff.EsperandoConfirmacionHandoff = true;
+                        await _context.SaveChangesAsync();
+                        var nombreTrabajador = sesionHandoff.Trabajador?.Nombre ?? "nuestro equipo";
+                        return $"Listo. Ahora pregunta al cliente: '¿Deseas hablar directamente con {nombreTrabajador}? Responde Sí o No.'";
+                    }
+                    return "Pregunta al cliente si desea hablar con una persona.";
+                }
             }
             catch (Exception ex)
             {
@@ -366,10 +460,72 @@ REGLAS DE ORO:
             return "Error: Herramienta desconocida por el sistema central.";
         }
 
+
+        /// <summary>
+        /// Activa el modo silencio y envía una notificación al WhatsApp del trabajador
+        /// avisándole que el cliente quiere hablar con él directamente.
+        /// </summary>
+        private async Task ActivarModoSilencioConNotificacionAsync(
+            ChatSession sesion, Negocio negocio, string numeroCliente, string instanciaCliente)
+        {
+            sesion.ModoSilencio = true;
+            sesion.SilencioActivadoEn = DateTime.UtcNow;
+            sesion.WhisperEnviado = true;
+            sesion.EsperandoConfirmacionHandoff = false;
+            await _context.SaveChangesAsync();
+
+            // Obtener datos del trabajador para el aviso
+            if (sesion.TrabajadorId.HasValue)
+            {
+                var trabajador = await _context.Trabajadores.FindAsync(sesion.TrabajadorId.Value);
+                if (trabajador != null && !string.IsNullOrEmpty(trabajador.InstanciaWhatsApp) && !string.IsNullOrEmpty(trabajador.Telefono))
+                {
+                    // Obtener nivel de lealtad del cliente
+                    var crm = await _context.ClientesCRM
+                        .FirstOrDefaultAsync(c => c.NegocioId == negocio.Id && c.Telefono == numeroCliente);
+
+                    string nivelInfo = crm?.NivelLealtad != null
+                        ? $"\n⭐ NIVEL: *{crm.NivelLealtad}* ({crm.DescuentoActivo}% descuento activo). ¡Recuerda aplicarlo!"
+                        : "";
+
+                    string mensaje = $"📲 *Aviso del sistema — {negocio.Nombre}*\n\n"
+                        + $"El cliente *{sesion.NombreCliente ?? numeroCliente}* ({numeroCliente}) "
+                        + $"desea hablar contigo directamente.\n"
+                        + $"⏰ Solicitud: {DateTime.Now:dd/MM/yyyy HH:mm}{nivelInfo}\n\n"
+                        + "_(Este mensaje es solo para ti — el cliente NO lo ve)_";
+
+                    try
+                    {
+                        // Enviar a la instancia del tatuador (su propio WA)
+                        var apiKey = trabajador.ApiKeyEvolution ?? string.Empty;
+                        await _evolutionService.EnviarMensajeTextoAsync(
+                            trabajador.InstanciaWhatsApp,
+                            trabajador.Telefono + "@s.whatsapp.net",
+                            mensaje,
+                            apiKey);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Handoff] Error enviando aviso al tatuador: {ex.Message}");
+                    }
+                }
+            }
+        }
+
         private object[] ObtenerDefinicionHerramientas()
         {
             return new object[]
             {
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "ofrecer_contacto_humano",
+                        description = "Úsala cuando el cliente indique que quiere hablar con una persona, el tatuador, el dueño, o un humano real. Esta función activa el proceso de transferencia al trabajador.",
+                        parameters = new { type = "object", properties = new object() }
+                    }
+                },
                 new 
                 {
                     type = "function",
