@@ -22,11 +22,9 @@ namespace SaaSERP.Api.Services
         public async Task<IEnumerable<Negocio>> ObtenerTodosNegociosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            // SP pero filtrando eliminados lógicos en caso que el SP no lo haga
-            var todos = await connection.QueryAsync<Negocio>(
-                "[Core].[usp_Negocios_ObtenerTodos]",
-                commandType: CommandType.StoredProcedure);
-            return todos.Where(n => !n.EliminadoLogico);
+            // Direct query — returns ALL columns including new ones (no SP dependency)
+            return await connection.QueryAsync<Negocio>(
+                "SELECT * FROM [Core].[Negocios] WHERE EliminadoLogico = 0 ORDER BY Id");
         }
 
         public async Task<Negocio?> ObtenerNegocioPorIdAsync(int id)
@@ -59,38 +57,37 @@ namespace SaaSERP.Api.Services
         public async Task<bool> ActualizarNegocioAsync(Negocio n)
         {
             using var connection = new SqlConnection(_connectionString);
-            var parameters = new DynamicParameters();
-            parameters.Add("@Id", n.Id);
-            parameters.Add("@Nombre", n.Nombre);
-            parameters.Add("@TelefonoWhatsApp", n.TelefonoWhatsApp);
-            parameters.Add("@SistemaAsignado", n.SistemaAsignado);
-            parameters.Add("@CapacidadMaxima", n.CapacidadMaxima);
-            parameters.Add("@DuracionMinutosCita", n.DuracionMinutosCita);
-            parameters.Add("@UsaMesas", n.UsaMesas);
-            parameters.Add("@HoraApertura", n.HoraApertura);
-            parameters.Add("@HoraCierre", n.HoraCierre);
-            parameters.Add("@Activo", n.Activo);
-            parameters.Add("@AccesoWeb", n.AccesoWeb);
-            parameters.Add("@AccesoMovil", n.AccesoMovil);
-            parameters.Add("@ModuloHistorial", n.ModuloHistorial);
-            parameters.Add("@ModuloWhatsApp", n.ModuloWhatsApp);
-            parameters.Add("@ModuloReportes", n.ModuloReportes);
-            parameters.Add("@MercadoPagoAccessToken", n.MercadoPagoAccessToken);
-
-            var rows = await connection.ExecuteScalarAsync<int>(
-                "[Core].[usp_Negocios_Actualizar]",
-                parameters,
-                commandType: CommandType.StoredProcedure);
-
-            // Los campos nuevos no están en el SP — los actualizamos con UPDATE directo
-            await connection.ExecuteAsync(
-                @"UPDATE [Core].[Negocios] 
-                  SET ModuloWhatsAppIA      = @ModuloWhatsAppIA,
-                      ModuloCRM             = @ModuloCRM,
-                      TiempoSilencioMinutos = @TiempoSilencioMinutos
+            // Direct UPDATE — incluye TODAS las columnas (sin dependencia del SP)
+            var rows = await connection.ExecuteAsync(
+                @"UPDATE [Core].[Negocios] SET
+                    Nombre                    = @Nombre,
+                    TelefonoWhatsApp          = @TelefonoWhatsApp,
+                    SistemaAsignado           = @SistemaAsignado,
+                    CapacidadMaxima           = @CapacidadMaxima,
+                    DuracionMinutosCita       = @DuracionMinutosCita,
+                    UsaMesas                  = @UsaMesas,
+                    HoraApertura              = @HoraApertura,
+                    HoraCierre                = @HoraCierre,
+                    Activo                    = @Activo,
+                    AccesoWeb                 = @AccesoWeb,
+                    AccesoMovil               = @AccesoMovil,
+                    ModuloHistorial           = @ModuloHistorial,
+                    ModuloWhatsApp            = @ModuloWhatsApp,
+                    ModuloWhatsAppIA          = @ModuloWhatsAppIA,
+                    ModuloCRM                 = @ModuloCRM,
+                    ModuloReportes            = @ModuloReportes,
+                    MercadoPagoAccessToken    = @MercadoPagoAccessToken,
+                    TiempoSilencioMinutos     = @TiempoSilencioMinutos
                   WHERE Id = @Id",
-                new { n.ModuloWhatsAppIA, n.ModuloCRM, n.TiempoSilencioMinutos, n.Id });
-
+                new {
+                    n.Nombre, n.TelefonoWhatsApp, n.SistemaAsignado,
+                    n.CapacidadMaxima, n.DuracionMinutosCita, n.UsaMesas,
+                    n.HoraApertura, n.HoraCierre, n.Activo,
+                    n.AccesoWeb, n.AccesoMovil, n.ModuloHistorial,
+                    n.ModuloWhatsApp, n.ModuloWhatsAppIA, n.ModuloCRM,
+                    n.ModuloReportes, n.MercadoPagoAccessToken,
+                    n.TiempoSilencioMinutos, n.Id
+                });
             return rows > 0;
         }
 
