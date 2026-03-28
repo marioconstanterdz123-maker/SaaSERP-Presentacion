@@ -91,8 +91,8 @@ const NegocioLayout: React.FC = () => {
             <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob pointer-events-none"></div>
             <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-rose-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 pointer-events-none"></div>
 
-            {/* ===== MOBILE TOP HEADER (portrait only — hidden at sm+) ===== */}
-            <div className="sm:hidden fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 z-50 shadow-sm">
+            {/* ===== MOBILE TOP HEADER (portrait and tablet — hidden at lg+) ===== */}
+            <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 z-50 shadow-sm">
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => navigate('/negocios')}
@@ -114,8 +114,8 @@ const NegocioLayout: React.FC = () => {
                 </button>
             </div>
 
-            {/* ===== SIDEBAR (visible at sm+: landscape phones, tablets, desktop) ===== */}
-            <aside className="hidden sm:flex w-52 lg:w-64 h-[calc(100vh-1.5rem)] lg:h-[calc(100vh-2rem)] flex-col backdrop-blur-xl bg-white/90 border-r border-white/20 shadow-xl z-40 m-3 lg:m-4 rounded-2xl lg:rounded-3xl overflow-hidden flex-shrink-0">
+            {/* ===== SIDEBAR (visible only at desktop lg+) ===== */}
+            <aside className="hidden lg:flex w-64 h-[calc(100vh-2rem)] flex-col backdrop-blur-xl bg-white/90 border-r border-white/20 shadow-xl z-40 m-4 rounded-3xl overflow-hidden flex-shrink-0">
                 <div className="p-4 lg:p-6 border-b border-slate-200/50 bg-white/50 text-slate-800">
                     <button onClick={() => navigate('/negocios')} className="flex items-center text-xs font-bold text-slate-400 hover:text-orange-500 mb-2 transition-colors">
                         <ArrowLeft size={14} className="mr-1" /> Volver a Global
@@ -145,7 +145,7 @@ const NegocioLayout: React.FC = () => {
                     })}
                 </nav>
                 {user && (
-                    <div className="p-4 border-t border-slate-200/50 bg-white/30">
+                    <div className="p-4 lg:p-6 border-t border-slate-200/50 bg-white/30">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
                                 {user.email.charAt(0).toUpperCase()}
@@ -165,9 +165,9 @@ const NegocioLayout: React.FC = () => {
                 )}
             </aside>
 
-            {/* ===== MOBILE SIDEBAR DRAWER (portrait phones only — hidden at sm+) ===== */}
+            {/* ===== MOBILE SIDEBAR DRAWER (portrait/tablet — hidden at lg+) ===== */}
             {sidebarOpen && (
-                <div className="sm:hidden fixed inset-0 z-[60] flex">
+                <div className="lg:hidden fixed inset-0 z-[60] flex">
                     <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
                     <aside className="relative ml-auto w-72 h-full bg-white shadow-2xl flex flex-col overflow-y-auto">
                         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -223,16 +223,16 @@ const NegocioLayout: React.FC = () => {
             )}
 
             {/* ===== MAIN CONTENT ===== */}
-            {/* pt-14: mobile header (portrait) | sm:pt-0: sidebar handles nav */}
-            <main className="flex-1 w-full h-screen overflow-y-auto overflow-x-hidden relative z-10 pt-14 sm:pt-0 sm:pb-2">
+            {/* pt-14: mobile header | lg:pt-0: sidebar handles nav. pb-24 ensures scroll clears bottom nav! */}
+            <main className="flex-1 w-full h-screen overflow-y-auto overflow-x-hidden relative z-10 pt-14 lg:pt-0 pb-24 lg:pb-2">
                 <div className="max-w-7xl mx-auto h-full p-2 sm:p-4 lg:p-8 animate-fade-in-up">
                     <Outlet />
                 </div>
             </main>
 
-            {/* ===== MOBILE BOTTOM TAB BAR (portrait phones only — hidden at sm+) ===== */}
+            {/* ===== MOBILE BOTTOM TAB BAR (portrait/tablet — hidden at lg+) ===== */}
             <nav
-                className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 <div className="flex items-stretch">

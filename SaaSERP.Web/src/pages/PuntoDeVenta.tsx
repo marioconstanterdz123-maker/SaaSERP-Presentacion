@@ -280,7 +280,7 @@ const PuntoDeVenta: React.FC = () => {
     const totalItems = cart.reduce((sum, i) => sum + i.cantidad, 0);
 
     // ===== Cart Panel =====
-    const CartPanel = ({ onClose }: { onClose?: () => void }) => (
+    const renderCartPanel = (onClose?: () => void) => (
         <div className="flex flex-col bg-slate-800 overflow-hidden h-full">
             {/* Header */}
             <div className="bg-slate-800 p-4 text-white flex-shrink-0">
@@ -574,7 +574,7 @@ const PuntoDeVenta: React.FC = () => {
             {/* RIGHT: Desktop Cart (hidden on mobile) */}
             {/* RIGHT: Cart panel visible at sm+ (tablets & landscape) */}
             <div className="hidden sm:flex w-80 sm:w-96 flex-col bg-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative flex-shrink-0" style={{ minHeight: '500px' }}>
-                <CartPanel />
+                {renderCartPanel()}
             </div>
 
             {/* MOBILE: Fixed bottom bar (portrait phones only) */}
@@ -626,7 +626,7 @@ const PuntoDeVenta: React.FC = () => {
                             <div className="w-10 h-1 rounded-full bg-slate-600" />
                         </div>
                         <div className="flex-1 overflow-hidden flex flex-col">
-                            <CartPanel onClose={() => setCartOpen(false)} />
+                            {renderCartPanel(() => setCartOpen(false))}
                         </div>
                     </div>
                 </div>
