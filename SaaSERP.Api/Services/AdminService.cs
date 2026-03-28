@@ -22,9 +22,11 @@ namespace SaaSERP.Api.Services
         public async Task<IEnumerable<Negocio>> ObtenerTodosNegociosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<Negocio>(
-                "[Core].[usp_Negocios_ObtenerTodos]", 
+            // SP pero filtrando eliminados lógicos en caso que el SP no lo haga
+            var todos = await connection.QueryAsync<Negocio>(
+                "[Core].[usp_Negocios_ObtenerTodos]",
                 commandType: CommandType.StoredProcedure);
+            return todos.Where(n => !n.EliminadoLogico);
         }
 
         public async Task<Negocio?> ObtenerNegocioPorIdAsync(int id)
@@ -68,8 +70,6 @@ namespace SaaSERP.Api.Services
             parameters.Add("@HoraApertura", n.HoraApertura);
             parameters.Add("@HoraCierre", n.HoraCierre);
             parameters.Add("@Activo", n.Activo);
-            
-            // Nuevos parámetros de Módulos (Feature Flags)
             parameters.Add("@AccesoWeb", n.AccesoWeb);
             parameters.Add("@AccesoMovil", n.AccesoMovil);
             parameters.Add("@ModuloHistorial", n.ModuloHistorial);
@@ -81,8 +81,50 @@ namespace SaaSERP.Api.Services
                 "[Core].[usp_Negocios_Actualizar]",
                 parameters,
                 commandType: CommandType.StoredProcedure);
+
+            // Los campos nuevos no están en el SP — los actualizamos con UPDATE directo
+            await connection.ExecuteAsync(
+                @"UPDATE [Core].[Negocios] 
+                  SET ModuloWhatsAppIA      = @ModuloWhatsAppIA,
+                      ModuloCRM             = @ModuloCRM,
+                      TiempoSilencioMinutos = @TiempoSilencioMinutos
+                  WHERE Id = @Id",
+                new { n.ModuloWhatsAppIA, n.ModuloCRM, n.TiempoSilencioMinutos, n.Id });
+
             return rows > 0;
         }
+
+        public async Task EliminarLogicoAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(
+                "UPDATE [Core].[Negocios] SET EliminadoLogico=1, FechaEliminacion=GETUTCDATE(), Activo=0 WHERE Id=@Id",
+                new { Id = id });
+        }
+
+        public async Task<IEnumerable<Negocio>> ObtenerPapeleraAsync()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<Negocio>(
+                "SELECT * FROM [Core].[Negocios] WHERE EliminadoLogico=1 ORDER BY FechaEliminacion DESC");
+        }
+
+        public async Task RestaurarAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(
+                "UPDATE [Core].[Negocios] SET EliminadoLogico=0, FechaEliminacion=NULL, Activo=1 WHERE Id=@Id",
+                new { Id = id });
+        }
+
+        public async Task EliminarDefinitivoAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(
+                "DELETE FROM [Core].[Negocios] WHERE Id=@Id AND EliminadoLogico=1",
+                new { Id = id });
+        }
+
 
         // ======================== SERVICIOS ========================
         public async Task<IEnumerable<Servicio>> ObtenerServiciosAdminAsync(int negocioId)

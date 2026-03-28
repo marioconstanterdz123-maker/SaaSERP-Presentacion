@@ -56,6 +56,10 @@ namespace SaaSERP.Api.Models
 
         /// <summary>Minutos de inactividad antes de reactivar la IA automáticamente (default 60)</summary>
         public int TiempoSilencioMinutos { get; set; } = 60;
+
+        // ─── Soft Delete ───────────────────────────────────────────────────────
+        public bool EliminadoLogico { get; set; } = false;
+        public DateTime? FechaEliminacion { get; set; }
     }
 }
 

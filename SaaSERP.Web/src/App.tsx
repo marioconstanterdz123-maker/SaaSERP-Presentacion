@@ -17,6 +17,7 @@ import Login from './pages/Login';
 import Usuarios from './pages/Usuarios';
 import Configuracion from './pages/Configuracion';
 import Ajustes from './pages/Ajustes';
+import Papelera from './pages/Papelera';
 import Trabajadores from './pages/Trabajadores';
 import CRM from './pages/CRM';
 import Lealtad from './pages/Lealtad';
@@ -83,6 +84,7 @@ function App() {
             <Route path="negocios" element={<Negocios />} />
             <Route path="usuarios" element={<Usuarios />} />
             <Route path="configuracion" element={<Configuracion />} />
+            <Route path="papelera" element={<Papelera />} />
           </Route>
 
           {/* ZONA TENANT — Aislada por NegocioId del Token */}

@@ -11,6 +11,11 @@ namespace SaaSERP.Api.Services
         Task<Negocio?> ObtenerNegocioPorIdAsync(int id);
         Task<int> CrearNegocioAsync(Negocio negocio);
         Task<bool> ActualizarNegocioAsync(Negocio negocio);
+        Task EliminarLogicoAsync(int id);
+        Task<IEnumerable<Negocio>> ObtenerPapeleraAsync();
+        Task RestaurarAsync(int id);
+        Task EliminarDefinitivoAsync(int id);
+
 
         // Servicios
         Task<IEnumerable<Servicio>> ObtenerServiciosAdminAsync(int negocioId);

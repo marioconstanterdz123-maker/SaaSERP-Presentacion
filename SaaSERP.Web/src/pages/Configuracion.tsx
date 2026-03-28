@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
+import Swal from 'sweetalert2';
 import {
     Settings, Globe, Smartphone, History, MessageCircle, BarChart2,
-    ChevronDown, ChevronUp, Wifi, WifiOff, Save, Loader
+    ChevronDown, ChevronUp, Wifi, WifiOff, Save, Loader, Trash2
 } from 'lucide-react';
 import WhatsAppPanel from '../components/WhatsAppPanel';
 
@@ -90,6 +91,24 @@ const Configuracion: React.FC = () => {
         ));
     };
 
+    const handleEliminar = async (n: NegocioConfig) => {
+        const result = await Swal.fire({
+            title: '¿Enviar a la papelera?',
+            html: `El negocio <b>${n.nombre}</b> dejará de estar activo. Podrás restaurarlo desde la Papelera.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '🗑️ Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+        });
+        if (!result.isConfirmed) return;
+        await axiosInstance.delete(`/negocios/${n.id}`);
+        setNegocios(prev => prev.filter(x => x.id !== n.id));
+        setExpanded(null);
+        Swal.fire('Enviado a papelera', `${n.nombre} fue desactivado.`, 'success');
+    };
+
     // Cargar los ajustes operativos desde el negocio al expandirlo
     const ensureAjustesOp = (n: NegocioConfig) => {
         if (!ajustesOp[n.id]) {
@@ -169,11 +188,11 @@ const Configuracion: React.FC = () => {
             ) : (
                 <div className="flex flex-col gap-4">
                     {negocios.map(n => (
-                        <div key={n.id} className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-lg overflow-hidden">
+                        <div key={n.id} className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-lg overflow-hidden relative">
                             {/* Card Header — click to expand */}
                             <button
                             onClick={() => { setExpanded(expanded === n.id ? null : n.id); ensureAjustesOp(n); }}
-                                className="w-full flex items-center gap-4 p-5 text-left hover:bg-slate-50/50 transition-colors"
+                                className="w-full flex items-center gap-4 p-5 text-left hover:bg-slate-50/50 transition-colors pr-16"
                             >
                                 <div className="text-2xl w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl">
                                     {SISTEMA_ICON[n.sistemaAsignado] ?? '🏢'}
@@ -195,6 +214,15 @@ const Configuracion: React.FC = () => {
                                 <span className="text-slate-400 ml-2">
                                     {expanded === n.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                 </span>
+                            </button>
+
+                            {/* Botón eliminar — absoluto sobre la tarjeta */}
+                            <button
+                                onClick={e => { e.stopPropagation(); handleEliminar(n); }}
+                                title="Enviar a papelera"
+                                className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all z-10"
+                            >
+                                <Trash2 size={16} />
                             </button>
 
                             {/* Expanded panel */}

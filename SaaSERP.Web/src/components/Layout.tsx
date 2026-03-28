@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Settings, Store, LogOut, Users, Menu, X } from 'lucide-react';
+import { Settings, Store, LogOut, Users, Menu, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Layout: React.FC = () => {
@@ -13,6 +13,7 @@ const Layout: React.FC = () => {
         { path: '/negocios', name: 'Tus Negocios', shortName: 'Negocios', icon: <Store size={22} /> },
         { path: '/usuarios', name: 'Usuarios', shortName: 'Usuarios', icon: <Users size={22} /> },
         { path: '/configuracion', name: 'Configuración', shortName: 'Config', icon: <Settings size={22} /> },
+        { path: '/papelera', name: 'Papelera', shortName: 'Papelera', icon: <Trash2 size={22} /> },
     ];
 
     return (

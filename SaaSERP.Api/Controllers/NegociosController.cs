@@ -111,6 +111,39 @@ namespace SaaSERP.Api.Controllers
             await _adminService.ActualizarNegocioAsync(negocio);
             return Ok(new { mensaje = "Configuración del negocio actualizada correctamente." });
         }
+
+        // ─── Papelera de Negocios ─────────────────────────────────────────────
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> EliminarLogico(int id)
+        {
+            await _adminService.EliminarLogicoAsync(id);
+            return Ok(new { mensaje = "Negocio enviado a la papelera." });
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpGet("papelera")]
+        public async Task<IActionResult> GetPapelera()
+        {
+            var papelera = await _adminService.ObtenerPapeleraAsync();
+            return Ok(papelera);
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost("{id}/restaurar")]
+        public async Task<IActionResult> Restaurar(int id)
+        {
+            await _adminService.RestaurarAsync(id);
+            return Ok(new { mensaje = "Negocio restaurado exitosamente." });
+        }
+
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpDelete("{id}/definitivo")]
+        public async Task<IActionResult> EliminarDefinitivo(int id)
+        {
+            await _adminService.EliminarDefinitivoAsync(id);
+            return Ok(new { mensaje = "Negocio eliminado permanentemente." });
+        }
     }
 
     public class ModulosDto
