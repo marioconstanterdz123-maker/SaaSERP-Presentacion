@@ -26,6 +26,7 @@ builder.Services.AddHttpClient<WhatsAppService>(); // Servicio propio de notific
 // BACKGROUND WORKERS (DEMONIOS)
 builder.Services.AddHostedService<RecordatoriosWorker>();
 builder.Services.AddHostedService<TimeoutWorkerService>(); // Reactivación automática de chats en silencio
+builder.Services.AddHostedService<SuscripcionWorker>();    // Desactiva negocios con suscripción vencida
 
 // MÓDULO TATTOO STUDIO
 builder.Services.AddScoped<ILoyaltyService, LoyaltyService>();

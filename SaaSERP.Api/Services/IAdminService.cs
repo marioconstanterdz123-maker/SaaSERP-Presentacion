@@ -15,6 +15,8 @@ namespace SaaSERP.Api.Services
         Task<IEnumerable<Negocio>> ObtenerPapeleraAsync();
         Task RestaurarAsync(int id);
         Task EliminarDefinitivoAsync(int id);
+        Task RenovarSuscripcionAsync(int id, int dias);
+
 
 
         // Servicios

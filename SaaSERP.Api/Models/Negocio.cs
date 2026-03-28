@@ -60,6 +60,10 @@ namespace SaaSERP.Api.Models
         // ─── Soft Delete ───────────────────────────────────────────────────────
         public bool EliminadoLogico { get; set; } = false;
         public DateTime? FechaEliminacion { get; set; }
+
+        // ─── Suscripción ───────────────────────────────────────────────────────
+        /// <summary>Fecha en que vence el período de suscripción. Al vencer, AccesoWeb se desactiva automáticamente.</summary>
+        public DateTime FechaVencimientoSuscripcion { get; set; } = DateTime.UtcNow.AddDays(30);
     }
 }
 

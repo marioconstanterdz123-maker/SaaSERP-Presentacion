@@ -125,6 +125,24 @@ namespace SaaSERP.Api.Services
                 new { Id = id });
         }
 
+        public async Task RenovarSuscripcionAsync(int id, int dias)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            // Si ya venció: inicia desde hoy. Si aún está vigente: extiende desde la fecha actual de vencimiento.
+            await connection.ExecuteAsync(
+                @"UPDATE [Core].[Negocios]
+                  SET FechaVencimientoSuscripcion = 
+                        CASE WHEN FechaVencimientoSuscripcion < GETUTCDATE()
+                             THEN DATEADD(DAY, @Dias, GETUTCDATE())
+                             ELSE DATEADD(DAY, @Dias, FechaVencimientoSuscripcion)
+                        END,
+                      AccesoWeb = 1,
+                      Activo    = 1
+                  WHERE Id = @Id",
+                new { Id = id, Dias = dias });
+        }
+
+
 
         // ======================== SERVICIOS ========================
         public async Task<IEnumerable<Servicio>> ObtenerServiciosAdminAsync(int negocioId)

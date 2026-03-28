@@ -144,6 +144,15 @@ namespace SaaSERP.Api.Controllers
             await _adminService.EliminarDefinitivoAsync(id);
             return Ok(new { mensaje = "Negocio eliminado permanentemente." });
         }
+
+        // ─── Suscripción ──────────────────────────────────────────────────────
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost("{id}/renovar")]
+        public async Task<IActionResult> RenovarSuscripcion(int id, [FromQuery] int dias = 30)
+        {
+            await _adminService.RenovarSuscripcionAsync(id, dias);
+            return Ok(new { mensaje = $"Suscripción extendida {dias} días." });
+        }
     }
 
     public class ModulosDto

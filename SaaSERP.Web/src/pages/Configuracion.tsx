@@ -36,6 +36,7 @@ interface NegocioConfig {
     capacidadMaxima: number;
     duracionMinutosCita: number;
     usaMesas: boolean;
+    fechaVencimientoSuscripcion: string | null;
 }
 
 interface ToggleProps {
@@ -69,6 +70,14 @@ const Toggle: React.FC<ToggleProps> = ({ label, description, icon, value, onChan
 
 const SISTEMA_ICON: Record<string, string> = {
     CITAS: '✂️', TAQUERIA: '🌮', PARQUEADERO: '🅿️', RESTAURANTES: '🍽️',
+};
+
+const getSuscripcionInfo = (fechaStr: string | null) => {
+    if (!fechaStr) return { dias: 0, estado: 'expired' as const, label: 'Sin fecha' };
+    const diff = Math.ceil((new Date(fechaStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (diff <= 0) return { dias: 0, estado: 'expired' as const, label: 'Vencida' };
+    if (diff <= 5)  return { dias: diff, estado: 'warning' as const, label: `${diff}d` };
+    return { dias: diff, estado: 'active' as const, label: `${diff}d` };
 };
 
 const Configuracion: React.FC = () => {
@@ -199,7 +208,21 @@ const Configuracion: React.FC = () => {
                                 </div>
                                 <div className="flex-1">
                                     <p className="font-black text-slate-800 text-lg leading-tight">{n.nombre}</p>
-                                    <p className="text-xs text-slate-400 font-semibold">{n.sistemaAsignado}</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-xs text-slate-400 font-semibold">{n.sistemaAsignado}</p>
+                                        {(() => {
+                                            const s = getSuscripcionInfo(n.fechaVencimientoSuscripcion);
+                                            return (
+                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                                    s.estado === 'expired' ? 'bg-red-100 text-red-600' :
+                                                    s.estado === 'warning' ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-emerald-50 text-emerald-600'
+                                                }`}>
+                                                    {s.estado === 'expired' ? '🔴 Vencida' : `🗓️ ${s.dias}d`}
+                                                </span>
+                                            );
+                                        })()}
+                                    </div>
                                 </div>
 
                                 {/* Mini status pills */}
@@ -288,22 +311,51 @@ const Configuracion: React.FC = () => {
                                             color="bg-rose-500"
                                         />
 
-                                        {/* Save button */}
-                                        <div className="mt-4">
+                                        {/* Renovar suscripción */}
+                                        <div className="mt-4 space-y-2">
+                                            {(() => {
+                                                const s = getSuscripcionInfo(n.fechaVencimientoSuscripcion);
+                                                return (
+                                                    <div className={`rounded-xl px-3 py-2 text-xs font-bold ${
+                                                        s.estado === 'expired' ? 'bg-red-50 text-red-600 border border-red-100' :
+                                                        s.estado === 'warning' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                                        'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                    }`}>
+                                                        {s.estado === 'expired'
+                                                            ? '🔴 Suscripción vencida — acceso bloqueado'
+                                                            : `✅ Activa: vence en ${s.dias} día(s)`}
+                                                    </div>
+                                                );
+                                            })()}
                                             {savedMsg === n.id ? (
                                                 <p className="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
                                                     <Wifi size={14} /> Cambios guardados correctamente
                                                 </p>
                                             ) : (
-                                                <button
-                                                    onClick={() => handleSaveAjustes(n.id)}
-                                                    disabled={saving === n.id}
-                                                    className="flex items-center gap-2 text-sm font-bold bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white px-5 py-2.5 rounded-xl transition-all active:scale-95"
-                                                >
-                                                    {saving === n.id
-                                                        ? <><Loader size={15} className="animate-spin" /> Guardando...</>
-                                                        : <><Save size={15} /> Guardar Todo</>}
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleSaveAjustes(n.id)}
+                                                        disabled={saving === n.id}
+                                                        className="flex-1 flex items-center justify-center gap-2 text-sm font-bold bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white px-4 py-2.5 rounded-xl transition-all active:scale-95"
+                                                    >
+                                                        {saving === n.id
+                                                            ? <><Loader size={15} className="animate-spin" /> Guardando...</>
+                                                            : <><Save size={15} /> Guardar</>}
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await axiosInstance.post(`/negocios/${n.id}/renovar?dias=30`);
+                                                            Swal.fire({ toast: true, position: 'top-end', icon: 'success',
+                                                                title: '✅ Renovado 30 días', showConfirmButton: false, timer: 2500 });
+                                                            const r = await axiosInstance.get('/negocios');
+                                                            setNegocios(r.data);
+                                                        }}
+                                                        title="Renovar 30 días"
+                                                        className="flex items-center justify-center gap-1.5 text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white px-3 py-2.5 rounded-xl transition-all active:scale-95"
+                                                    >
+                                                        🔄 +30d
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
