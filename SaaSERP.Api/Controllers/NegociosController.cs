@@ -87,11 +87,13 @@ namespace SaaSERP.Api.Controllers
             if (negocio == null) return NotFound();
 
             // Actualizar módulos
-            negocio.AccesoWeb       = dto.AccesoWeb;
-            negocio.AccesoMovil     = dto.AccesoMovil;
-            negocio.ModuloHistorial = dto.ModuloHistorial;
-            negocio.ModuloWhatsApp  = dto.ModuloWhatsApp;
-            negocio.ModuloReportes  = dto.ModuloReportes;
+            negocio.AccesoWeb          = dto.AccesoWeb;
+            negocio.AccesoMovil        = dto.AccesoMovil;
+            negocio.ModuloHistorial    = dto.ModuloHistorial;
+            negocio.ModuloWhatsApp     = dto.ModuloWhatsApp;
+            negocio.ModuloWhatsAppIA   = dto.ModuloWhatsAppIA;
+            negocio.ModuloCRM          = dto.ModuloCRM;
+            negocio.ModuloReportes     = dto.ModuloReportes;
 
             // Actualizar parámetros operativos
             if (!string.IsNullOrWhiteSpace(dto.TelefonoWhatsApp))
@@ -123,11 +125,13 @@ namespace SaaSERP.Api.Controllers
     public class AjustesCompletosDto
     {
         // Módulos contratados
-        public bool AccesoWeb       { get; set; }
-        public bool AccesoMovil     { get; set; }
-        public bool ModuloHistorial { get; set; }
-        public bool ModuloWhatsApp  { get; set; }
-        public bool ModuloReportes  { get; set; }
+        public bool AccesoWeb         { get; set; }
+        public bool AccesoMovil       { get; set; }
+        public bool ModuloHistorial   { get; set; }
+        public bool ModuloWhatsApp    { get; set; }
+        public bool ModuloWhatsAppIA  { get; set; }
+        public bool ModuloCRM         { get; set; }
+        public bool ModuloReportes    { get; set; }
 
         // Configuración operativa
         public string? TelefonoWhatsApp  { get; set; }  // Teléfono del dueño para Owner Routing
