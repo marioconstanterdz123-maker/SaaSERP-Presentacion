@@ -252,50 +252,72 @@ class _ProductCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Name area
             Expanded(
-              child: Text(
-                product.nombre,
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: const Color(0xFF1E293B),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        product.nombre,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: Colors.white,
+                          height: 1.3,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${product.precio.toStringAsFixed(2)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF6EE7B7), // emerald-300
+                      ),
+                    ),
+                  ],
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              '\$${product.precio.toStringAsFixed(2)}',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: Colors.indigo[600],
-              ),
-            ),
-            const SizedBox(height: 6),
+            // Add button strip
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.indigo[50],
-                borderRadius: BorderRadius.circular(8),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF6366F1), // indigo-500
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
-              child: const Icon(Icons.add, size: 18, color: Colors.indigo),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add, color: Colors.white, size: 16),
+                  const SizedBox(width: 4),
+                  Text('Agregar',
+                      style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700)),
+                ],
+              ),
             ),
           ],
         ),
@@ -303,6 +325,7 @@ class _ProductCard extends StatelessWidget {
     );
   }
 }
+
 
 class _CartSummaryBar extends StatelessWidget {
   final double total;

@@ -1,8 +1,29 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/services/api_service.dart';
+
+// Matches the ESTADO_COLORS map in PuntoDeVenta.tsx exactly
+class _EstadoStyle {
+  final Color bg;
+  final Color text;
+  final Color border;
+  const _EstadoStyle({required this.bg, required this.text, required this.border});
+}
+
+const _estadoStyles = {
+  'Recibida':       _EstadoStyle(bg: Color(0xFFFEF9C3), text: Color(0xFF92400E), border: Color(0xFFFDE68A)),
+  'En Preparacion': _EstadoStyle(bg: Color(0xFFFEF3C7), text: Color(0xFF92400E), border: Color(0xFFFCD34D)),
+  'Lista':          _EstadoStyle(bg: Color(0xFFD1FAE5), text: Color(0xFF065F46), border: Color(0xFF6EE7B7)),
+  'Entregada':      _EstadoStyle(bg: Color(0xFFDBEAFE), text: Color(0xFF1E3A5F), border: Color(0xFF93C5FD)),
+  'Cobrada':        _EstadoStyle(bg: Color(0xFFF1F5F9), text: Color(0xFF64748B), border: Color(0xFFCBD5E1)),
+};
+
+_EstadoStyle _getEstado(String estado) =>
+    _estadoStyles[estado] ??
+    const _EstadoStyle(bg: Color(0xFFF1F5F9), text: Color(0xFF64748B), border: Color(0xFFCBD5E1));
 
 class HistorialScreen extends StatefulWidget {
   final String negocioId;
@@ -17,6 +38,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
   List<dynamic> _comandas = [];
   bool _isLoading = true;
   String _periodo = 'hoy';
+  int? _expandedId;
+
+  final _mxFmt = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
 
   final _periodos = [
     {'label': 'Hoy', 'value': 'hoy'},
@@ -37,29 +61,20 @@ class _HistorialScreenState extends State<HistorialScreen> {
     setState(() => _isLoading = true);
     try {
       final res = await _api.get('/Reportes/historial/${widget.negocioId}?periodo=$_periodo');
-      if (res.statusCode == 200) {
+      if (res.statusCode == 200 && mounted) {
         setState(() => _comandas = jsonDecode(res.body));
       }
     } catch (e) {
-      print('Historial error: $e');
+      debugPrint('Historial error: $e');
     }
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
-  Color _estadoColor(String estado) {
-    switch (estado) {
-      case 'Cobrada': return Colors.green;
-      case 'Entregada': return Colors.blue;
-      case 'Lista': return Colors.teal;
-      case 'En Preparacion': return Colors.orange;
-      default: return Colors.grey;
-    }
-  }
-
-  String _formatDate(String fechaIso) {
+  String _formatDate(String? fechaIso) {
+    if (fechaIso == null || fechaIso.isEmpty) return '';
     try {
       final dt = DateTime.parse(fechaIso).toLocal();
-      return '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')} ${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
+      return DateFormat('dd/MM HH:mm', 'es_MX').format(dt);
     } catch (_) {
       return fechaIso;
     }
@@ -69,165 +84,356 @@ class _HistorialScreenState extends State<HistorialScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-        title: Text('Historial de Ventas',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 18)),
-      ),
       body: Column(
         children: [
-          // Period selector
+          // ── Header matching web style ──────────────────────────────────
           Container(
-            color: const Color(0xFF1E293B),
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              children: _periodos.map((p) {
-                final active = _periodo == p['value'];
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => _periodo = p['value']!);
-                      _fetchHistorial();
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).padding.top + 16, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: active ? Colors.indigo : Colors.white12,
+                        color: Colors.blue.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      alignment: Alignment.center,
-                      child: Text(p['label']!,
-                          style: GoogleFonts.inter(
-                            color: active ? Colors.white : Colors.white54,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          )),
+                      child: const Icon(Icons.history, color: Colors.white, size: 20),
                     ),
-                  ),
-                );
-              }).toList(),
+                    const SizedBox(width: 10),
+                    Text('Historial de Ventas',
+                        style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Period filter tabs
+                Row(
+                  children: _periodos.map((p) {
+                    final active = _periodo == p['value'];
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _periodo = p['value']!;
+                            _expandedId = null;
+                          });
+                          _fetchHistorial();
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          decoration: BoxDecoration(
+                            color: active
+                                ? const Color(0xFF6366F1)
+                                : Colors.white.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: active
+                                  ? const Color(0xFF6366F1)
+                                  : Colors.white.withOpacity(0.12),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(p['label']!,
+                              style: GoogleFonts.inter(
+                                color: active ? Colors.white : Colors.white54,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              )),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ),
 
-          // Totals banner
+          // ── KPI summary card ─────────────────────────────────────────────
           if (!_isLoading)
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF10B981), Color(0xFF059669)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                        color: const Color(0xFF10B981).withOpacity(0.4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6))
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Total del Período',
-                          style: GoogleFonts.inter(color: Colors.white70, fontSize: 13)),
-                      Text('\$${_totalIngresos.toStringAsFixed(2)}',
-                          style: GoogleFonts.inter(
-                              color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white12,
-                      borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('TOTAL DEL PERÍODO',
+                            style: GoogleFonts.inter(
+                                color: const Color(0xFFD1FAE5),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8)),
+                        const SizedBox(height: 4),
+                        Text(_mxFmt.format(_totalIngresos),
+                            style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w900)),
+                      ],
                     ),
-                    child: Text('${_comandas.length}\nventas',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('${_comandas.length}',
+                              style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900)),
+                          Text('ventas',
+                              style: GoogleFonts.inter(
+                                  color: const Color(0xFFD1FAE5),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
-          // List
+          // ── Orders list ──────────────────────────────────────────────────
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _comandas.isEmpty
                     ? Center(
-                        child: Text('Sin ventas en este período',
-                            style: GoogleFonts.inter(color: Colors.grey[500])))
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.receipt_long, size: 48, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('Sin ventas en este período',
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[400])),
+                          ],
+                        ),
+                      )
                     : RefreshIndicator(
                         onRefresh: _fetchHistorial,
                         child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                           itemCount: _comandas.length,
-                          itemBuilder: (_, i) {
-                            final c = _comandas[i];
-                            final estado = c['estado'] ?? '';
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 4,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: _estadoColor(estado),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(c['nombreCliente'] ?? 'Cliente',
-                                            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                                        Text(
-                                          '${c['tipoAtencion']} • #${c['id']}',
-                                          style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 12),
-                                        ),
-                                        Text(_formatDate(c['fechaCreacion'] ?? ''),
-                                            style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 11)),
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text('\$${(c['total'] ?? 0).toStringAsFixed(2)}',
-                                          style: GoogleFonts.inter(
-                                              fontWeight: FontWeight.w900, fontSize: 16, color: Colors.indigo)),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: _estadoColor(estado).withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(estado,
-                                            style: GoogleFonts.inter(
-                                                color: _estadoColor(estado),
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                          itemBuilder: (_, i) => _ComandaCard(
+                            comanda: _comandas[i],
+                            isExpanded: _expandedId == _comandas[i]['id'],
+                            formatDate: _formatDate,
+                            onTap: () => setState(() {
+                              _expandedId = _expandedId == _comandas[i]['id']
+                                  ? null
+                                  : _comandas[i]['id'];
+                            }),
+                          ),
                         ),
                       ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ComandaCard extends StatelessWidget {
+  final Map<String, dynamic> comanda;
+  final bool isExpanded;
+  final String Function(String?) formatDate;
+  final VoidCallback onTap;
+
+  const _ComandaCard({
+    required this.comanda,
+    required this.isExpanded,
+    required this.formatDate,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final estado = comanda['estado'] ?? '';
+    final style = _getEstado(estado);
+    final detalles = (comanda['detalles'] as List?) ?? [];
+    final mxFmt = NumberFormat.currency(locale: 'es_MX', symbol: '\$');
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3)),
+          ],
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // Color bar — matches the web's left accent pill
+                  Container(
+                    width: 4,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: style.text,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(comanda['nombreCliente'] ?? 'Cliente',
+                            style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                                color: const Color(0xFF1E293B))),
+                        Text(
+                          '${comanda['tipoAtencion'] ?? ''} • #${comanda['id']}',
+                          style: GoogleFonts.inter(
+                              color: const Color(0xFF64748B), fontSize: 12),
+                        ),
+                        Text(formatDate(comanda['fechaCreacion']),
+                            style: GoogleFonts.inter(
+                                color: const Color(0xFF94A3B8), fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(mxFmt.format((comanda['total'] ?? 0).toDouble()),
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              color: const Color(0xFF6366F1))),
+                      const SizedBox(height: 6),
+                      // Status badge — exact match to web ESTADO_COLORS
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: style.bg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: style.border),
+                        ),
+                        child: Text(estado,
+                            style: GoogleFonts.inter(
+                                color: style.text,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: const Color(0xFF94A3B8),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+            // Expandable details
+            if (isExpanded && detalles.isNotEmpty) ...[
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Detalle del pedido',
+                        style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF64748B))),
+                    const SizedBox(height: 8),
+                    ...detalles.map((d) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 22,
+                                height: 22,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text('${d['cantidad']}',
+                                    style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: const Color(0xFF475569))),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(d['nombreServicio'] ?? d['servicio']?['nombre'] ?? '',
+                                    style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: const Color(0xFF1E293B))),
+                              ),
+                              Text(
+                                  mxFmt.format(
+                                      (d['subtotal'] ?? 0).toDouble()),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF6366F1))),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
