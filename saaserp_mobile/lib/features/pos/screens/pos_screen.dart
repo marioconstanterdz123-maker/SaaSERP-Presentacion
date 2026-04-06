@@ -35,20 +35,20 @@ class _PuntoDeVentaScreenState extends State<PuntoDeVentaScreen> {
 
   void _openCart(BuildContext context) {
     final pos = Provider.of<PosProvider>(context, listen: false);
-    if (pos.cart.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Agrega productos al ticket primero')),
-      );
-      return;
-    }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => CartBottomSheet(negocioId: widget.negocioId),
+      // CRITICAL: showModalBottomSheet creates a new route that has no access
+      // to the PosProvider above. We must bridge it using .value constructor.
+      builder: (ctx) => ChangeNotifierProvider.value(
+        value: pos,
+        child: CartBottomSheet(negocioId: widget.negocioId),
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
