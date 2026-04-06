@@ -366,17 +366,40 @@ class _CartSummaryBar extends StatelessWidget {
   }
 }
 
-class CartBottomSheet extends StatelessWidget {
+class CartBottomSheet extends StatefulWidget {
   final String negocioId;
-
   const CartBottomSheet({Key? key, required this.negocioId}) : super(key: key);
+
+  @override
+  State<CartBottomSheet> createState() => _CartBottomSheetState();
+}
+
+class _CartBottomSheetState extends State<CartBottomSheet> {
+  final _clientNameCtrl = TextEditingController();
+  final _clientPhoneCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill controllers from provider state
+    final pos = Provider.of<PosProvider>(context, listen: false);
+    _clientNameCtrl.text = pos.identificadorCliente;
+    _clientPhoneCtrl.text = pos.telefonoCliente;
+  }
+
+  @override
+  void dispose() {
+    _clientNameCtrl.dispose();
+    _clientPhoneCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PosProvider>(builder: (context, pos, child) {
       return DraggableScrollableSheet(
-        initialChildSize: 0.85,
-        maxChildSize: 0.95,
+        initialChildSize: 0.9,
+        maxChildSize: 0.97,
         minChildSize: 0.4,
         builder: (ctx, scrollController) {
           return Container(
@@ -388,15 +411,18 @@ class CartBottomSheet extends StatelessWidget {
               children: [
                 // Handle + Header
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.white24,
-                          borderRadius: BorderRadius.circular(4),
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -420,13 +446,15 @@ class CartBottomSheet extends StatelessWidget {
                             },
                             icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
                             label: Text('Vaciar',
-                              style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 13)),
+                                style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 13)),
                           ),
                         ],
                       ),
                       // Tipo Atencion selector
                       const SizedBox(height: 12),
                       _TipoAtencionSelector(pos: pos),
+                      // Client fields (shown only when not Mesa type)
+                      if (pos.tipoAtencion != 'Mesa') ..._buildClientFields(pos),
                     ],
                   ),
                 ),
@@ -466,13 +494,21 @@ class CartBottomSheet extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: pos.isSubmitting ? null : () async {
-                            final success = await pos.submitOrder(negocioId);
+                            // Flush controller values into provider before submitting
+                            pos.identificadorCliente = _clientNameCtrl.text;
+                            pos.telefonoCliente = _clientPhoneCtrl.text;
+                            final success = await pos.submitOrder(widget.negocioId);
                             if (success && context.mounted) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('¡Pedido Enviado a Cocina!'),
-                                  backgroundColor: Colors.green,
+                                SnackBar(
+                                  content: Text(
+                                    '¡Pedido enviado a cocina! 🍽️',
+                                    style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.green[700],
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                               );
                             }
@@ -505,6 +541,48 @@ class CartBottomSheet extends StatelessWidget {
       );
     });
   }
+
+  List<Widget> _buildClientFields(PosProvider pos) {
+    return [
+      const SizedBox(height: 12),
+      TextField(
+        controller: _clientNameCtrl,
+        style: GoogleFonts.inter(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: pos.tipoAtencion == 'Llevar'
+              ? 'Nombre del Cliente (para llevar)'
+              : 'Nombre / ID del Cliente',
+          hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
+          prefixIcon: const Icon(Icons.person_outline, color: Colors.white38, size: 18),
+          filled: true,
+          fillColor: Colors.white10,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextField(
+        controller: _clientPhoneCtrl,
+        keyboardType: TextInputType.phone,
+        style: GoogleFonts.inter(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: 'Teléfono (para aviso WhatsApp)',
+          hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
+          prefixIcon: const Icon(Icons.phone_outlined, color: Colors.white38, size: 18),
+          filled: true,
+          fillColor: Colors.white10,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        ),
+      ),
+    ];
+  }
 }
 
 class _TipoAtencionSelector extends StatelessWidget {
@@ -521,7 +599,7 @@ class _TipoAtencionSelector extends StatelessWidget {
           child: GestureDetector(
             onTap: () {
               pos.tipoAtencion = t;
-              (pos as dynamic).notifyListeners();
+              pos.notifyListeners();
             },
             child: Container(
               margin: const EdgeInsets.only(right: 6),
@@ -547,13 +625,34 @@ class _TipoAtencionSelector extends StatelessWidget {
   }
 }
 
-class _CartItemRow extends StatelessWidget {
+class _CartItemRow extends StatefulWidget {
   final CartItem item;
   final PosProvider pos;
   const _CartItemRow({required this.item, required this.pos});
 
   @override
+  State<_CartItemRow> createState() => _CartItemRowState();
+}
+
+class _CartItemRowState extends State<_CartItemRow> {
+  late final TextEditingController _notesCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesCtrl = TextEditingController(text: widget.item.notas);
+  }
+
+  @override
+  void dispose() {
+    _notesCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final item = widget.item;
+    final pos = widget.pos;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -561,56 +660,80 @@ class _CartItemRow extends StatelessWidget {
         color: Colors.white10,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.nombre,
-                    style: GoogleFonts.inter(
-                        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                Text('\$${item.precio.toStringAsFixed(2)} c/u',
-                    style: GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
-              ],
-            ),
-          ),
           Row(
             children: [
-              _CircleBtn(
-                icon: Icons.remove,
-                onTap: () => pos.removeFromCart(item.servicioId),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  '${item.cantidad}',
-                  style: GoogleFonts.inter(
-                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.nombre,
+                        style: GoogleFonts.inter(
+                            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text('\$${item.precio.toStringAsFixed(2)} c/u',
+                        style: GoogleFonts.inter(color: Colors.white38, fontSize: 12)),
+                  ],
                 ),
               ),
-              _CircleBtn(
-                icon: Icons.add,
-                onTap: () {
-                  final s = pos.servicios.firstWhere((s) => s.id == item.servicioId);
-                  pos.addToCart(s);
-                },
+              Row(
+                children: [
+                  _CircleBtn(
+                    icon: Icons.remove,
+                    onTap: () => pos.removeFromCart(item.servicioId),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      '${item.cantidad}',
+                      style: GoogleFonts.inter(
+                          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                  _CircleBtn(
+                    icon: Icons.add,
+                    onTap: () {
+                      final s = pos.servicios.firstWhere((s) => s.id == item.servicioId);
+                      pos.addToCart(s);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '\$${item.subtotal.toStringAsFixed(2)}',
+                style: GoogleFonts.inter(
+                  color: Colors.indigo[200],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => pos.deleteFromCart(item.servicioId),
+                child: const Icon(Icons.close, color: Colors.redAccent, size: 20),
               ),
             ],
           ),
-          const SizedBox(width: 12),
-          Text(
-            '\$${item.subtotal.toStringAsFixed(2)}',
-            style: GoogleFonts.inter(
-              color: Colors.indigo[200],
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          // Notes field
+          const SizedBox(height: 8),
+          TextField(
+            controller: _notesCtrl,
+            style: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+            onChanged: (v) => pos.updateItemNotes(item.servicioId, v),
+            decoration: InputDecoration(
+              hintText: 'Notas (ej: sin cebolla, extra salsa...)',
+              hintStyle: GoogleFonts.inter(color: Colors.white24, fontSize: 12),
+              prefixIcon: const Icon(Icons.edit_note, color: Colors.white24, size: 16),
+              filled: true,
+              fillColor: Colors.white.withOpacity(0.05),
+              isDense: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             ),
-          ),
-          const SizedBox(width: 6),
-          GestureDetector(
-            onTap: () => pos.deleteFromCart(item.servicioId),
-            child: const Icon(Icons.close, color: Colors.redAccent, size: 20),
           ),
         ],
       ),

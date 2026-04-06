@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/models.dart';
 import '../../../core/services/api_service.dart';
 
@@ -12,6 +11,9 @@ class PosProvider with ChangeNotifier {
   List<Mesa> mesas = [];
   String tipoAtencion = 'Mostrador';
   String mesaSeleccionada = '';
+  // Client identification fields (for Llevar / Mostrador)
+  String identificadorCliente = '';
+  String telefonoCliente = '';
   bool isLoading = true;
   bool isSubmitting = false;
   String? successMsg;
@@ -44,7 +46,7 @@ class PosProvider with ChangeNotifier {
 
       await fetchComandasActivas(negocioId);
     } catch (e) {
-      print('POS init error: $e');
+      debugPrint('POS init error: $e');
     }
 
     isLoading = false;
@@ -53,8 +55,6 @@ class PosProvider with ChangeNotifier {
 
   Future<void> fetchComandasActivas(String negocioId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
       final res = await _api.get('/Comandas/activas');
       if (res.statusCode == 200) {
         final List data = jsonDecode(res.body);
@@ -62,7 +62,7 @@ class PosProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error fetching comandas: $e');
+      debugPrint('Error fetching comandas: $e');
     }
   }
 
@@ -98,29 +98,56 @@ class PosProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateItemNotes(int servicioId, String notes) {
+    final idx = cart.indexWhere((i) => i.servicioId == servicioId);
+    if (idx >= 0) {
+      cart[idx].notas = notes;
+      // No notifyListeners here to avoid disrupting the TextField focus
+    }
+  }
+
   void clearCart() {
     cart = [];
     mesaSeleccionada = '';
+    identificadorCliente = '';
+    telefonoCliente = '';
     notifyListeners();
   }
 
   Future<bool> submitOrder(String negocioId) async {
     if (cart.isEmpty) return false;
+
+    // Determine the final identifier: mesa name or client name
+    final String identificadorFinal = tipoAtencion == 'Mesa'
+        ? mesaSeleccionada
+        : identificadorCliente.trim();
+
+    // Normalize phone for WhatsApp (MX: +521 prefix for 10-digit numbers)
+    final String telefonoLimpio =
+        telefonoCliente.replaceAll(RegExp(r'\D'), '');
+    final String telefonoWa =
+        telefonoLimpio.length == 10 ? '521$telefonoLimpio' : telefonoLimpio;
+
     isSubmitting = true;
     notifyListeners();
 
     try {
       final body = {
         'negocioId': int.tryParse(negocioId) ?? 0,
-        'nombreCliente': 'Cliente',
-        'identificadorMesa': tipoAtencion == 'Mesa' ? mesaSeleccionada : '',
-        'tipoAtencion': tipoAtencion,
-        'detalles': cart.map((i) => {
-          'servicioId': i.servicioId,
-          'cantidad': i.cantidad,
-          'precioUnitario': i.precio,
-          'notasOpcionales': i.notas,
-        }).toList(),
+        'nombreCliente':
+            identificadorFinal.isNotEmpty ? identificadorFinal : 'Sin nombre',
+        'identificadorMesa': identificadorFinal,
+        'tipoAtencion': tipoAtencion == 'Mesa' ? 'Mesas' : tipoAtencion,
+        'telefonoCliente': telefonoWa,
+        'total': cartTotal,
+        'detalles': cart
+            .map((i) => {
+                  'servicioId': i.servicioId,
+                  'cantidad': i.cantidad,
+                  'subtotal': i.subtotal,
+                  'notasOpcionales': i.notas,
+                })
+            .toList(),
       };
 
       final res = await _api.post('/Comandas', body);
@@ -132,7 +159,7 @@ class PosProvider with ChangeNotifier {
         return true;
       }
     } catch (e) {
-      print('Submit order error: $e');
+      debugPrint('Submit order error: $e');
     }
 
     isSubmitting = false;
