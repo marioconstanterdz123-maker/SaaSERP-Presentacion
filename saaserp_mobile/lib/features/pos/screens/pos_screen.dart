@@ -441,7 +441,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                           const Spacer(),
                           TextButton.icon(
                             onPressed: () {
-                              pos.clearCart();
+                              pos.clearItems();
                               Navigator.pop(ctx);
                             },
                             icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
@@ -466,7 +466,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
                     itemCount: pos.cart.length,
                     itemBuilder: (context, i) {
                       final item = pos.cart[i];
-                      return _CartItemRow(item: item, pos: pos);
+                      return _CartItemRow(item: item, index: i, pos: pos);
                     },
                   ),
                 ),
@@ -627,8 +627,9 @@ class _TipoAtencionSelector extends StatelessWidget {
 
 class _CartItemRow extends StatefulWidget {
   final CartItem item;
+  final int index;
   final PosProvider pos;
-  const _CartItemRow({required this.item, required this.pos});
+  const _CartItemRow({required this.item, required this.index, required this.pos});
 
   @override
   State<_CartItemRow> createState() => _CartItemRowState();
@@ -653,6 +654,8 @@ class _CartItemRowState extends State<_CartItemRow> {
   Widget build(BuildContext context) {
     final item = widget.item;
     final pos = widget.pos;
+    final index = widget.index;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -680,7 +683,7 @@ class _CartItemRowState extends State<_CartItemRow> {
                 children: [
                   _CircleBtn(
                     icon: Icons.remove,
-                    onTap: () => pos.removeFromCart(item.servicioId),
+                    onTap: () => pos.decrementItem(index),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -692,10 +695,7 @@ class _CartItemRowState extends State<_CartItemRow> {
                   ),
                   _CircleBtn(
                     icon: Icons.add,
-                    onTap: () {
-                      final s = pos.servicios.firstWhere((s) => s.id == item.servicioId);
-                      pos.addToCart(s);
-                    },
+                    onTap: () => pos.incrementItem(index),
                   ),
                 ],
               ),
@@ -710,17 +710,17 @@ class _CartItemRowState extends State<_CartItemRow> {
               ),
               const SizedBox(width: 6),
               GestureDetector(
-                onTap: () => pos.deleteFromCart(item.servicioId),
+                onTap: () => pos.deleteItem(index),
                 child: const Icon(Icons.close, color: Colors.redAccent, size: 20),
               ),
             ],
           ),
-          // Notes field
+          // Notes field — unique per item
           const SizedBox(height: 8),
           TextField(
             controller: _notesCtrl,
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
-            onChanged: (v) => pos.updateItemNotes(item.servicioId, v),
+            onChanged: (v) => pos.updateItemNotes(index, v),
             decoration: InputDecoration(
               hintText: 'Notas (ej: sin cebolla, extra salsa...)',
               hintStyle: GoogleFonts.inter(color: Colors.white24, fontSize: 12),
@@ -740,6 +740,7 @@ class _CartItemRowState extends State<_CartItemRow> {
     );
   }
 }
+
 
 class _CircleBtn extends StatelessWidget {
   final IconData icon;

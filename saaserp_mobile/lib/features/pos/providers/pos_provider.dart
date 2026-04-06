@@ -11,12 +11,11 @@ class PosProvider with ChangeNotifier {
   List<Mesa> mesas = [];
   String tipoAtencion = 'Mostrador';
   String mesaSeleccionada = '';
-  // Client identification fields (for Llevar / Mostrador)
+  // Client identification fields (persist across modal open/close)
   String identificadorCliente = '';
   String telefonoCliente = '';
   bool isLoading = true;
   bool isSubmitting = false;
-  String? successMsg;
 
   int get cartCount => cart.fold(0, (sum, i) => sum + i.cantidad);
   double get cartTotal => cart.fold(0.0, (sum, i) => sum + i.subtotal);
@@ -66,63 +65,77 @@ class PosProvider with ChangeNotifier {
     }
   }
 
+  /// Each tap on a product ALWAYS adds a new separate line item.
+  /// This is intentional: items with the same product can have different
+  /// notes (e.g., "sin cebolla"), so they must be independent.
   void addToCart(Servicio s) {
-    final idx = cart.indexWhere((i) => i.servicioId == s.id);
-    if (idx >= 0) {
-      cart[idx].cantidad++;
+    cart.add(CartItem(
+      servicioId: s.id,
+      nombre: s.nombre,
+      precio: s.precio,
+      cantidad: 1,
+    ));
+    notifyListeners();
+  }
+
+  /// Increase quantity of a specific line item (identified by its list index).
+  void incrementItem(int index) {
+    if (index >= 0 && index < cart.length) {
+      cart[index].cantidad++;
+      notifyListeners();
+    }
+  }
+
+  /// Decrease quantity of a specific line item (remove if it reaches 0).
+  void decrementItem(int index) {
+    if (index < 0 || index >= cart.length) return;
+    if (cart[index].cantidad > 1) {
+      cart[index].cantidad--;
     } else {
-      cart.add(CartItem(
-        servicioId: s.id,
-        nombre: s.nombre,
-        precio: s.precio,
-        cantidad: 1,
-      ));
+      cart.removeAt(index);
     }
     notifyListeners();
   }
 
-  void removeFromCart(int servicioId) {
-    final idx = cart.indexWhere((i) => i.servicioId == servicioId);
-    if (idx >= 0) {
-      if (cart[idx].cantidad > 1) {
-        cart[idx].cantidad--;
-      } else {
-        cart.removeAt(idx);
-      }
+  /// Remove a specific line item by its list index.
+  void deleteItem(int index) {
+    if (index >= 0 && index < cart.length) {
+      cart.removeAt(index);
+      notifyListeners();
     }
-    notifyListeners();
   }
 
-  void deleteFromCart(int servicioId) {
-    cart.removeWhere((i) => i.servicioId == servicioId);
-    notifyListeners();
-  }
-
-  void updateItemNotes(int servicioId, String notes) {
-    final idx = cart.indexWhere((i) => i.servicioId == servicioId);
-    if (idx >= 0) {
-      cart[idx].notas = notes;
+  void updateItemNotes(int index, String notes) {
+    if (index >= 0 && index < cart.length) {
+      cart[index].notas = notes;
       // No notifyListeners here to avoid disrupting the TextField focus
     }
   }
 
+  /// Clears only the items in the cart, but PRESERVES the tipo/client info
+  /// so the mesero doesn't have to re-enter the client name between orders.
+  void clearItems() {
+    cart = [];
+    notifyListeners();
+  }
+
+  /// Full reset including tipo, client fields, and mesa selection.
   void clearCart() {
     cart = [];
     mesaSeleccionada = '';
     identificadorCliente = '';
     telefonoCliente = '';
+    tipoAtencion = 'Mostrador';
     notifyListeners();
   }
 
   Future<bool> submitOrder(String negocioId) async {
     if (cart.isEmpty) return false;
 
-    // Determine the final identifier: mesa name or client name
     final String identificadorFinal = tipoAtencion == 'Mesa'
         ? mesaSeleccionada
         : identificadorCliente.trim();
 
-    // Normalize phone for WhatsApp (MX: +521 prefix for 10-digit numbers)
     final String telefonoLimpio =
         telefonoCliente.replaceAll(RegExp(r'\D'), '');
     final String telefonoWa =
@@ -152,7 +165,7 @@ class PosProvider with ChangeNotifier {
 
       final res = await _api.post('/Comandas', body);
       if (res.statusCode == 200 || res.statusCode == 201) {
-        clearCart();
+        clearItems(); // Keep client info, just clear the product list
         await fetchComandasActivas(negocioId);
         isSubmitting = false;
         notifyListeners();
