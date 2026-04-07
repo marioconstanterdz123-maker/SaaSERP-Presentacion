@@ -254,7 +254,15 @@ namespace SaaSERP.Api.Controllers
             _context.UsuarioNegocios.Add(asignacion);
             await _context.SaveChangesAsync();
 
-            return Ok(new { mensaje = "Negocio asignado correctamente.", asignacion });
+            return Ok(new { 
+                mensaje = "Negocio asignado correctamente.", 
+                asignacion = new {
+                    asignacion.Id,
+                    asignacion.UsuarioId,
+                    asignacion.NegocioId,
+                    asignacion.Rol
+                }
+            });
         }
 
         // ==========================================
