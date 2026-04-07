@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
-import { Users, Plus, Trash2, X, Eye, EyeOff, Shield, Store, UserCheck } from 'lucide-react';
+import { Users, Plus, Trash2, X, Eye, EyeOff, Shield, Store, UserCheck, Building2, Link2 } from 'lucide-react';
 
 interface Usuario {
     id: number;
@@ -17,9 +17,17 @@ interface Negocio {
     sistemaAsignado: string;
 }
 
+interface Asignacion {
+    id: number;
+    negocioId: number;
+    negocioNombre: string;
+    rol: string;
+}
+
 const ROL_COLORS: Record<string, string> = {
     SuperAdmin: 'bg-violet-100 text-violet-700 border-violet-200',
     Admin: 'bg-blue-100 text-blue-700 border-blue-200',
+    AdminNegocio: 'bg-blue-100 text-blue-700 border-blue-200',
     Operativo: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     Mesero: 'bg-orange-100 text-orange-700 border-orange-200',
     Cocina: 'bg-red-100 text-red-700 border-red-200',
@@ -34,6 +42,12 @@ const Usuarios: React.FC = () => {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [filterBusqueda, setFilterBusqueda] = useState('');
+
+    // Multi-business modal state
+    const [negocioModalUser, setNegocioModalUser] = useState<Usuario | null>(null);
+    const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
+    const [newNegocioId, setNewNegocioId] = useState<number | ''>('');
+    const [loadingAsig, setLoadingAsig] = useState(false);
 
     // Form state
     const [form, setForm] = useState({
@@ -93,10 +107,58 @@ const Usuarios: React.FC = () => {
         }
     };
 
+    // ─── Multi-business handlers ────────────────────────────────────────
+    const openNegocioModal =  async (user: Usuario) => {
+        setNegocioModalUser(user);
+        setLoadingAsig(true);
+        setNewNegocioId('');
+        try {
+            const { data } = await axiosInstance.get(`/Auth/usuarios/${user.id}/negocios`);
+            setAsignaciones(data);
+        } catch {
+            setAsignaciones([]);
+        } finally {
+            setLoadingAsig(false);
+        }
+    };
+
+    const handleAsignar = async () => {
+        if (!negocioModalUser || newNegocioId === '') return;
+        try {
+            await axiosInstance.post(`/Auth/usuarios/${negocioModalUser.id}/negocios`, {
+                negocioId: Number(newNegocioId),
+            });
+            setNewNegocioId('');
+            // Refrescar lista
+            const { data } = await axiosInstance.get(`/Auth/usuarios/${negocioModalUser.id}/negocios`);
+            setAsignaciones(data);
+            setSuccessMsg('Negocio asignado correctamente.');
+            setTimeout(() => setSuccessMsg(''), 3000);
+        } catch (err: any) {
+            alert(err.response?.data?.error || 'Error al asignar negocio.');
+        }
+    };
+
+    const handleRemover = async (negocioId: number) => {
+        if (!negocioModalUser) return;
+        if (!confirm('¿Remover este negocio del usuario?')) return;
+        try {
+            await axiosInstance.delete(`/Auth/usuarios/${negocioModalUser.id}/negocios/${negocioId}`);
+            setAsignaciones(prev => prev.filter(a => a.negocioId !== negocioId));
+        } catch {
+            alert('Error al remover negocio.');
+        }
+    };
+
     const filtrados = usuarios.filter(u =>
         u.nombre.toLowerCase().includes(filterBusqueda.toLowerCase()) ||
         u.correo.toLowerCase().includes(filterBusqueda.toLowerCase()) ||
         (u.negocioNombre || '').toLowerCase().includes(filterBusqueda.toLowerCase())
+    );
+
+    // Negocios que el usuario aún no tiene asignados
+    const negociosDisponibles = negocios.filter(
+        n => !asignaciones.some(a => a.negocioId === n.id)
     );
 
     return (
@@ -129,7 +191,7 @@ const Usuarios: React.FC = () => {
 
             {/* Stats */}
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
-                {['SuperAdmin', 'Admin', 'Operativo', 'Mesero', 'Cocina'].map(rol => (
+                {['SuperAdmin', 'AdminNegocio', 'Operativo', 'Mesero', 'Cocina'].map(rol => (
                     <div key={rol} className="bg-white/70 backdrop-blur-sm rounded-2xl p-3 border border-white shadow-sm text-center">
                         <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5 truncate">{rol}</p>
                         <p className="text-2xl md:text-3xl font-black text-slate-800">{usuarios.filter(u => u.rol === rol).length}</p>
@@ -186,17 +248,27 @@ const Usuarios: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Role badge + delete */}
+                                {/* Role badge + actions */}
                                 <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                                     <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${ROL_COLORS[u.rol] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                                         {u.rol}
                                     </span>
-                                    <button
-                                        onClick={() => handleEliminar(u.id, u.nombre)}
-                                        className="p-1 rounded-lg text-slate-200 hover:text-red-400 hover:bg-red-50 transition-all"
-                                    >
-                                        <Trash2 size={13} />
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        {/* Multi-business button */}
+                                        <button
+                                            onClick={() => openNegocioModal(u)}
+                                            title="Gestionar negocios asignados"
+                                            className="p-1 rounded-lg text-slate-300 hover:text-indigo-500 hover:bg-indigo-50 transition-all"
+                                        >
+                                            <Building2 size={13} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleEliminar(u.id, u.nombre)}
+                                            className="p-1 rounded-lg text-slate-200 hover:text-red-400 hover:bg-red-50 transition-all"
+                                        >
+                                            <Trash2 size={13} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -204,7 +276,7 @@ const Usuarios: React.FC = () => {
                 )}
             </div>
 
-            {/* Create Modal */}
+            {/* ── Create User Modal ── */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative animate-fade-in-up">
@@ -257,7 +329,7 @@ const Usuarios: React.FC = () => {
                                         <option value="Operativo">Operativo (KDS)</option>
                                         <option value="Mesero">Mesero (POS)</option>
                                         <option value="Cocina">Cocina (KDS Exclusivo)</option>
-                                        <option value="Admin">Administrador</option>
+                                        <option value="AdminNegocio">Admin Negocio</option>
                                         <option value="SuperAdmin">SuperAdmin</option>
                                     </select>
                                 </div>
@@ -277,6 +349,94 @@ const Usuarios: React.FC = () => {
                                 Crear Usuario
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Multi-Business Assignment Modal ── */}
+            {negocioModalUser && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 relative animate-fade-in-up">
+                        <button
+                            onClick={() => setNegocioModalUser(null)}
+                            className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors"
+                        >
+                            <X size={22} />
+                        </button>
+
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="bg-gradient-to-br from-indigo-500 to-blue-600 p-3 rounded-2xl">
+                                <Building2 size={24} className="text-white" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-800">Negocios Asignados</h3>
+                                <p className="text-sm text-slate-500">{negocioModalUser.nombre} · <span className="font-semibold">{negocioModalUser.rol}</span></p>
+                            </div>
+                        </div>
+
+                        {/* Current primary business */}
+                        {negocioModalUser.negocioNombre && (
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-3 mb-4 flex items-center gap-2">
+                                <Store size={16} className="text-indigo-500" />
+                                <span className="text-sm font-bold text-indigo-700">Primario: {negocioModalUser.negocioNombre}</span>
+                            </div>
+                        )}
+
+                        {/* Assigned businesses list */}
+                        {loadingAsig ? (
+                            <div className="flex justify-center py-6">
+                                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                            </div>
+                        ) : asignaciones.length === 0 ? (
+                            <div className="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-6 text-center mb-4">
+                                <Link2 size={24} className="mx-auto text-slate-300 mb-2" />
+                                <p className="text-sm text-slate-400 font-medium">Sin negocios extra asignados</p>
+                                <p className="text-xs text-slate-300">Usa el selector de abajo para asignar uno.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
+                                {asignaciones.map(a => (
+                                    <div key={a.id} className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <Store size={14} className="text-slate-400" />
+                                            <span className="text-sm font-bold text-slate-700">{a.negocioNombre}</span>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">{a.rol}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleRemover(a.negocioId)}
+                                            className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                                            title="Remover negocio"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Add new business */}
+                        <div className="border-t border-slate-100 pt-4 mt-2">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Asignar Nuevo Negocio</label>
+                            <div className="flex gap-2">
+                                <select
+                                    value={newNegocioId}
+                                    onChange={e => setNewNegocioId(e.target.value ? Number(e.target.value) : '')}
+                                    className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+                                >
+                                    <option value="">Seleccionar negocio...</option>
+                                    {negociosDisponibles.map(n => (
+                                        <option key={n.id} value={n.id}>{n.nombre} ({n.sistemaAsignado})</option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={handleAsignar}
+                                    disabled={newNegocioId === ''}
+                                    className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 hover:from-indigo-500 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                                >
+                                    <Plus size={16} /> Asignar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

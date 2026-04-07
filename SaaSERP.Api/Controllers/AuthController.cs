@@ -209,6 +209,71 @@ namespace SaaSERP.Api.Controllers
             return Ok(new { mensaje = "Rol actualizado correctamente." });
         }
 
+        // ==========================================
+        // 6. MULTI-NEGOCIO: Listar negocios asignados
+        // ==========================================
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpGet("usuarios/{id}/negocios")]
+        public async Task<IActionResult> ListarNegociosUsuario(int id)
+        {
+            var asignaciones = await _context.UsuarioNegocios
+                .Where(un => un.UsuarioId == id)
+                .Include(un => un.Negocio)
+                .Select(un => new {
+                    un.Id,
+                    un.NegocioId,
+                    NegocioNombre = un.Negocio != null ? un.Negocio.Nombre : "?",
+                    un.Rol
+                })
+                .ToListAsync();
+
+            return Ok(asignaciones);
+        }
+
+        // ==========================================
+        // 7. MULTI-NEGOCIO: Asignar negocio a usuario
+        // ==========================================
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpPost("usuarios/{id}/negocios")]
+        public async Task<IActionResult> AsignarNegocio(int id, [FromBody] AsignarNegocioRequest request)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null) return NotFound(new { error = "Usuario no encontrado." });
+
+            var existe = await _context.UsuarioNegocios.AnyAsync(
+                un => un.UsuarioId == id && un.NegocioId == request.NegocioId);
+            if (existe) return BadRequest(new { error = "El usuario ya tiene asignado ese negocio." });
+
+            var asignacion = new UsuarioNegocio
+            {
+                UsuarioId = id,
+                NegocioId = request.NegocioId,
+                Rol = request.Rol ?? usuario.Rol
+            };
+
+            _context.UsuarioNegocios.Add(asignacion);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensaje = "Negocio asignado correctamente.", asignacion });
+        }
+
+        // ==========================================
+        // 8. MULTI-NEGOCIO: Remover negocio de usuario
+        // ==========================================
+        [Authorize(Roles = "SuperAdmin")]
+        [HttpDelete("usuarios/{userId}/negocios/{negocioId}")]
+        public async Task<IActionResult> RemoverNegocio(int userId, int negocioId)
+        {
+            var asignacion = await _context.UsuarioNegocios
+                .FirstOrDefaultAsync(un => un.UsuarioId == userId && un.NegocioId == negocioId);
+            if (asignacion == null) return NotFound(new { error = "Asignación no encontrada." });
+
+            _context.UsuarioNegocios.Remove(asignacion);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensaje = "Negocio removido del usuario." });
+        }
+
     // ==========================================
     // CLASES AUXILIARES (DTOs) PARA RECIBIR DATOS
     // ==========================================
@@ -232,5 +297,11 @@ namespace SaaSERP.Api.Controllers
     public class CambiarRolRequest
     {
         public string Rol { get; set; } = string.Empty;
+    }
+
+    public class AsignarNegocioRequest
+    {
+        public int NegocioId { get; set; }
+        public string? Rol { get; set; }
     }
 }
