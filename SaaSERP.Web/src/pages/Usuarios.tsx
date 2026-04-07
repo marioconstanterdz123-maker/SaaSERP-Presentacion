@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosConfig';
 import { Users, Plus, Trash2, X, Eye, EyeOff, Shield, Store, UserCheck, Building2, Link2 } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 interface Usuario {
     id: number;
@@ -98,12 +99,23 @@ const Usuarios: React.FC = () => {
     };
 
     const handleEliminar = async (id: number, nombre: string) => {
-        if (!confirm(`¿Eliminar al usuario "${nombre}"? Esta acción no puede deshacerse.`)) return;
+        const result = await Swal.fire({
+            title: `¿Eliminar a ${nombre}?`,
+            text: 'Esta acción no puede deshacerse.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+        if (!result.isConfirmed) return;
+
         try {
             await axiosInstance.delete(`/Auth/usuarios/${id}`);
             setUsuarios(prev => prev.filter(u => u.id !== id));
-        } catch (e) {
-            alert('Error al eliminar el usuario.');
+            Swal.fire('¡Eliminado!', 'Usuario eliminado correctamente.', 'success');
+        } catch (e: any) {
+            Swal.fire('Error', e.response?.data?.error || 'Error al eliminar el usuario.', 'error');
         }
     };
 
@@ -127,26 +139,39 @@ const Usuarios: React.FC = () => {
         try {
             await axiosInstance.post(`/Auth/usuarios/${negocioModalUser.id}/negocios`, {
                 negocioId: Number(newNegocioId),
+                rol: negocioModalUser.rol // pasamos el rol existente  para evitar null reference 
             });
             setNewNegocioId('');
-            // Refrescar lista
             const { data } = await axiosInstance.get(`/Auth/usuarios/${negocioModalUser.id}/negocios`);
             setAsignaciones(data);
             setSuccessMsg('Negocio asignado correctamente.');
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err: any) {
-            alert(err.response?.data?.error || 'Error al asignar negocio.');
+            const errDetails = typeof err.response?.data === 'string' 
+                ? err.response.data 
+                : (err.response?.data?.error || JSON.stringify(err.response?.data));
+            Swal.fire('Error', errDetails || 'Error al asignar negocio.', 'error');
         }
     };
 
     const handleRemover = async (negocioId: number) => {
         if (!negocioModalUser) return;
-        if (!confirm('¿Remover este negocio del usuario?')) return;
+        const result = await Swal.fire({
+            title: '¿Remover negocio?',
+            text: 'El usuario perderá el acceso a este negocio.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Sí, remover',
+            cancelButtonText: 'Cancelar'
+        });
+        if (!result.isConfirmed) return;
+
         try {
             await axiosInstance.delete(`/Auth/usuarios/${negocioModalUser.id}/negocios/${negocioId}`);
             setAsignaciones(prev => prev.filter(a => a.negocioId !== negocioId));
-        } catch {
-            alert('Error al remover negocio.');
+        } catch (err: any) {
+            Swal.fire('Error', err.response?.data?.error || 'Error al remover negocio.', 'error');
         }
     };
 
