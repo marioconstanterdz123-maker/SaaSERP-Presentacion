@@ -22,19 +22,18 @@ class BusinessProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.get('/Negocios');
+      // El endpoint /mis-negocios filtra según el rol del usuario en el backend:
+      // - SuperAdmin: ve todos
+      // - AdminNegocio: ve los que tiene asignados en UsuarioNegocios
+      // - Otros: solo su negocio primario
+      final response = await _apiService.get('/Negocios/mis-negocios');
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        
-        // Filtramos negocios basados en el rol
-        if (user.rol == 'SuperAdmin' || user.rol == 'AdminNegocio') {
-          // El backend ya filtra y devuelve sólo sus negocios si es AdminNegocio.
+        final data = jsonDecode(response.body);
+        if (data is List) {
           _negocios = data.map((json) => Negocio.fromJson(json)).toList();
-        } else {
-          _negocios = data
-              .map((json) => Negocio.fromJson(json))
-              .where((n) => n.id == user.negocioIdActivo)
-              .toList();
+        } else if (data is Map) {
+          // Si devuelve un solo objeto (para roles operativos)
+          _negocios = [Negocio.fromJson(data as Map<String, dynamic>)];
         }
       }
     } catch (e) {

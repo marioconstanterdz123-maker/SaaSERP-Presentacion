@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SaaSERP.Api.Models;
 using SaaSERP.Api.Services;
+using SaaSERP.Api.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,10 +16,12 @@ namespace SaaSERP.Api.Controllers
     public class NegociosController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly SaaSContext _context;
 
-        public NegociosController(IAdminService adminService)
+        public NegociosController(IAdminService adminService, SaaSContext context)
         {
             _adminService = adminService;
+            _context = context;
         }
 
         [Authorize(Roles = "SuperAdmin")]
@@ -25,6 +30,61 @@ namespace SaaSERP.Api.Controllers
         {
             var data = await _adminService.ObtenerTodosNegociosAsync();
             return Ok(data);
+        }
+
+        /// <summary>
+        /// Endpoint accesible por CUALQUIER ROL autenticado.
+        /// Devuelve los negocios a los que el usuario tiene acceso:
+        /// - SuperAdmin: todos los negocios activos
+        /// - AdminNegocio: negocios asignados via UsuarioNegocios (fallback a NegocioId del JWT)
+        /// - Otros: solo su NegocioId primario
+        /// </summary>
+        [HttpGet("mis-negocios")]
+        public async Task<IActionResult> GetMisNegocios()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var negocioIdStr = User.FindFirst("NegocioId")?.Value;
+
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized("Token inválido.");
+
+            // SuperAdmin ve todos
+            if (userRole == "SuperAdmin")
+            {
+                var todos = await _adminService.ObtenerTodosNegociosAsync();
+                return Ok(todos);
+            }
+
+            // AdminNegocio: buscar en tabla puente
+            if (userRole == "AdminNegocio")
+            {
+                var negocioIds = await _context.UsuarioNegocios
+                    .Where(un => un.UsuarioId == userId)
+                    .Select(un => un.NegocioId)
+                    .ToListAsync();
+
+                // Fallback: si no hay registros en la tabla puente, usar NegocioId original del JWT
+                if (negocioIds.Count == 0 && int.TryParse(negocioIdStr, out var primaryId) && primaryId > 0)
+                {
+                    negocioIds = new List<int> { primaryId };
+                }
+
+                var negocios = await _context.Negocios
+                    .Where(n => negocioIds.Contains(n.Id) && !n.EliminadoLogico)
+                    .ToListAsync();
+
+                return Ok(negocios);
+            }
+
+            // Otros roles: solo su negocio primario
+            if (int.TryParse(negocioIdStr, out var nId) && nId > 0)
+            {
+                var negocio = await _adminService.ObtenerNegocioPorIdAsync(nId);
+                return Ok(negocio != null ? new[] { negocio } : Array.Empty<Negocio>());
+            }
+
+            return Ok(Array.Empty<Negocio>());
         }
 
         [AllowAnonymous]

@@ -28,6 +28,9 @@ namespace SaaSERP.Api.Data
         public DbSet<ClienteCRM> ClientesCRM { get; set; }
         public DbSet<ReglaBonificacion> ReglasBonificacion { get; set; }
 
+        // ── Multi-Negocio ─────────────────────────────────────────────────────
+        public DbSet<UsuarioNegocio> UsuarioNegocios { get; set; }
+
         // ── KPI Views ─────────────────────────────────────────────────────────
         public DbSet<KpiComandaActiva> KpiComandasActivas { get; set; }
         public DbSet<KpiEstadiaActiva> KpiEstadiasActivas { get; set; }
@@ -39,6 +42,13 @@ namespace SaaSERP.Api.Data
             // ── Core ──────────────────────────────────────────────────────────
             modelBuilder.Entity<Negocio>().ToTable("Negocios", schema: "Core");
             modelBuilder.Entity<Usuario>().ToTable("Usuarios", schema: "Core");
+            modelBuilder.Entity<UsuarioNegocio>(entity =>
+            {
+                entity.ToTable("UsuarioNegocios", schema: "Core");
+                entity.HasIndex(e => new { e.UsuarioId, e.NegocioId }).IsUnique();
+                entity.HasOne(e => e.Usuario).WithMany().HasForeignKey(e => e.UsuarioId);
+                entity.HasOne(e => e.Negocio).WithMany().HasForeignKey(e => e.NegocioId);
+            });
             modelBuilder.Entity<Servicio>().ToTable("Servicios", schema: "Core");
             modelBuilder.Entity<TarifaEstadia>().ToTable("TarifaEstadia", schema: "Core");
             modelBuilder.Entity<DeliveryCredencial>().ToTable("DeliveryCredenciales", schema: "Core");
