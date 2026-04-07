@@ -54,7 +54,7 @@ class PosProvider with ChangeNotifier {
 
   Future<void> fetchComandasActivas(String negocioId) async {
     try {
-      final res = await _api.get('/Comandas/activas');
+      final res = await _api.get('/Comandas/activas', headers: {'X-Negocio-Id': negocioId});
       if (res.statusCode == 200) {
         final List data = jsonDecode(res.body);
         comandasActivas = data.map((c) => ComandaActiva.fromJson(c)).toList();
@@ -163,7 +163,7 @@ class PosProvider with ChangeNotifier {
             .toList(),
       };
 
-      final res = await _api.post('/Comandas', body);
+      final res = await _api.post('/Comandas', body, headers: {'X-Negocio-Id': negocioId});
       if (res.statusCode == 200 || res.statusCode == 201) {
         clearItems(); // Keep client info, just clear the product list
         await fetchComandasActivas(negocioId);

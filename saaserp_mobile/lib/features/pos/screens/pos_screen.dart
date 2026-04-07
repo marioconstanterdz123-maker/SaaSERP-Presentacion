@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/pos_provider.dart';
 import '../../../models/models.dart';
 import '../../business/providers/business_provider.dart';
+import '../../../core/widgets/fade_slide_in.dart';
 
 class PuntoDeVentaScreen extends StatefulWidget {
   final String negocioId;
@@ -40,8 +41,6 @@ class _PuntoDeVentaScreenState extends State<PuntoDeVentaScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      // CRITICAL: showModalBottomSheet creates a new route that has no access
-      // to the PosProvider above. We must bridge it using .value constructor.
       builder: (ctx) => ChangeNotifierProvider.value(
         value: pos,
         child: CartBottomSheet(negocioId: widget.negocioId),
@@ -49,85 +48,54 @@ class _PuntoDeVentaScreenState extends State<PuntoDeVentaScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Consumer<PosProvider>(builder: (context, pos, child) {
       if (pos.isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: CircularProgressIndicator(color: Color(0xFFF97316)));
       }
 
       final filteredProducts = pos.servicios.where((s) =>
           s.nombre.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
 
       return Scaffold(
-        backgroundColor: const Color(0xFFF1F5F9),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1E293B),
-          foregroundColor: Colors.white,
-          title: Text(
-            'Punto de Venta',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 18),
-          ),
-          actions: [
-            // Cart badge button
-            Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () => _openCart(context),
-                ),
-                if (pos.cartCount > 0)
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.indigo,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${pos.cartCount}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            // Mesa Selector
-            if (widget.usaMesas && pos.mesas.isNotEmpty)
-              _buildMesaSelector(pos),
+        backgroundColor: Colors.transparent,
+        body: FadeSlideIn(
+          child: Column(
+            children: [
+              // Mesa Selector
+              if (widget.usaMesas && pos.mesas.isNotEmpty)
+                _buildMesaSelector(pos),
 
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                controller: _searchController,
-                style: GoogleFonts.inter(),
-                decoration: InputDecoration(
-                  hintText: 'Buscar productos...',
-                  hintStyle: GoogleFonts.inter(color: Colors.grey[400]),
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
+              // Search bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: TextField(
+                  controller: _searchController,
+                  style: GoogleFonts.inter(),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar productos...',
+                    hintStyle: GoogleFonts.inter(color: Colors.grey[400]),
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.8),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFF97316), width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  onChanged: (v) => setState(() => _searchQuery = v),
                 ),
-                onChanged: (v) => setState(() => _searchQuery = v),
               ),
-            ),
 
             // Products grid
             Expanded(
@@ -135,8 +103,8 @@ class _PuntoDeVentaScreenState extends State<PuntoDeVentaScreen> {
                   ? _buildEmptyState()
                   : GridView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 5 : 3,
                         childAspectRatio: 0.85,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
@@ -152,6 +120,7 @@ class _PuntoDeVentaScreenState extends State<PuntoDeVentaScreen> {
                     ),
             ),
           ],
+        ),
         ),
         // Persistent bottom bar when cart has items
         bottomNavigationBar: pos.cart.isNotEmpty
@@ -570,6 +539,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       const SizedBox(height: 12),
       TextField(
         controller: _clientNameCtrl,
+        onChanged: (val) => pos.identificadorCliente = val,
         style: GoogleFonts.inter(color: Colors.white),
         decoration: InputDecoration(
           hintText: pos.tipoAtencion == 'Llevar'
@@ -589,6 +559,7 @@ class _CartBottomSheetState extends State<CartBottomSheet> {
       const SizedBox(height: 8),
       TextField(
         controller: _clientPhoneCtrl,
+        onChanged: (val) => pos.telefonoCliente = val,
         keyboardType: TextInputType.phone,
         style: GoogleFonts.inter(color: Colors.white),
         decoration: InputDecoration(

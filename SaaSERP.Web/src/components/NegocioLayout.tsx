@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useParams, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Scissors, Calendar, ListOrdered, ArrowLeft, Settings, Car, Coffee, Briefcase, Users, Archive, LogOut, Menu, X, BookUser, Star } from 'lucide-react';
+import { LayoutDashboard, Scissors, Calendar, ListOrdered, ArrowLeft, Settings, Car, Coffee, Briefcase, Users, Archive, LogOut, Menu, X, BookUser, Star, MessageCircle } from 'lucide-react';
 import axiosInstance from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
@@ -68,6 +68,9 @@ const NegocioLayout: React.FC = () => {
         menuItems.push({ path: `${basePath}/citas`, name: 'Agenda / Citas', shortName: 'Agenda', icon: <Calendar size={22} /> });
         menuItems.push({ path: `${basePath}/operacion`, name: 'Punto de Venta', shortName: 'POS', icon: <ListOrdered size={22} /> });
     }
+
+    // WhatsApp para todos en tenant excepto SuperAdmins que eligen negocio (los SuperAdmin igual lo ven si entran a la vista del Tenant)
+    menuItems.push({ path: `${basePath}/whatsapp`, name: 'WhatsApp Web', shortName: 'WhatsApp', icon: <MessageCircle size={22} /> });
 
     if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
         menuItems.push({ path: `${basePath}/historial`, name: 'Historial', shortName: 'Historial', icon: <Archive size={22} /> });

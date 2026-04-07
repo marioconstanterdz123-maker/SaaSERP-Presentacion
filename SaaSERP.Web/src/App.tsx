@@ -21,6 +21,7 @@ import Papelera from './pages/Papelera';
 import Trabajadores from './pages/Trabajadores';
 import CRM from './pages/CRM';
 import Lealtad from './pages/Lealtad';
+import WhatsAppWeb from './pages/WhatsAppWeb';
 import { App as CapApp } from '@capacitor/app';
 
 function App() {
@@ -149,6 +150,11 @@ function App() {
             <Route path="lealtad" element={
               <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio']}>
                 <Lealtad />
+              </ProtectedRoute>
+            } />
+            <Route path="whatsapp" element={
+              <ProtectedRoute requiredRole="Tenant" allowedTenantRoles={['SuperAdmin', 'AdminNegocio', 'Cajero', 'Mesero', 'Cocinero']}>
+                <WhatsAppWeb />
               </ProtectedRoute>
             } />
           </Route>

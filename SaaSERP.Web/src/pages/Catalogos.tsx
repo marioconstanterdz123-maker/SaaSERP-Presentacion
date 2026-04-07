@@ -84,7 +84,7 @@ const Catalogos: React.FC = () => {
     const isRestaurante = negocio?.sistemaAsignado === 'TAQUERIA' || negocio?.sistemaAsignado === 'RESTAURANTES';
 
     return (
-        <div className="h-full flex flex-col space-y-4">
+        <div className="min-h-full flex flex-col space-y-4">
             <header className="flex flex-col md:flex-row md:justify-between md:items-end mb-2 gap-3">
                 <div>
                     <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">

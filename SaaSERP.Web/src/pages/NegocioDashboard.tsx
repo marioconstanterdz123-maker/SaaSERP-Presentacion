@@ -42,7 +42,7 @@ const NegocioDashboard: React.FC = () => {
     const isCitas = negocio?.sistemaAsignado === 'CITAS';
 
     return (
-        <div className="h-full flex flex-col space-y-6 animate-fade-in-up">
+        <div className="min-h-full flex flex-col space-y-6 animate-fade-in-up">
             <header className="flex justify-between items-end mb-2">
                 <div>
                     <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-2">

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/services/api_service.dart';
+import '../../../core/widgets/fade_slide_in.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String negocioId;
@@ -62,22 +63,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final sistema = _negocio?['sistemaAsignado'] ?? '';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: const Color(0xFFF8FAFC), // slate-50
       body: RefreshIndicator(
+        color: const Color(0xFFF97316),
         onRefresh: () async {
           setState(() => _isLoading = true);
           await _fetchAll();
         },
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFFF97316)))
+            : FadeSlideIn(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           // Header — matches web <header>
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -125,6 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ],
               ),
+            ),
       ),
     );
   }

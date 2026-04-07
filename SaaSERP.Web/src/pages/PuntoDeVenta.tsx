@@ -578,11 +578,12 @@ const PuntoDeVenta: React.FC = () => {
             </div>
 
             {/* MOBILE: Fixed bottom bar (portrait phones only) */}
-            <div className="sm:hidden fixed z-[60] left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.15)]" style={{ bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}>
-                <button
-                    onClick={() => setCartOpen(true)}
-                    className="w-full flex items-center justify-between px-5 py-4 active:bg-slate-50 transition-colors"
-                >
+            {!cartOpen && (
+                <div className="sm:hidden fixed z-[60] left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.15)]" style={{ bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}>
+                    <button
+                        onClick={() => setCartOpen(true)}
+                        className="w-full flex items-center justify-between px-5 py-4 active:bg-slate-50 transition-colors"
+                    >
                     <div className="flex items-center gap-3">
                         <div className="relative">
                             <ShoppingCart size={22} className="text-indigo-600" />
@@ -604,10 +605,11 @@ const PuntoDeVenta: React.FC = () => {
                     </div>
                 </button>
             </div>
+            )}
 
             {/* MOBILE: Cart Bottom Sheet */}
             {cartOpen && (
-                <div className="sm:hidden fixed inset-0 z-50 flex flex-col justify-end">
+                <div className="sm:hidden fixed inset-0 z-[70] flex flex-col justify-end">
                     {/* Backdrop — solo cierra si el teclado NO está abierto */}
                     <div
                         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
@@ -620,7 +622,7 @@ const PuntoDeVenta: React.FC = () => {
                         }}
                     />
                     {/* Sheet */}
-                    <div className="relative bg-slate-800 rounded-t-3xl overflow-hidden flex flex-col" style={{ maxHeight: '92vh' }}>
+                    <div className="relative bg-slate-800 rounded-t-3xl overflow-hidden flex flex-col h-[92vh] shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
                         {/* Drag handle */}
                         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
                             <div className="w-10 h-1 rounded-full bg-slate-600" />

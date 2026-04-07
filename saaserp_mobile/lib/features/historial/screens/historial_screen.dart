@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/services/api_service.dart';
+import '../../../core/widgets/fade_slide_in.dart';
 
 // Matches the ESTADO_COLORS map in PuntoDeVenta.tsx exactly
 class _EstadoStyle {
@@ -83,84 +84,51 @@ class _HistorialScreenState extends State<HistorialScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      body: Column(
-        children: [
-          // ── Header matching web style ──────────────────────────────────
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      backgroundColor: Colors.transparent,
+      body: FadeSlideIn(
+        child: Column(
+          children: [
+            // Period filter tabs (light glass styling)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: _periodos.map((p) {
+                  final active = _periodo == p['value'];
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _periodo = p['value']!;
+                          _expandedId = null;
+                        });
+                        _fetchHistorial();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: active
+                              ? const Color(0xFFF97316) // orange-500
+                              : Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: active
+                                ? const Color(0xFFF97316)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(p['label']!,
+                            style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: active ? Colors.white : const Color(0xFF64748B))),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-            padding: EdgeInsets.fromLTRB(
-                20, MediaQuery.of(context).padding.top + 16, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.history, color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(width: 10),
-                    Text('Historial de Ventas',
-                        style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Period filter tabs
-                Row(
-                  children: _periodos.map((p) {
-                    final active = _periodo == p['value'];
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _periodo = p['value']!;
-                            _expandedId = null;
-                          });
-                          _fetchHistorial();
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(vertical: 9),
-                          decoration: BoxDecoration(
-                            color: active
-                                ? const Color(0xFF6366F1)
-                                : Colors.white.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: active
-                                  ? const Color(0xFF6366F1)
-                                  : Colors.white.withOpacity(0.12),
-                            ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(p['label']!,
-                              style: GoogleFonts.inter(
-                                color: active ? Colors.white : Colors.white54,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              )),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
 
           // ── KPI summary card ─────────────────────────────────────────────
           if (!_isLoading)
@@ -265,7 +233,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
                         ),
                       ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

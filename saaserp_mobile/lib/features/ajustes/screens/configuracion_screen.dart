@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/api_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/widgets/fade_slide_in.dart';
 
 class ConfiguracionScreen extends StatefulWidget {
   final String negocioId;
@@ -142,31 +143,37 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
     final sistema = _negocio?['sistemaAsignado'] ?? '';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
-        title: Text('Configuración',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 18)),
-        actions: [
-          TextButton.icon(
-            onPressed: _saving ? null : _save,
-            icon: _saving
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
-                : const Icon(Icons.save_outlined, color: Colors.white, size: 18),
-            label: Text('Guardar',
-                style: GoogleFonts.inter(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      backgroundColor: Colors.transparent,
+      body: FadeSlideIn(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Top action bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _saving ? null : _save,
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.save_outlined, color: Colors.white, size: 18),
+                  label: Text('Guardar Cambios',
+                      style: GoogleFonts.inter(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF97316),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
           // Business identity card
           _Card(
             child: Column(
@@ -451,8 +458,9 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
             ),
           ),
 
-          const SizedBox(height: 32),
-        ],
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

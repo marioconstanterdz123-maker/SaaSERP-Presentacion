@@ -15,42 +15,46 @@ class ApiService {
     };
   }
 
-  Future<http.Response> get(String endpoint) async {
-    final headers = await _getHeaders();
+  Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
+    final reqHeaders = await _getHeaders();
+    if (headers != null) reqHeaders.addAll(headers);
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
-    return await http.get(url, headers: headers).timeout(
+    return await http.get(url, headers: reqHeaders).timeout(
       const Duration(seconds: ApiConfig.timeoutSeconds),
     );
   }
 
-  Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
-    final headers = await _getHeaders();
+  Future<http.Response> post(String endpoint, dynamic body, {Map<String, String>? headers}) async {
+    final reqHeaders = await _getHeaders();
+    if (headers != null) reqHeaders.addAll(headers);
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     return await http.post(
       url, 
-      headers: headers, 
+      headers: reqHeaders, 
       body: jsonEncode(body)
     ).timeout(
       const Duration(seconds: ApiConfig.timeoutSeconds),
     );
   }
 
-  Future<http.Response> put(String endpoint, Map<String, dynamic> body) async {
-    final headers = await _getHeaders();
+  Future<http.Response> put(String endpoint, dynamic body, {Map<String, String>? headers}) async {
+    final reqHeaders = await _getHeaders();
+    if (headers != null) reqHeaders.addAll(headers);
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     return await http.put(
       url, 
-      headers: headers, 
+      headers: reqHeaders, 
       body: jsonEncode(body)
     ).timeout(
       const Duration(seconds: ApiConfig.timeoutSeconds),
     );
   }
 
-  Future<http.Response> delete(String endpoint) async {
-    final headers = await _getHeaders();
+  Future<http.Response> delete(String endpoint, {Map<String, String>? headers}) async {
+    final reqHeaders = await _getHeaders();
+    if (headers != null) reqHeaders.addAll(headers);
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
-    return await http.delete(url, headers: headers).timeout(
+    return await http.delete(url, headers: reqHeaders).timeout(
       const Duration(seconds: ApiConfig.timeoutSeconds),
     );
   }

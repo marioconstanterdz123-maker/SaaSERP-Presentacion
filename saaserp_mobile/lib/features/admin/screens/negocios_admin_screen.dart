@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/widgets/fade_slide_in.dart';
 
 /// SuperAdmin screen: full CRUD for Negocios (list, create, toggle active, delete)
 class NegociosAdminScreen extends StatefulWidget {
@@ -159,29 +160,50 @@ class _NegociosAdminScreenState extends State<NegociosAdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
-        title: Text('Gestión de Negocios',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 18)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _fetchNegocios,
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showCreateModal,
-        backgroundColor: Colors.indigo,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Nuevo', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _fetchNegocios,
+      backgroundColor: Colors.transparent,
+      body: FadeSlideIn(
+        child: Column(
+          children: [
+            // Top Actions
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _showCreateModal,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text('Nuevo Negocio', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF97316),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.refresh, color: Color(0xFF64748B)),
+                      onPressed: _fetchNegocios,
+                      tooltip: 'Actualizar',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // List
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFFF97316)))
+                  : RefreshIndicator(
+                      onRefresh: _fetchNegocios,
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _negocios.length,
@@ -251,6 +273,10 @@ class _NegociosAdminScreenState extends State<NegociosAdminScreen> {
                 },
               ),
             ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

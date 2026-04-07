@@ -6,6 +6,7 @@ import '../../../models/user.dart';
 
 class BusinessProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
+  ApiService get api => _apiService;
   List<Negocio> _negocios = [];
   Negocio? _negocioActivo;
   bool _isLoading = false;
