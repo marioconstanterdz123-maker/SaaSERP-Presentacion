@@ -26,8 +26,9 @@ class BusinessProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         
-        // Filtramos negocios basados en el rol (SuperAdmin ve todos)
-        if (user.rol == 'SuperAdmin') {
+        // Filtramos negocios basados en el rol
+        if (user.rol == 'SuperAdmin' || user.rol == 'AdminNegocio') {
+          // El backend ya filtra y devuelve sólo sus negocios si es AdminNegocio.
           _negocios = data.map((json) => Negocio.fromJson(json)).toList();
         } else {
           _negocios = data

@@ -61,7 +61,10 @@ class _HistorialScreenState extends State<HistorialScreen> {
   Future<void> _fetchHistorial() async {
     setState(() => _isLoading = true);
     try {
-      final res = await _api.get('/Reportes/historial/${widget.negocioId}?periodo=$_periodo');
+      final res = await _api.get(
+        '/Reportes/historial/${widget.negocioId}?periodo=$_periodo',
+        headers: {'X-Negocio-Id': widget.negocioId},
+      );
       if (res.statusCode == 200 && mounted) {
         setState(() => _comandas = jsonDecode(res.body));
       }

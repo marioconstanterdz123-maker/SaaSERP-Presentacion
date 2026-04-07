@@ -157,13 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
         name: 'Historial',
         screen: HistorialScreen(negocioId: negocioId),
       ));
-      items.add(_NavItem(
-        icon: Icons.settings_outlined,
-        selectedIcon: Icons.settings,
-        shortName: 'Ajustes',
-        name: 'Ajustes',
-        screen: ConfiguracionScreen(negocioId: negocioId),
-      ));
     }
 
     if (esSuperAdmin) {
@@ -214,15 +207,23 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() => _currentIndex = 0);
           return;
         }
+        
+        // If at Dashboard, clear active business -> returns to BusinessSelector
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text('Salir', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            content: Text('¿Cerrar la aplicación?', style: GoogleFonts.inter()),
+            title: Text('Volver o Salir', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            content: Text('¿Deseas volver a la selección de negocios o salir de la app?', style: GoogleFonts.inter()),
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
                   child: Text('Cancelar', style: GoogleFonts.inter(color: Colors.grey))),
+              TextButton(
+                  onPressed: () { 
+                    Navigator.pop(ctx, false);
+                    Provider.of<BusinessProvider>(context, listen: false).deseleccionarNegocio();
+                  },
+                  child: Text('Cambiar Negocio', style: GoogleFonts.inter(color: Colors.blue))),
               TextButton(
                   onPressed: () => Navigator.pop(ctx, true),
                   child: Text('Salir',

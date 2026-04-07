@@ -34,6 +34,12 @@ class _OperacionScreenState extends State<OperacionScreen> {
   bool _placaModalOpen = false;
   final _placaController = TextEditingController();
   final _telefonoController = TextEditingController();
+  
+  bool _citaModalOpen = false;
+  final _clienteCitaController = TextEditingController();
+  final _telefonoCitaController = TextEditingController();
+  DateTime _selectedCitaDateTime = DateTime.now().add(const Duration(hours: 1));
+  int _duracionMinutos = 30;
 
   static const _filtros = ['TODAS', 'Recibida', 'En Preparacion', 'Lista', 'Entregada'];
   static const _estadoColors = {
@@ -104,6 +110,38 @@ class _OperacionScreenState extends State<OperacionScreen> {
     await _fetchData();
   }
 
+  Future<void> _registrarCitaManual() async {
+    final nombre = _clienteCitaController.text.trim();
+    if (nombre.isEmpty) return;
+    try {
+      final res = await _api.post('/Citas/registrar', {
+        'negocioId': int.tryParse(widget.negocioId) ?? 0,
+        'nombreCliente': nombre,
+        'telefonoCliente': _telefonoCitaController.text.trim(),
+        'fechaHoraInicio': _selectedCitaDateTime.toUtc().toIso8601String(),
+        'duracionMinutos': _duracionMinutos,
+        'servicioId': 0,
+        'recursoId': 0,
+      }, headers: {'X-Negocio-Id': widget.negocioId});
+      if (res.statusCode == 409) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Horario no disponible. Elige otro.'), backgroundColor: Colors.red),
+          );
+        }
+        return;
+      }
+    } catch (e) {
+      debugPrint('Error registrar cita: $e');
+    }
+    setState(() => _citaModalOpen = false);
+    _clienteCitaController.clear();
+    _telefonoCitaController.clear();
+    _selectedCitaDateTime = DateTime.now().add(const Duration(hours: 1));
+    _duracionMinutos = 30;
+    await _fetchData();
+  }
+
   Future<void> _cobrarVehiculo(Vehiculo v) async {
     showDialog(
       context: context,
@@ -144,6 +182,14 @@ class _OperacionScreenState extends State<OperacionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      floatingActionButton: widget.sistemaAsignado == 'CITAS'
+          ? FloatingActionButton.extended(
+              onPressed: () => setState(() => _citaModalOpen = true),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text('Registrar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+              backgroundColor: const Color(0xFFF97316),
+            )
+          : null,
       body: FadeSlideIn(
         child: Stack(
           children: [
@@ -197,8 +243,9 @@ class _OperacionScreenState extends State<OperacionScreen> {
               ],
             ),
           
-          // Placa modal
+          // Modals
             if (_placaModalOpen) _buildPlacaModal(),
+            if (_citaModalOpen) _buildCitaModal(),
           ],
         ),
       ),
@@ -380,6 +427,131 @@ class _OperacionScreenState extends State<OperacionScreen> {
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCitaModal() {
+    final dateStr = '${_selectedCitaDateTime.day.toString().padLeft(2,'0')}/${_selectedCitaDateTime.month.toString().padLeft(2,'0')}/${_selectedCitaDateTime.year}';
+    final timeStr = '${_selectedCitaDateTime.hour.toString().padLeft(2,'0')}:${_selectedCitaDateTime.minute.toString().padLeft(2,'0')}';
+
+    return Container(
+      color: Colors.black54,
+      child: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Agendar Cita',
+                    style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _clienteCitaController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    labelText: 'Nombre del Cliente',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.person),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _telefonoCitaController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Teléfono',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.phone),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Date/Time picker
+                GestureDetector(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedCitaDateTime,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (date != null && mounted) {
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.fromDateTime(_selectedCitaDateTime),
+                      );
+                      if (time != null && mounted) {
+                        setState(() {
+                          _selectedCitaDateTime = DateTime(
+                            date.year, date.month, date.day,
+                            time.hour, time.minute,
+                          );
+                        });
+                      }
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[400]!),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        Text('$dateStr  $timeStr',
+                            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Duration
+                Row(
+                  children: [
+                    Text('Duración:', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 12),
+                    DropdownButton<int>(
+                      value: _duracionMinutos,
+                      items: [15, 30, 45, 60, 90, 120].map((m) => 
+                        DropdownMenuItem(value: m, child: Text('$m min'))
+                      ).toList(),
+                      onChanged: (v) { if (v != null) setState(() => _duracionMinutos = v); },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => setState(() => _citaModalOpen = false),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _registrarCitaManual,
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF97316)),
+                        child: Text('Agendar',
+                            style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
