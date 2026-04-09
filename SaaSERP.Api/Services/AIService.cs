@@ -116,8 +116,8 @@ namespace SaaSERP.Api.Services
             // ── 4. Guardar mensaje del usuario ────────────────────────────────────
             await _chatMemoryService.GuardarMensajeAsync(numeroCliente, "user", textoOriginal);
 
-            // ── 5. Recuperar historial (LIMITADO A UNO TEMPORALMENTE PARA CORTAR ALUCINACION) ──
-            var historial = await _chatMemoryService.ObtenerHistorialAsync(numeroCliente, 1);
+            // ── 5. Recuperar historial (Restaurado a 10 para contexto) ──
+            var historial = await _chatMemoryService.ObtenerHistorialAsync(numeroCliente, 10);
 
             // ── 6. Variables Dinámicas de Sistema ─────────────────────────────────
             string reglaSistema = "";
@@ -434,7 +434,7 @@ RESTRICCIONES TÉCNICAS:
                         catch { /* Silenciar errores de notificación para no interrumpir el tókem del bot */ }
                     });
 
-                    return $"Pedido/Comanda creada con éxito en la base de datos. El Total a cobrar exacto calculado según el sistema es ${res.TotalCalculado} MXN. Confírmale al cliente que su pedido se envió a cocina y dile el total a pagar. ADVERTENCIA: NO le des el número de pedido al cliente.";
+                    return $"Pedido/Comanda procesada en el sistema. Cobro total será ${res.TotalCalculado} MXN. Confírmale al cliente de forma natural que su pedido 'fue procesado y se le avisará cuando esté listo'. ADVERTENCIA: NO uses asteriscos ni reveles su número de pedido.";
                 }
                 else if (nombre == "consultar_estado_pedido")
                 {
