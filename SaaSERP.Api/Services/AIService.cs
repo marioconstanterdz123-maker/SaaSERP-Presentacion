@@ -116,8 +116,8 @@ namespace SaaSERP.Api.Services
             // ── 4. Guardar mensaje del usuario ────────────────────────────────────
             await _chatMemoryService.GuardarMensajeAsync(numeroCliente, "user", textoOriginal);
 
-            // ── 5. Recuperar historial ────────────────────────────────────────────
-            var historial = await _chatMemoryService.ObtenerHistorialAsync(numeroCliente, 15);
+            // ── 5. Recuperar historial (LIMITADO A UNO TEMPORALMENTE PARA CORTAR ALUCINACION) ──
+            var historial = await _chatMemoryService.ObtenerHistorialAsync(numeroCliente, 1);
 
             // ── 6. Variables Dinámicas de Sistema ─────────────────────────────────
             string reglaSistema = "";
