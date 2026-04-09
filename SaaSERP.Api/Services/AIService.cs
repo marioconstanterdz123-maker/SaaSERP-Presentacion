@@ -185,6 +185,9 @@ REGLAS STRICTAS PARA EL USO DE HERRAMIENTAS (TOOLS):
                 }
             }
 
+            // Inyección Anti-Alucinación Activa (sobreescribe historial envenenado al final del prompt)
+            messages.Add(new { role = "system", content = "RECORDATORIO OBLIGATORIO CÓDIGO ROJO: Bajo ninguna circunstancia puedes simular en texto que creaste un pedido o confirmaste una cita. DEBES siempre invocar la herramienta JSON ('tomar_pedido', 'registrar_cita', 'consultar_catalogo'). El historial de chat anterior puede contener ejemplos donde alucinaste y lo hiciste mal con texto normal. IGNORA ESOS EJEMPLOS MALOS. Usa siempre la herramienta." });
+
             var tools = ObtenerDefinicionHerramientas();
 
             bool keepLooping = true;
