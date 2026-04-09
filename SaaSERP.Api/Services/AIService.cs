@@ -158,20 +158,27 @@ namespace SaaSERP.Api.Services
                 }
             }
 
+            // ── 8.5 Calcular Horario y Estado del Negocio ─────────────────────────
+            DateTime horaLocal = DateTime.UtcNow.AddHours(-6); // Ajuste Zona Horaria México
+            bool estaAbierto = horaLocal.TimeOfDay >= negocio.HoraApertura && horaLocal.TimeOfDay <= negocio.HoraCierre;
+            string reglaCierre = estaAbierto 
+                ? "" 
+                : $"\n- ESTADO ACTUAL CLAVE: EL NEGOCIO ESTÁ CERRADO. Te escribieron a las {horaLocal:hh\\:mm tt}. Tienes PROHIBIDO tomar pedidos o asignar citas, debes avisar amablemente que el horario de atención es de {negocio.HoraApertura:hh\\:mm} a {negocio.HoraCierre:hh\\:mm} e invitarlos a volver pronto.";
+
             // ── 9. Armar System Prompt ────────────────────────────────────────────
             string systemPrompt = $@"
 Actúa como la Asistente Virtual Inteligente para '{negocio.Nombre}'.
 Tu tarea es atender a los clientes de manera amable, breve y profesional.
 
-REGLAS DE FORMATO (ESTRCITAMENTE OBLIGATORIO):
+REGLAS DE FORMATO (ESTRICTAMENTE OBLIGATORIO):
 NO uses formato Markdown. Cero asteriscos (*), cero negritas, cero símbolos extraños. Tu texto debe ser 100% limpio como un mensaje casual de WhatsApp. Usa emojis libremente.
 
-FECHA Y HORA ACTUAL DEL SISTEMA: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+FECHA Y HORA ACTUAL (ZONA LOCAL): {horaLocal:yyyy-MM-dd HH:mm:ss}
 HORARIO DE ATENCIÓN: de {negocio.HoraApertura:hh\:mm} a {negocio.HoraCierre:hh\:mm}
 
 RESTRICCIONES TÉCNICAS:
 1. PROHIBIDO ALUCINAR COMPROBANTES: JAMÁS confirmes un pedido/cita a la imaginación. DEBES ejecutar obligatoriamente el JSON interno (`tomar_pedido` / `registrar_cita`). Si no usas la herramienta real que da la BD, no digas nada sobre confirmaciones.
-2. USA LOS IDS CORRECTOS: Tienes que usar `consultar_catalogo` la primera vez que inicia la charla. Usa sólo esos IDs para las herramientas. No los inventes.{reglaSistema}{ctxLealtad}{ctxTrabajador}
+2. USA LOS IDS CORRECTOS: Tienes que usar `consultar_catalogo` la primera vez que inicia la charla. Usa sólo esos IDs para las herramientas. No los inventes.{reglaCierre}{reglaSistema}{ctxLealtad}{ctxTrabajador}
 ";
 
             var messages = new List<object>

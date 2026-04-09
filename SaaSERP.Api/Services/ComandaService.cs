@@ -52,6 +52,9 @@ namespace SaaSERP.Api.Services
             int outId = Convert.ToInt32(result.ComandaId);
             decimal outTotal = Convert.ToDecimal(result.TotalCobrar);
 
+            // Parche temporal para asegurar que la hora de la comanda quede en Zona Horaria Centro (México GMT-6) y no en UTC
+            await connection.ExecuteAsync("UPDATE [Operacion].[Comandas] SET FechaCreacion = DATEADD(hour, -6, GETUTCDATE()) WHERE Id = @Id", new { Id = outId });
+
             return (outId, outTotal);
         }
 
