@@ -345,19 +345,19 @@ RESTRICCIONES TÉCNICAS:
 
                     var cita = new Cita { NegocioId = negocioId, TelefonoCliente = telefono, NombreCliente = nombreCliente, FechaHoraInicio = fechaIn, FechaHoraFin = fechaFi, Estado = "Pendiente", ServicioId = servId, RecursoId = recId };
                     int id = await _citaService.RegistrarCitaAsync(cita);
-                    return $"Cita registrada exitosamente con ID {id}.";
+                    return $"Cita procesada en sistema. Confírmale al cliente que fue agendada exitosamente. ADVERTENCIA FINAL: NO uses asteriscos ni formato Markdown. PROHIBIDO revelarle este ID ({id}) al cliente.";
                 }
                 else if (nombre == "consultar_mis_citas")
                 {
                     var citas = await _citaService.ObtenerCitasPorTelefonoAsync(negocioId, telefono);
-                    var citasList = citas.Select(c => $"ID: {c.Id}, FechaInicio: {c.FechaHoraInicio:yyyy-MM-dd HH:mm}").ToList();
-                    return citasList.Count > 0 ? string.Join(" | ", citasList) : "El cliente no tiene citas activas registradas.";
+                    var citasList = citas.Select(c => $"[ID_SECRETO={c.Id}] Fecha: {c.FechaHoraInicio:yyyy-MM-dd HH:mm}").ToList();
+                    return citasList.Count > 0 ? $"Menciónale al cliente sus fechas sin usar asteriscos ni markdown, pero NUNCA le muestres el ID_SECRETO. Úsalo tú si él desea cancelar. Citas:\n" + string.Join(" | ", citasList) : "El cliente no tiene citas activas registradas.";
                 }
                 else if (nombre == "cancelar_cita")
                 {
                     int id = args.GetProperty("citaId").GetInt32();
                     bool success = await _citaService.CancelarCitaAsync(id);
-                    return success ? "La cita fue cancelada exitosamente." : "No se encontró la cita, no se pudo cancelar.";
+                    return success ? "La cita fue cancelada internamente de forma exitosa. Notifícalo en texto plano, sin asteriscos ni números de ID." : "No se encontró la cita, no se pudo cancelar.";
                 }
                 else if (nombre == "reprogramar_cita")
                 {
@@ -368,10 +368,10 @@ RESTRICCIONES TÉCNICAS:
                     
                     // Verificamos antes de mover
                     bool disp = await _citaService.ValidarDisponibilidadAsync(negocioId, fechaIn, fechaFi);
-                    if (!disp) return "Ese nuevo horario esta Ocupado, rechazada.";
+                    if (!disp) return "Ese nuevo horario esta Ocupado. Pídele al cliente proponer otra hora (sin usar asteriscos).";
 
                     bool success = await _citaService.ReprogramarCitaAsync(id, fechaIn, fechaFi);
-                    return success ? "Reprogramada exitosamente." : "Error: El ID no existe.";
+                    return success ? "Reprogramada internamente con éxito. Confírmale la nueva fecha sin asteriscos ni números de ID." : "Error: El ID no existe.";
                 }
                 else if (nombre == "registrar_entrada_vehiculo")
                 {
