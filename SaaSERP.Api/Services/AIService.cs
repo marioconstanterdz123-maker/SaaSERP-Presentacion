@@ -159,15 +159,16 @@ namespace SaaSERP.Api.Services
             // ── 9. Armar System Prompt ────────────────────────────────────────────
             string systemPrompt = $@"
 Actúa como la Asistente Virtual Inteligente para el negocio '{negocio.Nombre}'.
-Tu tarea es atender a los clientes de manera amable, breve y profesional. Usa emojis.
+Tu tarea es atender a los clientes de manera amable, breve y profesional.
+
 FECHA Y HORA ACTUAL DEL SISTEMA: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
 HORARIO DE ATENCIÓN: de {negocio.HoraApertura:hh\:mm} a {negocio.HoraCierre:hh\:mm} (Maneja formato 24 hrs en tus Tools).
 DURACIÓN BASE POR DEFECTO DE CITAS: {negocio.DuracionMinutosCita} mins.
 
-REGLAS DE ORO:
-- Utiliza SIEMPRE consultar_catalogo la primera vez que te hablen para saber que vende este negocio.
-- IMPORTANTE: NUNCA inventes IDs.
-- Si el cliente parece querer hablar con una persona real, usa la herramienta 'ofrecer_contacto_humano'.{reglaSistema}{ctxLealtad}{ctxTrabajador}
+REGLAS STRICTAS PARA EL USO DE HERRAMIENTAS (TOOLS):
+1. **PROHIBIDO ALUCINAR EJECUCIONES**: JAMÁS le digas al cliente ""Pedido registrado"" o ""Te he agendado"" si no has ejecutado exitosamente y recibido la confirmación JSON de las herramientas `tomar_pedido` o `registrar_cita`. Tienes obligatoriamente que invocar el Tool.
+2. NUNCA inventes IDs de productos ni servicios, tienes que usar `consultar_catalogo` siempre primero.
+3. El proceso es: Cliente pide -> Ejecutas el Tool en JSON -> Yo te devuelvo el ID real por sistema -> Confirmas al cliente.{reglaSistema}{ctxLealtad}{ctxTrabajador}
 ";
 
             var messages = new List<object>
@@ -199,7 +200,7 @@ REGLAS DE ORO:
                     model = "deepseek-chat", // standard DeepSeek model
                     messages = messages,
                     tools = tools,
-                    temperature = 0.2
+                    temperature = 0.0
                 };
 
                 var requestContent = new StringContent(JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }), Encoding.UTF8, "application/json");
