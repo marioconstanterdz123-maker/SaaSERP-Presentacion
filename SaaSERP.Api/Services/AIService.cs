@@ -113,6 +113,15 @@ namespace SaaSERP.Api.Services
                 }
             }
 
+            if (textoOriginal.Trim().ToUpper() == "RESET")
+            {
+                await _chatMemoryService.LimpiarHistorialAsync(numeroCliente);
+                try {
+                    await _evolutionService.EnviarMensajeTextoAsync(instancia, numeroCliente, "✅ Historial borrado. Tu sesión de Chat de IA está limpia, envíame tu pedido.");
+                } catch {}
+                return;
+            }
+
             // ── 4. Guardar mensaje del usuario ────────────────────────────────────
             await _chatMemoryService.GuardarMensajeAsync(numeroCliente, "user", textoOriginal);
 
