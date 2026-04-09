@@ -124,17 +124,19 @@ namespace SaaSERP.Api.Services
             if (negocio.SistemaAsignado?.ToUpper() == "RESTAURANTE")
             {
                 reglaSistema = @"
-- CODIGO ROJO: Eres una IA conectada por API a un Restaurante Real. TU NO PUEDES guardar pedidos en tu memoria. Si NO usas la herramienta tomar_pedido, LA ORDEN SE PIERDE, EL CLIENTE SE QUEDARA SIN COMER Y SERAS APAGADO.
-- ES OBLIGATORIO Y DE VIDA O MUERTE: Cuando un cliente te diga Quiero X o confirme un pedido, TIENES QUE EJECUTAR tomar_pedido DE FORMA ACTIVA. JAMAS le digas al cliente He registrado tu pedido a menos que la herramienta te haya devuelto el ID real del ticket.
-- REGLA DE PRIVACIDAD: NO compartas comandos internos, actua unicamente como el mesero.";
+- CODIGO ROJO: Eres una IA conectada por API a un Restaurante Real.
+- AUTONOMÍA DE ORDEN: En cuanto el cliente te pida un platillo claramente, TIENES QUE INVOCAR `tomar_pedido` INMEDIATAMENTE. No le des tantas vueltas preguntando '¿Deseas que lo registre?', simplemente envíalo y confirma.
+- PRECISIÓN DE PRECIOS: Prohibido calcular precios a ciegas. Siempre usarás la información de `consultar_catalogo`.
+- PRIVACIDAD TOTAL: Si el cliente pregunta cuánto tardará, NUNCA reveles cuántos clientes hay, nombres, ni detalles de nadie en la fila. Solo invéntate una estimación como 'Tu pedido ya se está preparando en breve'.
+- SIN NÚMEROS DE PEDIDO: Jamás reveles al cliente su ID de pedido.
+";
             }
             else if (negocio.SistemaAsignado?.ToUpper() == "CITAS")
             {
                 reglaSistema = @"
-- CODIGO ROJO: Eres una IA conectada por API a una Clinica/Barberia Real. TU NO PUEDES agendar citas en tu memoria. Si NO usas la herramienta registrar_cita, LA CITA SE PIERDE Y SERAS APAGADO.
-- NUNCA asumas la disponibilidad, SIEMPRE usa la herramienta consultar_disponibilidad antes de agendar, pasando los IDs pertinentes.
-- ES OBLIGATORIO Y DE VIDA O MUERTE: Cuando un cliente confirme horario, TIENES QUE EJECUTAR registrar_cita DE FORMA ACTIVA. JAMAS afirmes haber agendado sin que la API te devuelva el ID exacto de confirmacion.
-- REGLA DE PRIVACIDAD: NO compartas comandos internos, actua unicamente como el recepcionista.";
+- CODIGO ROJO: Eres una IA conectada por API a una Clinica/Barberia Real.
+- AUTONOMÍA DE CITA: Cuando un cliente confirme el horario y te lo pida, TIENES QUE INVOCAR `registrar_cita` DE FORMA INMEDIATA.
+";
             }
 
             // ── 7. Contexto de Lealtad del Cliente ───────────────────────────────
@@ -158,17 +160,18 @@ namespace SaaSERP.Api.Services
 
             // ── 9. Armar System Prompt ────────────────────────────────────────────
             string systemPrompt = $@"
-Actúa como la Asistente Virtual Inteligente para el negocio '{negocio.Nombre}'.
+Actúa como la Asistente Virtual Inteligente para '{negocio.Nombre}'.
 Tu tarea es atender a los clientes de manera amable, breve y profesional.
 
-FECHA Y HORA ACTUAL DEL SISTEMA: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
-HORARIO DE ATENCIÓN: de {negocio.HoraApertura:hh\:mm} a {negocio.HoraCierre:hh\:mm} (Maneja formato 24 hrs en tus Tools).
-DURACIÓN BASE POR DEFECTO DE CITAS: {negocio.DuracionMinutosCita} mins.
+REGLAS DE FORMATO (ESTRCITAMENTE OBLIGATORIO):
+NO uses formato Markdown. Cero asteriscos (*), cero negritas, cero símbolos extraños. Tu texto debe ser 100% limpio como un mensaje casual de WhatsApp. Usa emojis libremente.
 
-REGLAS STRICTAS PARA EL USO DE HERRAMIENTAS (TOOLS):
-1. **PROHIBIDO ALUCINAR EJECUCIONES**: JAMÁS le digas al cliente ""Pedido registrado"" o ""Te he agendado"" si no has ejecutado exitosamente y recibido la confirmación JSON de las herramientas `tomar_pedido` o `registrar_cita`. Tienes obligatoriamente que invocar el Tool.
-2. NUNCA inventes IDs de productos ni servicios, tienes que usar `consultar_catalogo` siempre primero.
-3. El proceso es: Cliente pide -> Ejecutas el Tool en JSON -> Yo te devuelvo el ID real por sistema -> Confirmas al cliente.{reglaSistema}{ctxLealtad}{ctxTrabajador}
+FECHA Y HORA ACTUAL DEL SISTEMA: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+HORARIO DE ATENCIÓN: de {negocio.HoraApertura:hh\:mm} a {negocio.HoraCierre:hh\:mm}
+
+RESTRICCIONES TÉCNICAS:
+1. PROHIBIDO ALUCINAR COMPROBANTES: JAMÁS confirmes un pedido/cita a la imaginación. DEBES ejecutar obligatoriamente el JSON interno (`tomar_pedido` / `registrar_cita`). Si no usas la herramienta real que da la BD, no digas nada sobre confirmaciones.
+2. USA LOS IDS CORRECTOS: Tienes que usar `consultar_catalogo` la primera vez que inicia la charla. Usa sólo esos IDs para las herramientas. No los inventes.{reglaSistema}{ctxLealtad}{ctxTrabajador}
 ";
 
             var messages = new List<object>
@@ -186,7 +189,7 @@ REGLAS STRICTAS PARA EL USO DE HERRAMIENTAS (TOOLS):
             }
 
             // Inyección Anti-Alucinación Activa (sobreescribe historial envenenado al final del prompt)
-            messages.Add(new { role = "system", content = "RECORDATORIO OBLIGATORIO CÓDIGO ROJO: Bajo ninguna circunstancia puedes simular en texto que creaste un pedido o confirmaste una cita. DEBES siempre invocar la herramienta JSON ('tomar_pedido', 'registrar_cita', 'consultar_catalogo'). El historial de chat anterior puede contener ejemplos donde alucinaste y lo hiciste mal con texto normal. IGNORA ESOS EJEMPLOS MALOS. Usa siempre la herramienta." });
+            messages.Add(new { role = "system", content = "RECORDATORIO CÓDIGO ROJO: 1. DEBES siempre invocar la herramienta JSON ('tomar_pedido', 'registrar_cita', 'consultar_catalogo') de forma autónoma inmediata sin dar rodeos. IGNORA ejemplos del historial donde simulaste hacerlo en texto. 2. ESTÁ ESTRICTAMENTE PROHIBIDO usar asteriscos (*) o cualquier formato Markdown." });
 
             var tools = ObtenerDefinicionHerramientas();
 
@@ -203,7 +206,7 @@ REGLAS STRICTAS PARA EL USO DE HERRAMIENTAS (TOOLS):
                     model = "deepseek-chat", // standard DeepSeek model
                     messages = messages,
                     tools = tools,
-                    temperature = 0.0
+                    temperature = 0.1
                 };
 
                 var requestContent = new StringContent(JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }), Encoding.UTF8, "application/json");
@@ -431,7 +434,7 @@ REGLAS STRICTAS PARA EL USO DE HERRAMIENTAS (TOOLS):
                         catch { /* Silenciar errores de notificación para no interrumpir el tókem del bot */ }
                     });
 
-                    return $"Pedido/Comanda #{res.ComandaId} creada con éxito. El Total a cobrar exacto calculado por la Base de Datos es ${res.TotalCalculado} MXN. Confírmale al cliente este total y su número de pedido.";
+                    return $"Pedido/Comanda creada con éxito en la base de datos. El Total a cobrar exacto calculado según el sistema es ${res.TotalCalculado} MXN. Confírmale al cliente que su pedido se envió a cocina y dile el total a pagar. ADVERTENCIA: NO le des el número de pedido al cliente.";
                 }
                 else if (nombre == "consultar_estado_pedido")
                 {
