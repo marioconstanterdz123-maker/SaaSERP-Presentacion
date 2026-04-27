@@ -3,7 +3,7 @@
    Maneja: auth, fetch API, toast, logout, icons
    ============================================= */
 
-const API_BASE = '';   // mismo origen → /Auth/login, /negocios, etc.
+const API_BASE = '/api';   // mismo origen → /api/Auth/login, /api/negocios, etc.
 const TOKEN_KEY = 'saas_token';
 
 // ── Lucide icons SVG inline (subset usado) ──────────────────────────────────

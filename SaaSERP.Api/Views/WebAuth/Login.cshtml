@@ -96,7 +96,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     try {
         const correo   = document.getElementById('inp-email').value;
         const password = document.getElementById('inp-password').value;
-        const res = await fetch('/Auth/login', {
+        const res = await fetch('/api/Auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ correo, password })
