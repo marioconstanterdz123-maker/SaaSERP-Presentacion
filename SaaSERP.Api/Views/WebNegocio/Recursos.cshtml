@@ -1,0 +1,276 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Recursos y Equipo";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<div class="flex flex-col gap-4 pb-6 h-full">
+    <!-- HEADER -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h2 class="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                <span id="icon-users-h" class="text-blue-500"></span>
+                <span id="page-title-h">Especialistas / Equipo</span>
+            </h2>
+            <p id="page-subtitle-h" class="text-slate-500 mt-0.5 text-xs">Configura horarios y WhatsApp por especialista.</p>
+        </div>
+        <button onclick="document.getElementById('modal-crear').classList.remove('hidden')" class="flex-shrink-0 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-2.5 px-4 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center gap-2 text-sm transition-transform active:scale-95">
+            <span id="icon-plus-btn"></span> <span id="btn-text-h">Nuevo</span>
+        </button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="relative">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" id="icon-search-r"></span>
+        <input type="search" placeholder="Buscar..." oninput="filtrar(this.value)" class="w-full bg-white border border-slate-200 text-sm font-medium pl-10 pr-4 py-2.5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm" />
+    </div>
+
+    <div class="loading-center" id="loading"><div class="spinner border-blue-500 border-t-transparent"></div></div>
+
+    <!-- CONTENT -->
+    <div id="empty-state" class="hidden bg-white/70 rounded-3xl shadow-xl border border-white/20 p-12 text-center text-slate-400">
+        <span id="icon-users-empty" class="mx-auto mb-3 opacity-30 text-4xl block"></span>
+        <p class="font-medium text-sm">Sin resultados.</p>
+    </div>
+    
+    <div id="grid-recursos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 hidden"></div>
+</div>
+
+<!-- MODAL CREAR -->
+<div id="modal-crear" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 p-5 flex justify-between items-center text-white">
+            <h3 class="text-lg font-bold" id="m-title">Agregar Especialista</h3>
+            <button onclick="document.getElementById('modal-crear').classList.add('hidden')" class="hover:bg-white/20 p-2 rounded-full transition-colors"><span id="icon-x-modal"></span></button>
+        </div>
+        <form id="form-crear" class="p-5 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5" id="l-nombre">Nombre</label>
+                <input id="m-nombre" required type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700" />
+            </div>
+            <div id="fields-colaborador">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Rol / Especialidad</label>
+                    <input id="m-tipo" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700" placeholder="Ej. BARBERO, ASESOR" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Teléfono (opcional)</label>
+                    <input id="m-tel" type="tel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700" />
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95">Registrar</button>
+        </form>
+    </div>
+</div>
+
+<!-- QR MODAL -->
+<div id="modal-qr" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" onclick="cerrarQR()">
+    <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-xs text-center space-y-4" onclick="event.stopPropagation()">
+        <h2 class="font-bold text-slate-800">Escanea el QR</h2>
+        <p class="text-xs text-slate-500">WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+        <img id="qr-img" src="" class="mx-auto rounded-xl w-48 h-48 object-contain" />
+        <p id="qr-wait" class="text-xs text-amber-600 hidden">Generando QR... espera 5s.</p>
+        <button onclick="cerrarQR()" class="w-full border border-slate-200 rounded-xl py-2 text-sm text-slate-600">Cerrar</button>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+let isMesas = false;
+let tieneWA = false;
+let recursos = [];
+let trabajadores = [];
+let expandedId = null;
+let searchQuery = '';
+const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    
+    document.getElementById('icon-users-h').innerHTML = ICONS.users;
+    document.getElementById('icon-plus-btn').innerHTML = ICONS.plus;
+    document.getElementById('icon-search-r').innerHTML = ICONS.search;
+    document.getElementById('icon-users-empty').innerHTML = ICONS.users;
+    document.getElementById('icon-x-modal').innerHTML = ICONS.xCircle;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+    document.getElementById('icon-back').innerHTML = ICONS.arrowLeft;
+
+    try {
+        const negociosRes = await apiFetch('/negocios');
+        const negocio = negociosRes.find(n => n.id == NEGOCIO_ID);
+        renderNegocioNav(user, negocio);
+        
+        if (negocio.sistemaAsignado === 'TAQUERIA' || negocio.sistemaAsignado === 'RESTAURANTES') {
+            isMesas = true;
+            document.getElementById('page-title-h').textContent = 'Disposición de Mesas';
+            document.getElementById('page-subtitle-h').textContent = 'Administra las mesas del local.';
+            document.getElementById('btn-text-h').textContent = 'Nueva Mesa';
+            document.getElementById('m-title').textContent = '🪑 Agregar Mesa';
+            document.getElementById('l-nombre').textContent = 'Número o Nombre';
+            document.getElementById('fields-colaborador').classList.add('hidden');
+        } else {
+            document.getElementById('m-tipo').value = 'COLABORADOR';
+            tieneWA = negocio.moduloWhatsAppIA === true;
+        }
+
+        await fetchAll();
+    } catch(err) { showToast('Error', 'error'); }
+    finally { document.getElementById('loading').style.display='none'; }
+
+    document.getElementById('form-crear').addEventListener('submit', handleCreate);
+})();
+
+async function fetchAll() {
+    try {
+        const [rRes, tRes] = await Promise.all([
+            apiFetch(`/recursos/negocio/${NEGOCIO_ID}`),
+            apiFetch(`/Trabajadores/negocio/${NEGOCIO_ID}`).catch(()=>[])
+        ]);
+        recursos = rRes || [];
+        trabajadores = tRes || [];
+        renderGrid();
+    } catch(e) {}
+}
+
+window.filtrar = (q) => { searchQuery = q; renderGrid(); }
+
+function renderGrid() {
+    const grid = document.getElementById('grid-recursos');
+    const empty = document.getElementById('empty-state');
+    const filtrados = recursos.filter(r => r.nombre.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    if (!filtrados.length) { grid.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden'); grid.classList.remove('hidden');
+
+    grid.innerHTML = filtrados.map(r => {
+        const tr = isMesas ? null : trabajadores.find(t => t.nombre.toLowerCase() === r.nombre.toLowerCase());
+        const isExp = expandedId === r.id;
+        
+        let expandedHtml = '';
+        if (!isMesas && isExp) {
+            if (tr) {
+                const horHtml = tr.horarios.map(h => `
+                <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-2 py-1.5 text-[11px]">
+                    <span class="font-bold text-slate-500 w-8">${DIAS[h.diaSemana]}</span>
+                    <input type="time" value="${h.horaInicio.substring(0,5)}" onchange="updateHor(${tr.id},${h.id},'horaInicio',this.value)" class="flex-1 bg-white border rounded px-1.5 py-1"/>
+                    <span class="text-slate-400 font-medium">–</span>
+                    <input type="time" value="${h.horaFin.substring(0,5)}" onchange="updateHor(${tr.id},${h.id},'horaFin',this.value)" class="flex-1 bg-white border rounded px-1.5 py-1"/>
+                    <button onclick="delHor(${tr.id},${h.id})" class="text-red-400 hover:text-red-600 ml-1">${ICONS.trash2||'X'}</button>
+                </div>`).join('');
+                
+                const addBtns = DIAS.map((d,i) => {
+                    const tiene = tr.horarios.some(h=>h.diaSemana===i);
+                    return `<button onclick="${tiene?'':`addHor(${tr.id},${i})`}" class="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${tiene?'bg-blue-500 text-white':'bg-slate-100 text-slate-400'}">${d}</button>`;
+                }).join('');
+
+                let waHtml = '';
+                if (tieneWA) {
+                    if (!tr.instanciaWhatsApp) {
+                        waHtml = `<button onclick="conectarWA(${tr.id})" class="w-full flex items-center justify-center gap-1.5 text-xs bg-green-600 text-white px-3 py-2 rounded-xl hover:bg-green-700">Conectar WhatsApp</button>`;
+                    } else {
+                        waHtml = `<button onclick="verQR(${tr.id})" class="w-full flex items-center justify-center gap-1.5 text-xs bg-violet-100 text-violet-700 px-3 py-2 rounded-xl">Ver / Reconectar QR</button>`;
+                    }
+                }
+
+                expandedHtml = `
+                <div class="border-t border-slate-50 px-4 pb-4 pt-3 space-y-4">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Horario semanal</p>
+                        <div class="flex flex-wrap gap-1 mb-2">${addBtns}</div>
+                        <div class="space-y-1.5 mt-3">${horHtml}</div>
+                    </div>
+                    ${tieneWA ? `<div><p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">📱 WhatsApp IA</p>${waHtml}</div>` : ''}
+                </div>`;
+            } else {
+                expandedHtml = `
+                <div class="border-t border-slate-50 px-4 pb-4 pt-3 space-y-2">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Perfil del especialista</p>
+                    <button onclick="initPerfil(${r.id}, '${r.nombre}')" class="w-full bg-blue-600 text-white px-3 py-2 rounded-xl hover:bg-blue-700 text-xs font-medium">Inicializar perfil</button>
+                </div>`;
+            }
+        }
+
+        return `
+        <div class="bg-white rounded-2xl border shadow-sm flex flex-col transition-all ${r.activo?'border-slate-100':'border-slate-100 opacity-60'}">
+            <div class="p-4 flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-black text-slate-800 text-base leading-tight truncate">${r.nombre}</p>
+                        <span class="bg-blue-50 text-blue-600 text-[10px] font-black px-2 py-0.5 rounded-lg uppercase mt-1 inline-block tracking-wider">${r.tipo}</span>
+                    </div>
+                    ${!isMesas ? `<button onclick="toggleExp(${r.id})" class="p-1.5 rounded-xl text-slate-300 hover:text-blue-500 hover:bg-blue-50">${isExp ? (ICONS.chevronUp||'^') : (ICONS.chevronDown||'v')}</button>` : ''}
+                </div>
+                <button onclick="toggleActivo(${r.id}, ${!r.activo})" class="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${r.activo?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-slate-50 text-slate-400 border-slate-200'}">
+                    ${r.activo ? '✅ Disponible' : '❌ Sin servicio'}
+                </button>
+            </div>
+            ${expandedHtml}
+        </div>`;
+    }).join('');
+}
+
+window.toggleExp = (id) => { expandedId = expandedId === id ? null : id; renderGrid(); }
+
+async function handleCreate(e) {
+    e.preventDefault();
+    try {
+        const bodyRec = { negocioId: NEGOCIO_ID, nombre: document.getElementById('m-nombre').value, tipo: isMesas?'MESA':document.getElementById('m-tipo').value.toUpperCase(), activo: true };
+        await apiFetch('/recursos', { method:'POST', body:JSON.stringify(bodyRec) });
+        if (!isMesas) {
+            await apiFetch('/Trabajadores', { method:'POST', body:JSON.stringify({ negocioId:NEGOCIO_ID, nombre:bodyRec.nombre, telefono:document.getElementById('m-tel').value||null }) }).catch(()=>{});
+        }
+        document.getElementById('modal-crear').classList.add('hidden');
+        document.getElementById('form-crear').reset();
+        await fetchAll(); showToast('Registrado', 'success');
+    } catch(err) { showToast('Error', 'error'); }
+}
+
+window.toggleActivo = async (id, val) => {
+    try {
+        const r = recursos.find(x => x.id === id);
+        await apiFetch(`/recursos/${id}`, { method:'PUT', body:JSON.stringify({...r, activo:val}) });
+        await fetchAll();
+    } catch(err) {}
+}
+
+window.initPerfil = async (recId, nom) => {
+    try {
+        await apiFetch('/Trabajadores', { method:'POST', body:JSON.stringify({ negocioId:NEGOCIO_ID, nombre:nom, telefono:null }) });
+        await fetchAll();
+    } catch(e){}
+}
+
+window.addHor = async (tId, dia) => {
+    try { await apiFetch(`/Trabajadores/${tId}/horarios`, { method:'POST', body:JSON.stringify({ diaSemana:dia, horaInicio:'09:00:00', horaFin:'18:00:00' }) }); await fetchAll(); } catch(e){}
+}
+window.delHor = async (tId, hId) => {
+    try { await apiFetch(`/Trabajadores/${tId}/horarios/${hId}`, { method:'DELETE' }); await fetchAll(); } catch(e){}
+}
+window.updateHor = async (tId, hId, field, val) => {
+    const tr = trabajadores.find(t=>t.id===tId);
+    const hor = tr.horarios.find(h=>h.id===hId);
+    hor[field] = val + ':00';
+    try { await apiFetch(`/Trabajadores/${tId}`, { method:'PUT', body:JSON.stringify({ nombre:tr.nombre, telefono:tr.telefono, horarios:tr.horarios }) }); await fetchAll(); } catch(e){}
+}
+
+window.conectarWA = async (tId) => {
+    try { await apiFetch(`/WhatsApp/trabajador/${tId}/crear`, { method:'POST' }); await fetchAll(); verQR(tId); } catch(e){}
+}
+window.verQR = async (tId) => {
+    document.getElementById('modal-qr').classList.remove('hidden');
+    document.getElementById('qr-img').src = '';
+    document.getElementById('qr-img').classList.add('hidden');
+    document.getElementById('qr-wait').classList.remove('hidden');
+    try {
+        const r = await apiFetch(`/WhatsApp/trabajador/${tId}/qr`);
+        const b64 = r.base64 || (r.qrcode && r.qrcode.base64);
+        if(b64) { document.getElementById('qr-img').src=b64; document.getElementById('qr-img').classList.remove('hidden'); document.getElementById('qr-wait').classList.add('hidden'); }
+    } catch(e) {}
+}
+window.cerrarQR = () => document.getElementById('modal-qr').classList.add('hidden');
+</script>
+}

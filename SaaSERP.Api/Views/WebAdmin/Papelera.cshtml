@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Papelera";
+}
+@await Html.PartialAsync("_AdminShellTop")
+<div class="page-header"><h2 class="page-title"><span id="icon-trash-h" style="color:#ef4444;display:inline-flex;margin-right:.5rem;"></span>Papelera</h2>
+<p class="page-subtitle">Negocios desactivados o eliminados del sistema.</p></div>
+<div class="loading-center" id="loading"><div class="spinner"></div></div>
+<div class="table-wrapper hidden" id="table-wrap">
+    <table><thead><tr><th>Negocio</th><th>Sistema</th><th>Motivo</th><th>Acciones</th></tr></thead>
+    <tbody id="table-body"></tbody></table>
+</div>
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;"><div style="font-size:3rem;">🗑️</div><p class="font-bold" style="color:var(--slate-600);">La papelera está vacía.</p></div>
+@await Html.PartialAsync("_AdminShellBottom")
+@section Scripts {
+<script>
+const ADMIN_MENU = [
+    { path: '/web/WebAdmin/Negocios',      name: 'Tus Negocios',  short: 'Negocios',  icon: 'store'    },
+    { path: '/web/WebAdmin/Usuarios',      name: 'Usuarios',      short: 'Usuarios',  icon: 'users'    },
+    { path: '/web/WebAdmin/Configuracion', name: 'Configuración', short: 'Config',    icon: 'settings' },
+    { path: '/web/WebAdmin/Papelera',      name: 'Papelera',      short: 'Papelera',  icon: 'trash2'   },
+];
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    document.getElementById('icon-trash-h').innerHTML = ICONS.trash2;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+    const cur = window.location.pathname;
+    const navHtml = ADMIN_MENU.map(m=>`<a href="${m.path}" class="nav-link ${cur===m.path?'active-admin':''}">${ICONS[m.icon]||''} ${m.name}</a>`).join('');
+    ['sidebar-nav','drawer-nav'].forEach(id=>{const el=document.getElementById(id);if(el) el.innerHTML=navHtml;});
+    ['sidebar-user','drawer-user'].forEach(id=>{const el=document.getElementById(id);if(el) el.innerHTML=renderUserInfo(user,'admin');});
+    const bn=document.getElementById('bottom-nav');if(bn) bn.innerHTML=ADMIN_MENU.slice(0,4).map(m=>`<a href="${m.path}" class="nav-tab ${cur===m.path?'active':''}">${ICONS[m.icon]||''}<span>${m.short}</span></a>`).join('');
+    try {
+        const negocios = await apiFetch('/negocios');
+        const inactivos = (negocios || []).filter(n => n.activo === false);
+        document.getElementById('loading').style.display='none';
+        if (!inactivos.length) { document.getElementById('empty').classList.remove('hidden'); document.getElementById('empty').style.display='block'; return; }
+        document.getElementById('table-wrap').classList.remove('hidden'); document.getElementById('table-wrap').style.display='block';
+        document.getElementById('table-body').innerHTML = inactivos.map(n=>`
+          <tr><td class="font-bold">${n.nombre}</td>
+          <td><span class="badge badge-slate">${n.sistemaAsignado}</span></td>
+          <td style="color:var(--slate-500);">Desactivado manualmente</td>
+          <td><button class="btn btn-primary" style="font-size:.75rem;padding:.375rem .875rem;" onclick="restaurar(${n.id})">Restaurar</button></td></tr>`).join('');
+    } catch(err) { showToast('Error: '+err.message,'error'); document.getElementById('loading').style.display='none'; }
+})();
+async function restaurar(id) {
+    try {
+        const n = await apiFetch('/negocios').then(list => list.find(x => x.id === id));
+        await apiFetch(`/negocios/${id}`, { method:'PUT', body:JSON.stringify({...n, activo:true}) });
+        showToast('Negocio restaurado','success'); window.location.reload();
+    } catch(err) { showToast('Error: '+err.message,'error'); }
+}
+</script>}

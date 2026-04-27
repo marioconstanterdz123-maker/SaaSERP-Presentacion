@@ -1,0 +1,190 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Catálogo";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<!-- Header -->
+<div class="page-header flex justify-between items-center" style="flex-wrap:wrap;gap:.75rem;">
+    <div>
+        <h2 class="page-title" id="page-title-h">Catálogo</h2>
+        <p class="page-subtitle" id="page-subtitle-h">Administra los productos o servicios del negocio.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;">
+        <button id="btn-add" class="btn btn-orange" onclick="openModal()"><span id="icon-plus-btn"></span> Nuevo Artículo</button>
+        <div style="position:relative;">
+            <span class="search-icon" id="icon-search"></span>
+            <input id="inp-search" class="input" style="padding-left:2.5rem;width:16rem;" placeholder="Buscar elementos..."
+                   oninput="filterCatalog(this.value)" />
+        </div>
+    </div>
+</div>
+
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+<div class="catalog-grid hidden" id="catalog-grid"></div>
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;">
+    <div style="font-size:3rem;margin-bottom:1rem;">📦</div>
+    <p class="font-bold" style="color:var(--slate-600);">Aún no hay artículos en el catálogo.</p>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-backdrop hidden">
+    <div class="modal">
+        <div class="modal-header modal-header-negocio" id="modal-header">
+            <span class="modal-title" id="modal-title">Agregar Artículo</span>
+            <button class="btn-icon" onclick="closeModal()" id="icon-x-modal"></button>
+        </div>
+        <div class="modal-body">
+            <div>
+                <label class="label">Nombre (Concepto)</label>
+                <input id="m-nombre" class="input" placeholder="Ej. Producto o Consulta General" />
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label class="label">Precio ($)</label>
+                    <input id="m-precio" class="input" type="number" min="0" step="0.5" value="0" />
+                </div>
+                <div id="m-duracion-wrap" class="hidden">
+                    <label class="label">Duración (Mins)</label>
+                    <input id="m-duracion" class="input" type="number" min="0" value="0" />
+                </div>
+            </div>
+            <div id="m-fraccion-wrap" class="hidden" style="display:flex;align-items:center;gap:.75rem;background:var(--slate-50);border:1px solid var(--slate-200);border-radius:var(--radius-xl);padding:1rem;cursor:pointer;" onclick="toggleFraccion()">
+                <input type="checkbox" id="m-fraccion" style="width:1.25rem;height:1.25rem;accent-color:var(--blue-600);" />
+                <div>
+                    <p class="font-bold text-sm" style="color:var(--slate-700);">Cobrar por Fracción</p>
+                    <p class="text-xs" style="color:var(--slate-500);">El sistema dividirá el precio según los minutos.</p>
+                </div>
+            </div>
+            <button class="btn btn-orange btn-full" onclick="crearArticulo()">
+                <span id="icon-plus-modal"></span> Guardar en Catálogo
+            </button>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+let allServicios = [];
+let negocioData  = null;
+
+(async function init() {
+    const user = requireAuth();
+    if (!user) return;
+
+    document.getElementById('icon-plus-btn').innerHTML  = ICONS.plus;
+    document.getElementById('icon-plus-modal').innerHTML = ICONS.plus;
+    document.getElementById('icon-x-modal').innerHTML   = ICONS.x;
+    document.getElementById('icon-search').innerHTML    = ICONS.search;
+    document.getElementById('icon-menu-btn').innerHTML  = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML  = ICONS.x;
+    document.getElementById('icon-back').innerHTML      = ICONS.arrowLeft;
+
+    try {
+        const [negociosRes, serviciosRes] = await Promise.all([
+            apiFetch('/negocios').catch(() => []),
+            apiFetch(`/servicios/negocio/${NEGOCIO_ID}`).catch(() => [])
+        ]);
+        negocioData = negociosRes.find(n => n.id == NEGOCIO_ID);
+        allServicios = serviciosRes || [];
+        renderNegocioNav(user, negocioData);
+        adaptUI();
+        renderCatalog(allServicios);
+    } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+})();
+
+function adaptUI() {
+    const s = negocioData?.sistemaAsignado;
+    const isParqueadero = s === 'PARQUEADERO';
+    const isCitas       = s === 'CITAS' || s === 'TATTOO';
+    const isRest        = s === 'TAQUERIA' || s === 'RESTAURANTES';
+
+    document.getElementById('page-title-h').textContent    = isParqueadero ? 'Tarifas' : isRest ? 'Catálogo' : 'Servicios';
+    document.getElementById('page-subtitle-h').textContent = isParqueadero ? 'Configura cobros por hora, fracción o pensión.' : 'Administra los productos o servicios del negocio.';
+    document.getElementById('btn-add').innerHTML = ICONS.plus + ' ' + (isParqueadero ? 'Nueva Tarifa' : isRest ? 'Nuevo Artículo' : 'Nuevo Servicio');
+    document.getElementById('modal-title').textContent     = isParqueadero ? 'Agregar Tarifa' : isRest ? 'Agregar Artículo' : 'Agregar Servicio';
+
+    if (isCitas)       { document.getElementById('m-duracion-wrap').classList.remove('hidden'); }
+    if (isParqueadero) { document.getElementById('m-fraccion-wrap').classList.remove('hidden'); document.getElementById('m-fraccion-wrap').style.display = 'flex'; }
+}
+
+function renderCatalog(list) {
+    const grid = document.getElementById('catalog-grid');
+    const empty = document.getElementById('empty');
+    if (!list.length) { empty.classList.remove('hidden'); empty.style.display = 'block'; return; }
+    empty.classList.add('hidden');
+    grid.classList.remove('hidden');
+    grid.style.display = 'grid';
+    grid.innerHTML = list.map(s => `
+      <div class="catalog-item ${s.activo ? '' : 'inactive'}">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:.25rem;">
+          <p class="catalog-name">${s.nombre}</p>
+          <button onclick="eliminarServicio(${s.id})" style="padding:.25rem;border-radius:.75rem;color:var(--slate-200);border:none;cursor:pointer;background:none;flex-shrink:0;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--slate-200)'">${ICONS.trash2}</button>
+        </div>
+        <div class="catalog-price">${formatMXN(s.precio)}</div>
+        ${s.duracionEstimadaMinutos > 0 ? `<span style="font-size:.6875rem;font-weight:700;color:var(--slate-400);background:var(--slate-50);padding:.125rem .5rem;border-radius:.5rem;width:fit-content;">⏱ ${s.duracionEstimadaMinutos} min</span>` : ''}
+        <button class="catalog-toggle ${s.activo ? 'on' : 'off'}" onclick="toggleEstado(${s.id}, ${!s.activo}, this)">
+          ${s.activo ? ICONS.check + ' En Menú' : ICONS.xCircle + ' Oculto'}
+        </button>
+      </div>`).join('');
+}
+
+function filterCatalog(q) {
+    renderCatalog(allServicios.filter(s => s.nombre.toLowerCase().includes(q.toLowerCase())));
+}
+
+async function toggleEstado(id, nuevoEstado, btn) {
+    const s = allServicios.find(x => x.id === id);
+    if (!s) return;
+    try {
+        await apiFetch(`/servicios/${id}`, { method: 'PUT', body: JSON.stringify({ ...s, activo: nuevoEstado }) });
+        s.activo = nuevoEstado;
+        btn.className = `catalog-toggle ${nuevoEstado ? 'on' : 'off'}`;
+        btn.innerHTML = nuevoEstado ? ICONS.check + ' En Menú' : ICONS.xCircle + ' Oculto';
+        btn.closest('.catalog-item').className = `catalog-item ${nuevoEstado ? '' : 'inactive'}`;
+    } catch(err) { showToast('Error al cambiar estado', 'error'); }
+}
+
+async function eliminarServicio(id) {
+    if (!confirm('¿Eliminar este artículo?')) return;
+    try {
+        await apiFetch(`/servicios/${id}`, { method: 'DELETE' });
+        allServicios = allServicios.filter(s => s.id !== id);
+        renderCatalog(allServicios);
+        showToast('Eliminado', 'success');
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+
+function toggleFraccion() { const cb = document.getElementById('m-fraccion'); cb.checked = !cb.checked; }
+function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+async function crearArticulo() {
+    const nombre = document.getElementById('m-nombre').value.trim();
+    if (!nombre) { showToast('El nombre es obligatorio', 'error'); return; }
+    const payload = {
+        negocioId: NEGOCIO_ID, nombre,
+        precio: parseFloat(document.getElementById('m-precio').value) || 0,
+        duracionEstimadaMinutos: parseInt(document.getElementById('m-duracion').value) || 0,
+        esPorFraccion: document.getElementById('m-fraccion').checked,
+        activo: true
+    };
+    try {
+        const created = await apiFetch('/servicios', { method: 'POST', body: JSON.stringify(payload) });
+        allServicios.push(created);
+        renderCatalog(allServicios);
+        closeModal();
+        showToast('Artículo creado', 'success');
+        document.getElementById('m-nombre').value  = '';
+        document.getElementById('m-precio').value  = '0';
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+</script>
+}

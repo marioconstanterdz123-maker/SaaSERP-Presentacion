@@ -1,0 +1,131 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Trabajadores";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<div class="page-header flex justify-between items-center">
+    <div>
+        <h2 class="page-title">Trabajadores</h2>
+        <p class="page-subtitle">Gestiona el equipo de trabajo del negocio.</p>
+    </div>
+    <button class="btn btn-orange" onclick="openModal()"><span id="icon-plus-btn"></span> Agregar Trabajador</button>
+</div>
+
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+
+<div class="table-wrapper hidden" id="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Rol / Especialidad</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+</div>
+
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;">
+    <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+    <p class="font-bold" style="color:var(--slate-600);">Aún no hay trabajadores registrados.</p>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-backdrop hidden">
+    <div class="modal">
+        <div class="modal-header modal-header-negocio">
+            <span class="modal-title">Nuevo Trabajador</span>
+            <button class="btn-icon" onclick="closeModal()" id="icon-x-modal"></button>
+        </div>
+        <div class="modal-body">
+            <div><label class="label">Nombre Completo</label><input id="m-nombre" class="input" placeholder="Ej. Juan Pérez" /></div>
+            <div><label class="label">Teléfono</label><input id="m-telefono" class="input" placeholder="+521234567890" /></div>
+            <div><label class="label">Especialidad / Rol</label><input id="m-especialidad" class="input" placeholder="Ej. Cocinero, Barbero..." /></div>
+            <button class="btn btn-orange btn-full" onclick="crearTrabajador()"><span id="icon-plus-modal"></span> Guardar</button>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+let allTrabajadores = [];
+
+(async function init() {
+    const user = requireAuth();
+    if (!user) return;
+    document.getElementById('icon-plus-btn').innerHTML   = ICONS.plus;
+    document.getElementById('icon-plus-modal').innerHTML = ICONS.plus;
+    document.getElementById('icon-x-modal').innerHTML   = ICONS.x;
+    document.getElementById('icon-menu-btn').innerHTML   = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML  = ICONS.x;
+    document.getElementById('icon-back').innerHTML      = ICONS.arrowLeft;
+
+    try {
+        const [negociosRes, trabRes] = await Promise.all([
+            apiFetch('/negocios').catch(() => []),
+            apiFetch(`/Trabajadores/negocio/${NEGOCIO_ID}`).catch(() => [])
+        ]);
+        const negocio = negociosRes.find(n => n.id == NEGOCIO_ID);
+        renderNegocioNav(user, negocio);
+        allTrabajadores = trabRes || [];
+        renderTable(allTrabajadores);
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    finally { document.getElementById('loading').style.display = 'none'; }
+})();
+
+function renderTable(list) {
+    const wrap = document.getElementById('table-wrap');
+    const empty = document.getElementById('empty');
+    if (!list.length) { empty.classList.remove('hidden'); empty.style.display='block'; return; }
+    wrap.classList.remove('hidden'); wrap.style.display='block';
+    document.getElementById('table-body').innerHTML = list.map(t => `
+      <tr>
+        <td class="font-bold">${t.nombre}</td>
+        <td style="color:var(--slate-500);">${t.telefono || '—'}</td>
+        <td><span class="badge badge-orange">${t.especialidad || t.rol || '—'}</span></td>
+        <td><span class="badge ${t.activo !== false ? 'badge-green' : 'badge-red'}">${t.activo !== false ? 'Activo' : 'Inactivo'}</span></td>
+        <td>
+          <button onclick="eliminar(${t.id})" class="btn btn-danger" style="padding:.25rem .75rem;font-size:.75rem;">${ICONS.trash2} Eliminar</button>
+        </td>
+      </tr>`).join('');
+}
+
+async function eliminar(id) {
+    if (!confirm('¿Eliminar este trabajador?')) return;
+    try {
+        await apiFetch(`/Trabajadores/${id}`, { method: 'DELETE' });
+        allTrabajadores = allTrabajadores.filter(t => t.id !== id);
+        renderTable(allTrabajadores);
+        showToast('Trabajador eliminado', 'success');
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+
+function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+async function crearTrabajador() {
+    const nombre = document.getElementById('m-nombre').value.trim();
+    if (!nombre) { showToast('El nombre es obligatorio', 'error'); return; }
+    try {
+        const created = await apiFetch('/Trabajadores', { method: 'POST', body: JSON.stringify({
+            negocioId: NEGOCIO_ID,
+            nombre,
+            telefono: document.getElementById('m-telefono').value,
+            especialidad: document.getElementById('m-especialidad').value,
+            activo: true
+        })});
+        allTrabajadores.push(created);
+        renderTable(allTrabajadores);
+        closeModal();
+        showToast('Trabajador registrado', 'success');
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+</script>
+}

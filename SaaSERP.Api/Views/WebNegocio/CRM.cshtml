@@ -1,0 +1,50 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "CRM Clientes";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+<div class="page-header flex justify-between items-center">
+    <div><h2 class="page-title"><span id="icon-crm-h" style="color:var(--orange-500);display:inline-flex;margin-right:.5rem;"></span>CRM Clientes</h2>
+    <p class="page-subtitle">Base de datos y perfil de clientes.</p></div>
+    <div style="position:relative;"><span class="search-icon" id="icon-search-c"></span>
+    <input id="inp-search" class="input" style="padding-left:2.5rem;width:16rem;" placeholder="Buscar cliente..." oninput="filter(this.value)" /></div>
+</div>
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+<div class="table-wrapper hidden" id="table-wrap">
+    <table><thead><tr><th>Cliente</th><th>Teléfono</th><th>Visitas</th><th>Última Visita</th><th>Gasto Total</th></tr></thead>
+    <tbody id="table-body"></tbody></table>
+</div>
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;"><div style="font-size:3rem;">👤</div><p class="font-bold" style="color:var(--slate-600);">Sin clientes en el CRM.</p></div>
+@await Html.PartialAsync("_NegocioShellBottom")
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId; let allClientes = [];
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    document.getElementById('icon-crm-h').innerHTML    = ICONS.bookUser;
+    document.getElementById('icon-search-c').innerHTML = ICONS.search;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+    document.getElementById('icon-back').innerHTML     = ICONS.arrowLeft;
+    try {
+        const [negociosRes, crmRes] = await Promise.all([apiFetch('/negocios').catch(()=>[]), apiFetch(`/ClientesCRM/negocio/${NEGOCIO_ID}`).catch(()=>[])]);
+        renderNegocioNav(user, negociosRes.find(n => n.id == NEGOCIO_ID));
+        allClientes = crmRes || []; renderTable(allClientes);
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    finally { document.getElementById('loading').style.display = 'none'; }
+})();
+function renderTable(list) {
+    const wrap = document.getElementById('table-wrap'); const empty = document.getElementById('empty');
+    if (!list.length) { empty.classList.remove('hidden'); empty.style.display='block'; return; }
+    wrap.classList.remove('hidden'); wrap.style.display='block';
+    document.getElementById('table-body').innerHTML = list.map(c => `
+      <tr>
+        <td><div class="font-bold" style="color:var(--slate-800);">${c.nombre}</div></td>
+        <td style="color:var(--slate-500);">${c.telefono || '—'}</td>
+        <td><span class="badge badge-blue">${c.totalVisitas || 0} visitas</span></td>
+        <td style="font-size:.75rem;color:var(--slate-500);">${c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString('es-MX') : '—'}</td>
+        <td class="font-bold" style="color:var(--emerald-600);">${formatMXN(c.gastoTotal || 0)}</td>
+      </tr>`).join('');
+}
+function filter(q) { renderTable(allClientes.filter(c => (c.nombre||'').toLowerCase().includes(q.toLowerCase()) || (c.telefono||'').includes(q))); }
+</script>}

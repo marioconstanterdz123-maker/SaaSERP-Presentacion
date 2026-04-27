@@ -1,0 +1,96 @@
+        </div>
+    </main>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="mobile-bottom-nav">
+        <div class="nav-tabs" id="bottom-nav"></div>
+    </nav>
+</div>
+
+@* Script compartido para renderizar el menú del negocio *@
+<script>
+// Construye el menú lateral según el sistema del negocio y el rol del usuario
+function buildNegocioMenu(negocio, user) {
+    const base = `/web/negocio/${negocio?.id || NEGOCIO_ID}`;
+    const rol  = user?.rol;
+    const s    = negocio?.sistemaAsignado;
+    const menu = [];
+
+    if (rol === 'SuperAdmin' || rol === 'AdminNegocio')
+        menu.push({ path: `${base}/Dashboard`, name: 'Resumen Local', short: 'Inicio', icon: 'dashboard' });
+
+    if (s === 'TAQUERIA' || s === 'RESTAURANTES') {
+        if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
+            menu.push({ path: `${base}/Catalogos`, name: 'Menú (Platillos)', short: 'Menú', icon: 'coffee' });
+            if (negocio?.usaMesas) menu.push({ path: `${base}/Recursos`, name: 'Control de Mesas', short: 'Mesas', icon: 'users' });
+        }
+        if (rol !== 'Cocinero') menu.push({ path: `${base}/POS`, name: 'Punto de Venta', short: 'POS', icon: 'list' });
+        if (rol !== 'Mesero')   menu.push({ path: `${base}/Operacion`, name: 'Cocina (KDS)', short: 'Cocina', icon: 'coffee' });
+    } else if (s === 'CITAS' || s === 'TATTOO') {
+        if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
+            menu.push({ path: `${base}/Catalogos`, name: s === 'TATTOO' ? 'Servicios / Tatuajes' : 'Servicios', short: 'Servicios', icon: 'scissors' });
+            menu.push({ path: `${base}/Recursos`, name: 'Especialistas', short: 'Especialistas', icon: 'users' });
+        }
+        menu.push({ path: `${base}/Citas`, name: 'Agenda / Citas', short: 'Agenda', icon: 'calendar' });
+    } else if (s === 'PARQUEADERO') {
+        menu.push({ path: `${base}/Operacion`, name: 'Caseta Vehículos', short: 'Caseta', icon: 'car' });
+    } else {
+        if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
+            menu.push({ path: `${base}/Catalogos`, name: 'Servicios', short: 'Servicios', icon: 'briefcase' });
+            menu.push({ path: `${base}/Recursos`, name: 'Recursos Físicos', short: 'Recursos', icon: 'users' });
+        }
+        menu.push({ path: `${base}/Citas`, name: 'Agenda / Citas', short: 'Agenda', icon: 'calendar' });
+        menu.push({ path: `${base}/Operacion`, name: 'Punto de Venta', short: 'POS', icon: 'list' });
+    }
+
+    menu.push({ path: `${base}/WhatsApp`, name: 'WhatsApp Web', short: 'WhatsApp', icon: 'messageCircle' });
+
+    if (rol === 'SuperAdmin' || rol === 'AdminNegocio') {
+        menu.push({ path: `${base}/Historial`, name: 'Historial', short: 'Historial', icon: 'archive' });
+        if (negocio?.moduloCRM) {
+            menu.push({ path: `${base}/CRM`, name: 'CRM Clientes', short: 'CRM', icon: 'bookUser' });
+            menu.push({ path: `${base}/Lealtad`, name: 'Lealtad', short: 'Lealtad', icon: 'star' });
+        }
+        menu.push({ path: `${base}/Ajustes`, name: 'Ajustes', short: 'Ajustes', icon: 'settings' });
+    } else if (rol === 'Cajero') {
+        menu.push({ path: `${base}/Historial`, name: 'Historial de Caja', short: 'Historial', icon: 'archive' });
+    }
+
+    return menu;
+}
+
+function renderNegocioNav(user, negocio) {
+    const menu = buildNegocioMenu(negocio, user);
+    const cur  = window.location.pathname;
+
+    const navHtml = menu.map(m => `
+      <a href="${m.path}" class="nav-link ${cur.toLowerCase() === m.path.toLowerCase() ? 'active-negocio' : 'negocio-link'}">
+        ${ICONS[m.icon] || ''} <span style="font-size:.875rem;">${m.name}</span>
+      </a>`).join('');
+
+    if (document.getElementById('sidebar-nav'))   document.getElementById('sidebar-nav').innerHTML  = navHtml;
+    if (document.getElementById('drawer-nav'))    document.getElementById('drawer-nav').innerHTML   = navHtml;
+    if (document.getElementById('sidebar-user'))  document.getElementById('sidebar-user').innerHTML = renderUserInfo(user, 'negocio');
+    if (document.getElementById('drawer-user'))   document.getElementById('drawer-user').innerHTML  = renderUserInfo(user, 'negocio');
+
+    // Set negocio name in sidebar + header
+    const nombreEls = ['negocio-nombre-sidebar','negocio-nombre-header','drawer-title'];
+    nombreEls.forEach(id => { const el = document.getElementById(id); if(el && negocio?.nombre) el.textContent = negocio.nombre; });
+    const sEl = document.getElementById('negocio-sistema-sidebar');
+    if (sEl) sEl.textContent = `Workspace · ${negocio?.sistemaAsignado || ''}`;
+    const dSys = document.getElementById('drawer-sistema');
+    if (dSys) dSys.textContent = negocio?.sistemaAsignado || '';
+
+    // bottom nav (max 5)
+    const bottomItems = menu.slice(0, 5);
+    const hasMore = menu.length > 5;
+    const bottomHtml = bottomItems.map(m => `
+      <a href="${m.path}" class="nav-tab ${cur.toLowerCase() === m.path.toLowerCase() ? 'active-orange' : ''}">
+        ${ICONS[m.icon] || ''} <span>${m.short}</span>
+      </a>`).join('') + (hasMore ? `<button class="nav-tab" onclick="openDrawer()">${ICONS.menu}<span>Más</span></button>` : '');
+    if (document.getElementById('bottom-nav')) document.getElementById('bottom-nav').innerHTML = bottomHtml;
+
+    // Icons for back buttons
+    if (document.getElementById('icon-back-desk')) document.getElementById('icon-back-desk').innerHTML = ICONS.arrowLeft;
+}
+</script>

@@ -1,0 +1,84 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Ajustes del Negocio";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+<div class="page-header"><h2 class="page-title"><span id="icon-set-h" style="color:var(--orange-500);display:inline-flex;margin-right:.5rem;"></span>Ajustes del Negocio</h2>
+<p class="page-subtitle">Configura las opciones operativas de esta sucursal.</p></div>
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+<div class="hidden" id="content" style="display:flex;flex-direction:column;gap:1.5rem;">
+    <!-- Info general -->
+    <div class="card-plain">
+        <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1.25rem;">Información General</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div><label class="label">Nombre del Negocio</label><input id="cfg-nombre" class="input" /></div>
+            <div><label class="label">Teléfono WhatsApp</label><input id="cfg-telefono" class="input" /></div>
+            <div><label class="label">Dirección</label><input id="cfg-direccion" class="input" /></div>
+            <div><label class="label">Sistema Asignado</label><input id="cfg-sistema" class="input" disabled style="opacity:.6;" /></div>
+        </div>
+        <button class="btn btn-orange" style="margin-top:1.25rem;" onclick="guardar()"><span id="icon-save-btn"></span> Guardar Cambios</button>
+    </div>
+    <!-- Módulos -->
+    <div class="card-plain">
+        <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1.25rem;">Módulos Activos</h3>
+        <div style="display:flex;flex-direction:column;gap:.75rem;" id="modulos-list"></div>
+    </div>
+</div>
+@await Html.PartialAsync("_NegocioShellBottom")
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+let negocioData = null;
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    document.getElementById('icon-set-h').innerHTML  = ICONS.settings;
+    document.getElementById('icon-save-btn').innerHTML = ICONS.check;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+    document.getElementById('icon-back').innerHTML     = ICONS.arrowLeft;
+    try {
+        const negociosRes = await apiFetch('/negocios').catch(()=>[]);
+        negocioData = negociosRes.find(n => n.id == NEGOCIO_ID);
+        renderNegocioNav(user, negocioData);
+        if (negocioData) {
+            document.getElementById('cfg-nombre').value   = negocioData.nombre || '';
+            document.getElementById('cfg-telefono').value = negocioData.telefono || '';
+            document.getElementById('cfg-direccion').value = negocioData.direccion || '';
+            document.getElementById('cfg-sistema').value  = negocioData.sistemaAsignado || '';
+            const modulos = [
+                { key: 'usaMesas',   label: 'Control de Mesas', desc: 'Habilita el módulo de mesas para restaurantes.' },
+                { key: 'moduloCRM',  label: 'Módulo CRM',       desc: 'Registro y seguimiento de clientes frecuentes.' },
+                { key: 'activo',     label: 'Negocio Activo',   desc: 'El negocio está operativo y visible.' },
+            ];
+            document.getElementById('modulos-list').innerHTML = modulos.map(m => `
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.875rem 1rem;background:var(--slate-50);border:1px solid var(--slate-200);border-radius:var(--radius-xl);">
+                <div><p class="font-bold text-sm" style="color:var(--slate-800);">${m.label}</p><p class="text-xs" style="color:var(--slate-500);">${m.desc}</p></div>
+                <label style="position:relative;display:inline-block;width:3rem;height:1.5rem;cursor:pointer;">
+                  <input type="checkbox" id="mod-${m.key}" ${negocioData[m.key] ? 'checked' : ''} style="opacity:0;width:0;height:0;" onchange="toggleModulo('${m.key}', this.checked)">
+                  <span style="position:absolute;inset:0;background:${negocioData[m.key]?'var(--orange-500)':'var(--slate-200)'};border-radius:9999px;transition:.2s;" id="mod-track-${m.key}">
+                    <span style="position:absolute;top:2px;left:${negocioData[m.key]?'calc(100% - 22px)':'2px'};width:20px;height:20px;background:white;border-radius:50%;transition:.2s;" id="mod-thumb-${m.key}"></span>
+                  </span>
+                </label>
+              </div>`).join('');
+        }
+        document.getElementById('loading').style.display='none';
+        document.getElementById('content').classList.remove('hidden');
+        document.getElementById('content').style.display='flex';
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+})();
+async function guardar() {
+    try {
+        const payload = { ...negocioData, nombre: document.getElementById('cfg-nombre').value, telefono: document.getElementById('cfg-telefono').value, direccion: document.getElementById('cfg-direccion').value };
+        await apiFetch(`/negocios/${NEGOCIO_ID}`, { method: 'PUT', body: JSON.stringify(payload) });
+        showToast('Cambios guardados', 'success');
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+async function toggleModulo(key, val) {
+    const track = document.getElementById(`mod-track-${key}`); const thumb = document.getElementById(`mod-thumb-${key}`);
+    if (track) track.style.background = val ? 'var(--orange-500)' : 'var(--slate-200)';
+    if (thumb) thumb.style.left = val ? 'calc(100% - 22px)' : '2px';
+    negocioData[key] = val;
+    try { await apiFetch(`/negocios/${NEGOCIO_ID}`, { method: 'PUT', body: JSON.stringify(negocioData) }); showToast('Módulo actualizado', 'success'); }
+    catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+</script>}

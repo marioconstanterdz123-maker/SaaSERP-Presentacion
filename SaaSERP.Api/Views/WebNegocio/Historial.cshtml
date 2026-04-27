@@ -1,0 +1,95 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Historial";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<div class="page-header flex justify-between items-center" style="flex-wrap:wrap;gap:.75rem;">
+    <div>
+        <h2 class="page-title"><span id="icon-archive-h" style="color:var(--orange-500);display:inline-flex;margin-right:.5rem;"></span>Historial de Operaciones</h2>
+        <p class="page-subtitle">Registro de pagos, citas y operaciones completadas.</p>
+    </div>
+    <div style="position:relative;">
+        <span class="search-icon" id="icon-search-h"></span>
+        <input id="inp-search" class="input" style="padding-left:2.5rem;width:16rem;" placeholder="Buscar..." oninput="filterHistory(this.value)" />
+    </div>
+</div>
+
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+
+<div class="table-wrapper hidden" id="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+</div>
+
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;">
+    <div style="font-size:3rem;margin-bottom:1rem;">🗂️</div>
+    <p class="font-bold" style="color:var(--slate-600);">No hay operaciones registradas.</p>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+let allHistorial = [];
+
+(async function init() {
+    const user = requireAuth();
+    if (!user) return;
+    document.getElementById('icon-archive-h').innerHTML = ICONS.archive;
+    document.getElementById('icon-search-h').innerHTML  = ICONS.search;
+    document.getElementById('icon-menu-btn').innerHTML  = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML  = ICONS.x;
+    document.getElementById('icon-back').innerHTML      = ICONS.arrowLeft;
+
+    try {
+        const [negociosRes, histRes] = await Promise.all([
+            apiFetch('/negocios').catch(() => []),
+            apiFetch(`/Pagos/negocio/${NEGOCIO_ID}`).catch(() => [])
+        ]);
+        const negocio = negociosRes.find(n => n.id == NEGOCIO_ID);
+        renderNegocioNav(user, negocio);
+        allHistorial = histRes || [];
+        renderTable(allHistorial);
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    finally { document.getElementById('loading').style.display = 'none'; }
+})();
+
+function renderTable(list) {
+    const wrap = document.getElementById('table-wrap');
+    const empty = document.getElementById('empty');
+    if (!list.length) {
+        wrap.classList.add('hidden');
+        empty.classList.remove('hidden'); empty.style.display = 'block'; return;
+    }
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden'); wrap.style.display = 'block';
+    document.getElementById('table-body').innerHTML = list.map(p => `
+      <tr>
+        <td style="font-size:.75rem;color:var(--slate-500);">${new Date(p.fecha || p.creadoEn).toLocaleString('es-MX')}</td>
+        <td class="font-bold">${p.concepto || p.descripcion || 'Operación'}</td>
+        <td style="color:var(--slate-500);">${p.clienteNombre || p.telefono || '—'}</td>
+        <td class="font-bold" style="color:var(--emerald-600);">${formatMXN(p.total || p.monto || 0)}</td>
+        <td><span class="badge ${p.estado === 'Pagado' || p.estado === 'Completado' ? 'badge-green' : 'badge-orange'}">${p.estado || 'Completado'}</span></td>
+      </tr>`).join('');
+}
+
+function filterHistory(q) {
+    renderTable(allHistorial.filter(p =>
+        (p.concepto || p.descripcion || '').toLowerCase().includes(q.toLowerCase()) ||
+        (p.clienteNombre || p.telefono || '').toLowerCase().includes(q.toLowerCase())
+    ));
+}
+</script>
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — SaaSERP Victoria</title>
+    <meta name="description" content="SaaSERP Victoria — Sistema de Gestión Multisucursal" />
+    <link rel="stylesheet" href="~/css/saas.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+    @RenderBody()
+
+    <div id="toast"></div>
+
+    <script src="~/js/saas.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

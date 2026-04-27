@@ -1,0 +1,164 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Panel de Rendimiento";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<div id="loading-dash" class="loading-center"><div class="spinner spinner-orange"></div></div>
+
+<div id="page-content" class="hidden">
+    <!-- Header -->
+    <div class="page-header flex justify-between items-center">
+        <div>
+            <h2 class="page-title" style="color:var(--slate-800);">
+                <span id="icon-activity-h" style="color:var(--blue-500);display:inline-flex;margin-right:.5rem;"></span>
+                Panel de Rendimiento
+            </h2>
+            <p class="page-subtitle">Sucursal: <b id="negocio-nombre">Cargando...</b></p>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="margin-bottom:1.5rem;" id="kpi-grid">
+        <!-- Caja del Día (siempre visible) -->
+        <div class="kpi-card kpi-card-emerald">
+            <div class="kpi-blob"></div>
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;position:relative;z-index:1;">
+                <div>
+                    <p style="color:rgba(209,250,229,1);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.875rem;margin-bottom:.25rem;">Caja del Día</p>
+                    <h3 id="kpi-ingresos" style="font-size:2.25rem;font-weight:900;">$0.00</h3>
+                </div>
+                <div style="background:rgba(52,211,153,.4);padding:.75rem;border-radius:1rem;backdrop-filter:blur(4px);" id="icon-dollar"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;font-weight:500;color:rgba(209,250,229,1);background:rgba(0,0,0,.1);width:fit-content;padding:.25rem .75rem;border-radius:9999px;position:relative;z-index:1;">
+                <span id="icon-trending"></span> <span id="kpi-crecimiento">+0%</span> vs. ayer
+            </div>
+        </div>
+        <!-- Dinámica según giro -->
+        <div id="kpi-extra"></div>
+        <!-- Clientes -->
+        <div class="kpi-card" style="transition:transform .2s;" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform=''">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+                <div>
+                    <p style="color:var(--slate-500);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.875rem;margin-bottom:.25rem;">Clientes Atendidos</p>
+                    <h3 id="kpi-clientes" style="font-size:2.25rem;font-weight:900;color:var(--slate-800);">0</h3>
+                </div>
+                <div style="background:rgba(233,213,255,.4);color:var(--purple-500);padding:.75rem;border-radius:1rem;" id="icon-users-kpi"></div>
+            </div>
+            <div style="font-size:.875rem;font-weight:500;color:#9333ea;background:rgba(233,213,255,.4);width:fit-content;padding:.25rem .75rem;border-radius:.5rem;">Buen flujo de tráfico</div>
+        </div>
+    </div>
+
+    <!-- Revenue Chart placeholder -->
+    <div class="card-plain" style="min-height:280px;display:flex;flex-direction:column;">
+        <div style="margin-bottom:1.5rem;">
+            <h3 style="font-size:1.25rem;font-weight:700;color:var(--slate-800);">Tendencia de Ingresos</h3>
+            <p style="font-size:.875rem;color:var(--slate-500);">Histórico de la caja de los últimos 7 días.</p>
+        </div>
+        <div id="chart-area" style="flex:1;min-height:200px;display:flex;align-items:center;justify-content:center;background:rgba(241,245,249,.5);border-radius:1rem;border:2px dashed var(--slate-200);">
+            <div style="text-align:center;color:var(--slate-400);">
+                <div id="icon-chart" style="font-size:3rem;margin-bottom:1rem;opacity:.5;"></div>
+                <p class="font-bold">Cargando tendencia...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+
+(async function init() {
+    const user = requireAuth();
+    if (!user) return;
+
+    document.getElementById('icon-activity-h').innerHTML = ICONS.activity;
+    document.getElementById('icon-dollar').innerHTML     = ICONS.dollar;
+    document.getElementById('icon-trending').innerHTML   = ICONS.trendingUp;
+    document.getElementById('icon-users-kpi').innerHTML  = ICONS.users;
+    document.getElementById('icon-chart').innerHTML      = ICONS.trendingUp;
+    document.getElementById('icon-menu-btn').innerHTML   = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML   = ICONS.x;
+    document.getElementById('icon-back').innerHTML       = ICONS.arrowLeft;
+
+    try {
+        const [negociosRes, statsRes] = await Promise.all([
+            apiFetch('/negocios').catch(() => []),
+            apiFetch('/Reportes/dashboard', {
+                headers: { 'X-Negocio-Id': String(NEGOCIO_ID) }
+            }).catch(() => null)
+        ]);
+
+        const negocio = negociosRes.find(n => n.id == NEGOCIO_ID);
+        if (negocio) {
+            document.getElementById('negocio-nombre').textContent = negocio.nombre;
+            renderNegocioNav(user, negocio);
+        } else {
+            renderNegocioNav(user, null);
+        }
+
+        if (statsRes) {
+            document.getElementById('kpi-ingresos').textContent  = formatMXN(statsRes.ingresosHoy || 0);
+            document.getElementById('kpi-crecimiento').textContent = `+${statsRes.crecimiento || 0}%`;
+            document.getElementById('kpi-clientes').textContent  = statsRes.clientesRegistrados || 0;
+
+            // KPI extra según sistema
+            const sistema = negocio?.sistemaAsignado;
+            const extra   = document.getElementById('kpi-extra');
+            if (sistema === 'PARQUEADERO') {
+                const pct = Math.round((statsRes.vehiculosAdentro / (negocio?.capacidadMaxima || 1)) * 100);
+                extra.innerHTML = `
+                  <div class="kpi-card" style="transition:transform .2s" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform=''">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+                      <div>
+                        <p style="color:var(--slate-500);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.875rem;margin-bottom:.25rem;">Ocupación Actual</p>
+                        <h3 style="font-size:2.25rem;font-weight:900;color:var(--slate-800);">${statsRes.vehiculosAdentro} <span style="font-size:1.125rem;color:var(--slate-400);font-weight:700;">/ ${negocio?.capacidadMaxima || '?'}</span></h3>
+                      </div>
+                      <div style="background:var(--blue-50);color:var(--blue-600);padding:.75rem;border-radius:1rem;">${ICONS.car}</div>
+                    </div>
+                    <div style="background:var(--slate-100);border-radius:9999px;height:.75rem;overflow:hidden;border:1px solid var(--slate-200);margin-bottom:.5rem;">
+                      <div style="height:100%;border-radius:9999px;background:var(--blue-500);width:${pct}%;"></div>
+                    </div>
+                    <p style="font-size:.75rem;color:var(--slate-500);font-weight:700;">Capacidad al ${pct}%</p>
+                  </div>`;
+            } else if (sistema === 'TAQUERIA' || sistema === 'RESTAURANTES') {
+                extra.innerHTML = `
+                  <div class="kpi-card" style="transition:transform .2s" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform=''">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+                      <div>
+                        <p style="color:var(--slate-500);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.875rem;margin-bottom:.25rem;">Comandas en Cocina</p>
+                        <h3 style="font-size:2.25rem;font-weight:900;color:var(--orange-500);">${statsRes.comandasActivas || 0}</h3>
+                      </div>
+                      <div style="background:var(--orange-50);color:var(--orange-500);padding:.75rem;border-radius:1rem;">${ICONS.coffee}</div>
+                    </div>
+                    <p style="font-size:.875rem;color:var(--slate-500);display:flex;align-items:center;gap:.25rem;">Requieren atención inmediata.</p>
+                  </div>`;
+            }
+
+            // Chart bars (simple)
+            if (statsRes.ingresosSemana?.length) {
+                const max = Math.max(...statsRes.ingresosSemana.map(d => d.ventas));
+                document.getElementById('chart-area').innerHTML = `
+                  <div style="display:flex;align-items:flex-end;gap:.5rem;height:160px;width:100%;padding:0 1rem;">
+                    ${statsRes.ingresosSemana.map(d => `
+                      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.25rem;">
+                        <span style="font-size:.625rem;color:var(--slate-500);font-weight:600;">${formatMXN(d.ventas)}</span>
+                        <div style="width:100%;background:linear-gradient(to top,var(--blue-500),var(--indigo-600));border-radius:.375rem .375rem 0 0;height:${max > 0 ? Math.round((d.ventas/max)*140) : 4}px;transition:height .5s;"></div>
+                        <span style="font-size:.625rem;color:var(--slate-500);font-weight:600;">${d.name}</span>
+                      </div>`).join('')}
+                  </div>`;
+            }
+        }
+
+        document.getElementById('loading-dash').style.display = 'none';
+        document.getElementById('page-content').classList.remove('hidden');
+        document.getElementById('page-content').style.display = 'block';
+    } catch (err) {
+        document.getElementById('loading-dash').style.display = 'none';
+        showToast('Error al cargar dashboard: ' + err.message, 'error');
+    }
+})();
+</script>
+}

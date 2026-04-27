@@ -1,0 +1,213 @@
+@{
+    ViewData["Title"] = "Configuración Global";
+}
+@await Html.PartialAsync("_AdminShellTop")
+
+<div class="flex flex-col gap-6 animate-fade-in-up">
+    <!-- Header -->
+    <div class="flex items-center gap-4 bg-white/60 p-6 rounded-3xl border border-white/40 shadow-sm backdrop-blur-md">
+        <div class="bg-slate-800 p-3 rounded-2xl shadow-lg text-white">
+            <span id="icon-set-big" style="font-size:2rem;"></span>
+        </div>
+        <div>
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Configuración Global</h2>
+            <p class="text-slate-500 font-medium">Gestiona módulos, accesos y WhatsApp por negocio</p>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="flex items-center gap-2 bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm"><span id="l-web"></span> Acceso Web</div>
+        <div class="flex items-center gap-2 bg-purple-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm"><span id="l-mov"></span> Acceso Móvil</div>
+        <div class="flex items-center gap-2 bg-amber-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm"><span id="l-his"></span> Historial</div>
+        <div class="flex items-center gap-2 bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm"><span id="l-wa"></span> WhatsApp</div>
+        <div class="flex items-center gap-2 bg-rose-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm"><span id="l-rep"></span> Reportes</div>
+    </div>
+
+    <div class="loading-center" id="loading"><div class="spinner"></div></div>
+
+    <!-- Negocio Cards -->
+    <div id="negocios-list" class="flex flex-col gap-4 hidden"></div>
+</div>
+
+@await Html.PartialAsync("_AdminShellBottom")
+
+@section Scripts {
+<script>
+const ADMIN_MENU = [
+    { path: '/web/WebAdmin/Negocios', name: 'Tus Negocios', short: 'Negocios', icon: 'store' },
+    { path: '/web/WebAdmin/Usuarios', name: 'Usuarios', short: 'Usuarios', icon: 'users' },
+    { path: '/web/WebAdmin/Configuracion', name: 'Configuración', short: 'Config', icon: 'settings' },
+    { path: '/web/WebAdmin/Papelera', name: 'Papelera', short: 'Papelera', icon: 'trash2' }
+];
+
+let negocios = [];
+let expandedId = null;
+let ajustesOp = {};
+
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    
+    // Icons
+    document.getElementById('icon-set-big').innerHTML = ICONS.settings;
+    document.getElementById('l-web').innerHTML = ICONS.globe;
+    document.getElementById('l-mov').innerHTML = ICONS.smartphone;
+    document.getElementById('l-his').innerHTML = ICONS.history;
+    document.getElementById('l-wa').innerHTML  = ICONS.messageCircle;
+    document.getElementById('l-rep').innerHTML = ICONS.barChart2;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+    
+    const cur = window.location.pathname;
+    const navHtml = ADMIN_MENU.map(m=>`<a href="${m.path}" class="nav-link ${cur===m.path?'active-admin':''}">${ICONS[m.icon]||''} ${m.name}</a>`).join('');
+    ['sidebar-nav','drawer-nav'].forEach(id=>{const el=document.getElementById(id);if(el) el.innerHTML=navHtml;});
+    ['sidebar-user','drawer-user'].forEach(id=>{const el=document.getElementById(id);if(el) el.innerHTML=renderUserInfo(user,'admin');});
+    const bn=document.getElementById('bottom-nav');if(bn) bn.innerHTML=ADMIN_MENU.slice(0,4).map(m=>`<a href="${m.path}" class="nav-tab ${cur===m.path?'active':''}">${ICONS[m.icon]||''}<span>${m.short}</span></a>`).join('');
+
+    try {
+        negocios = await apiFetch('/negocios');
+        renderList();
+    } catch(err) { showToast('Error cargando configuración', 'error'); }
+    finally { document.getElementById('loading').style.display='none'; document.getElementById('negocios-list').classList.remove('hidden'); }
+})();
+
+function renderList() {
+    const container = document.getElementById('negocios-list');
+    container.innerHTML = negocios.map(n => {
+        const sysIcon = {'CITAS':'✂️','TAQUERIA':'🌮','PARQUEADERO':'🅿️','RESTAURANTES':'🍽️'}[n.sistemaAsignado] || '🏢';
+        
+        let subHtml = '';
+        if (expandedId === n.id) {
+            const op = ajustesOp[n.id] || {};
+            subHtml = `
+            <div class="border-t border-slate-100 p-5 grid md:grid-cols-3 gap-8 cursor-default" onclick="event.stopPropagation()">
+                <!-- Columna A -->
+                <div>
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Módulos Contratados</p>
+                    ${renderToggle(n.id, 'accesoWeb', 'Acceso Web', 'Panel web', ICONS.globe, n.accesoWeb, 'bg-blue-500')}
+                    ${renderToggle(n.id, 'accesoMovil', 'Acceso Móvil', 'App móvil', ICONS.smartphone, n.accesoMovil, 'bg-purple-500')}
+                    ${renderToggle(n.id, 'moduloHistorial', 'Historial', 'Registros', ICONS.history, n.moduloHistorial, 'bg-amber-500')}
+                    ${renderToggle(n.id, 'moduloWhatsApp', 'WhatsApp', 'Mensajes auto', ICONS.messageCircle, n.moduloWhatsApp, 'bg-emerald-500')}
+                    ${renderToggle(n.id, 'moduloWhatsAppIA', 'WhatsApp IA', 'Asistente', ICONS.messageCircle, n.moduloWhatsAppIA, 'bg-violet-500')}
+                    ${renderToggle(n.id, 'moduloCRM', 'CRM + Lealtad', 'Perfiles', ICONS.barChart2, n.moduloCRM, 'bg-amber-500')}
+                    
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="guardarAjustes(${n.id})" class="flex-1 flex justify-center gap-2 text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-xl transition-all active:scale-95" id="btn-save-${n.id}">${ICONS.save} Guardar</button>
+                        <button onclick="renovar(${n.id})" class="text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white px-3 py-2.5 rounded-xl transition-all active:scale-95">🔄 +30d</button>
+                    </div>
+                </div>
+                <!-- Columna B -->
+                <div>
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Ajustes Operativos</p>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 block mb-1">📞 Teléfono Dueño</label>
+                            <input type="tel" value="${op.telefonoWhatsApp || ''}" oninput="updateOp(${n.id},'telefonoWhatsApp',this.value)" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-slate-400 focus:outline-none"/>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-xs font-bold text-slate-500 block mb-1">🕐 Apertura</label><input type="time" value="${(op.horaApertura||'08:00').substring(0,5)}" onchange="updateOp(${n.id},'horaApertura',this.value+':00')" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2"/></div>
+                            <div><label class="text-xs font-bold text-slate-500 block mb-1">🕗 Cierre</label><input type="time" value="${(op.horaCierre||'20:00').substring(0,5)}" onchange="updateOp(${n.id},'horaCierre',this.value+':00')" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2"/></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="text-xs font-bold text-slate-500 block mb-1">👥 Cap. Máx</label><input type="number" value="${op.capacidadMaxima||1}" oninput="updateOp(${n.id},'capacidadMaxima',this.value)" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none"/></div>
+                            <div><label class="text-xs font-bold text-slate-500 block mb-1">⏱️ Min Cita</label><input type="number" value="${op.duracionMinutosCita||30}" oninput="updateOp(${n.id},'duracionMinutosCita',this.value)" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none"/></div>
+                        </div>
+                        <label class="flex items-center gap-3 cursor-pointer text-sm font-bold text-slate-600 select-none mt-2">
+                            <input type="checkbox" ${op.usaMesas?'checked':''} onchange="updateOp(${n.id},'usaMesas',this.checked)" class="w-4 h-4 rounded" /> 🪑 Maneja Mesas
+                        </label>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        return `
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-lg overflow-hidden relative">
+            <div class="w-full flex items-center gap-4 p-5 text-left hover:bg-slate-50/50 transition-colors pr-16 cursor-pointer" onclick="toggleExpand(${n.id})">
+                <div class="text-2xl w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl">${sysIcon}</div>
+                <div class="flex-1">
+                    <p class="font-black text-slate-800 text-lg leading-tight">${n.nombre}</p>
+                    <p class="text-xs text-slate-400 font-semibold">${n.sistemaAsignado}</p>
+                </div>
+                <div class="hidden md:flex items-center gap-1.5">
+                    <span class="p-1.5 rounded-lg ${n.accesoWeb?'bg-blue-100 text-blue-600':'bg-slate-100 text-slate-300'}">${ICONS.globe}</span>
+                    <span class="p-1.5 rounded-lg ${n.accesoMovil?'bg-purple-100 text-purple-600':'bg-slate-100 text-slate-300'}">${ICONS.smartphone}</span>
+                    <span class="p-1.5 rounded-lg ${n.moduloWhatsApp?'bg-emerald-100 text-emerald-600':'bg-slate-100 text-slate-300'}">${ICONS.messageCircle}</span>
+                </div>
+                <span class="text-slate-400 ml-2">${expandedId===n.id ? ICONS.chevronUp : ICONS.chevronDown}</span>
+            </div>
+            <button onclick="eliminarNegocio(${n.id}, '${n.nombre}')" class="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all z-10">${ICONS.trash2}</button>
+            ${subHtml}
+        </div>`;
+    }).join('');
+}
+
+function renderToggle(id, field, label, desc, icon, value, color) {
+    return `
+    <div class="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl ${value ? color : 'bg-slate-100'} transition-colors"><span class="${value?'text-white':'text-slate-400'}">${icon}</span></div>
+            <div><p class="text-sm font-bold text-slate-700">${label}</p><p class="text-xs text-slate-400">${desc}</p></div>
+        </div>
+        <button onclick="toggleMod(${id}, '${field}', ${!value})" class="relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none ${value?'bg-blue-500':'bg-slate-200'}">
+            <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ${value?'translate-x-6':'translate-x-0'}"></span>
+        </button>
+    </div>`;
+}
+
+window.toggleExpand = (id) => {
+    expandedId = expandedId === id ? null : id;
+    if (expandedId) {
+        const n = negocios.find(x => x.id === id);
+        ajustesOp[id] = { ...n };
+    }
+    renderList();
+}
+
+window.toggleMod = (id, field, val) => {
+    const n = negocios.find(x => x.id === id);
+    if(n) n[field] = val;
+    renderList();
+}
+
+window.updateOp = (id, field, val) => {
+    if(ajustesOp[id]) ajustesOp[id][field] = val;
+}
+
+window.guardarAjustes = async (id) => {
+    const n = negocios.find(x => x.id === id);
+    const op = ajustesOp[id];
+    const btn = document.getElementById(`btn-save-${id}`);
+    btn.disabled = true; btn.innerHTML = 'Guardando...';
+    try {
+        await apiFetch(`/negocios/${id}/ajustes-completos`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                accesoWeb: n.accesoWeb, accesoMovil: n.accesoMovil, moduloHistorial: n.moduloHistorial,
+                moduloWhatsApp: n.moduloWhatsApp, moduloWhatsAppIA: n.moduloWhatsAppIA, moduloCRM: n.moduloCRM, moduloReportes: n.moduloReportes,
+                telefonoWhatsApp: op.telefonoWhatsApp, horaApertura: op.horaApertura, horaCierre: op.horaCierre,
+                capacidadMaxima: parseInt(op.capacidadMaxima)||1, duracionMinutosCita: parseInt(op.duracionMinutosCita)||30, usaMesas: op.usaMesas
+            })
+        });
+        showToast('Guardado correctamente', 'success');
+    } catch(err) { showToast('Error al guardar', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = `${ICONS.save} Guardar`; }
+}
+
+window.renovar = async (id) => {
+    try {
+        await apiFetch(`/negocios/${id}/renovar?dias=30`, { method: 'POST' });
+        showToast('Renovado 30 días', 'success');
+        negocios = await apiFetch('/negocios'); renderList();
+    } catch(err) {}
+}
+
+window.eliminarNegocio = async (id, nombre) => {
+    if (!confirm(`¿Enviar a papelera el negocio ${nombre}?`)) return;
+    try {
+        await apiFetch(`/negocios/${id}`, { method: 'DELETE' });
+        negocios = negocios.filter(n => n.id !== id);
+        renderList(); showToast('Enviado a papelera', 'success');
+    } catch(e) {}
+}
+</script>
+}

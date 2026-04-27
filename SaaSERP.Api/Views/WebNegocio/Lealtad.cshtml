@@ -1,0 +1,84 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Lealtad";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+<div class="page-header"><h2 class="page-title"><span id="icon-star-h" style="color:#f59e0b;display:inline-flex;margin-right:.5rem;"></span>Programa de Lealtad</h2>
+<p class="page-subtitle">Recompensas y bonificaciones para clientes frecuentes.</p></div>
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+<div class="hidden" id="content">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+        <div class="card-plain">
+            <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Reglas de Bonificación</h3>
+            <div id="reglas-list" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+            <button class="btn btn-orange btn-full" style="margin-top:1rem;" onclick="openModal()"><span id="icon-plus-btn"></span> Nueva Regla</button>
+        </div>
+        <div class="card-plain">
+            <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Top Clientes Leales</h3>
+            <div id="top-clientes" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+        </div>
+    </div>
+</div>
+<div id="modal" class="modal-backdrop hidden">
+    <div class="modal">
+        <div class="modal-header modal-header-negocio"><span class="modal-title">Nueva Regla</span><button class="btn-icon" onclick="closeModal()" id="icon-x-modal"></button></div>
+        <div class="modal-body">
+            <div><label class="label">Descripción de la Regla</label><input id="m-desc" class="input" placeholder="Ej. Por cada 10 visitas, 1 gratis" /></div>
+            <div class="grid-2">
+                <div><label class="label">Visitas Requeridas</label><input id="m-visitas" class="input" type="number" min="1" value="10" /></div>
+                <div><label class="label">% Descuento Recompensa</label><input id="m-descuento" class="input" type="number" min="0" max="100" value="10" /></div>
+            </div>
+            <button class="btn btn-orange btn-full" onclick="crearRegla()"><span id="icon-plus-modal"></span> Guardar Regla</button>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_NegocioShellBottom")
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    document.getElementById('icon-star-h').innerHTML     = ICONS.star;
+    document.getElementById('icon-plus-btn').innerHTML   = ICONS.plus;
+    document.getElementById('icon-plus-modal').innerHTML = ICONS.plus;
+    document.getElementById('icon-x-modal').innerHTML   = ICONS.x;
+    document.getElementById('icon-menu-btn').innerHTML   = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML  = ICONS.x;
+    document.getElementById('icon-back').innerHTML      = ICONS.arrowLeft;
+    try {
+        const [negociosRes, reglasRes, clientesRes] = await Promise.all([
+            apiFetch('/negocios').catch(()=>[]),
+            apiFetch(`/ReglasBonificacion/negocio/${NEGOCIO_ID}`).catch(()=>[]),
+            apiFetch(`/ClientesCRM/negocio/${NEGOCIO_ID}`).catch(()=>[])
+        ]);
+        renderNegocioNav(user, negociosRes.find(n => n.id == NEGOCIO_ID));
+        const reglas = reglasRes || [];
+        const clientes = clientesRes || [];
+        document.getElementById('reglas-list').innerHTML = reglas.length
+            ? reglas.map(r => `<div style="background:var(--slate-50);border:1px solid var(--slate-200);border-radius:var(--radius-xl);padding:.875rem;display:flex;justify-content:space-between;align-items:center;"><div><p class="font-bold text-sm" style="color:var(--slate-800);">${r.descripcion}</p><p class="text-xs" style="color:var(--slate-500);">${r.visitasRequeridas} visitas → ${r.descuentoPorcentaje}% descuento</p></div><span class="badge badge-green">Activa</span></div>`).join('')
+            : `<p class="text-sm" style="color:var(--slate-400);text-align:center;">Sin reglas configuradas.</p>`;
+
+        const top = [...clientes].sort((a,b) => (b.totalVisitas||0)-(a.totalVisitas||0)).slice(0,5);
+        document.getElementById('top-clientes').innerHTML = top.length
+            ? top.map((c,i) => `<div style="display:flex;align-items:center;gap:.75rem;padding:.625rem;border-radius:var(--radius-xl);background:${i===0?'rgba(245,158,11,.1)':'var(--slate-50)'};">
+                <span style="font-weight:900;color:${i===0?'#f59e0b':'var(--slate-400)'};width:1.5rem;">#${i+1}</span>
+                <div style="flex:1;"><p class="font-bold text-sm" style="color:var(--slate-800);">${c.nombre}</p><p class="text-xs" style="color:var(--slate-500);">${c.totalVisitas||0} visitas · ${formatMXN(c.gastoTotal||0)}</p></div>
+              </div>`).join('')
+            : `<p class="text-sm" style="color:var(--slate-400);text-align:center;">Sin clientes aún.</p>`;
+
+        document.getElementById('loading').style.display='none';
+        document.getElementById('content').classList.remove('hidden');
+        document.getElementById('content').style.display='block';
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+})();
+function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+async function crearRegla() {
+    const desc = document.getElementById('m-desc').value.trim();
+    if (!desc) { showToast('La descripción es obligatoria', 'error'); return; }
+    try {
+        await apiFetch('/ReglasBonificacion', { method: 'POST', body: JSON.stringify({ negocioId: NEGOCIO_ID, descripcion: desc, visitasRequeridas: parseInt(document.getElementById('m-visitas').value)||10, descuentoPorcentaje: parseFloat(document.getElementById('m-descuento').value)||10 }) });
+        showToast('Regla creada', 'success'); closeModal();
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+</script>}

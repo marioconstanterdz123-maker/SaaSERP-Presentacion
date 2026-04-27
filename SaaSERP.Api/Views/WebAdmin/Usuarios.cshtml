@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Usuarios";
+}
+@await Html.PartialAsync("_AdminShellTop")
+<div class="page-header flex justify-between items-center">
+    <div><h2 class="page-title">Usuarios del Sistema</h2><p class="page-subtitle">Gestiona los accesos y roles de cada usuario.</p></div>
+    <button class="btn btn-primary" onclick="openModal()"><span id="icon-plus-btn"></span> Nuevo Usuario</button>
+</div>
+<div class="loading-center" id="loading"><div class="spinner"></div></div>
+<div class="table-wrapper hidden" id="table-wrap">
+    <table><thead><tr><th>Email</th><th>Rol</th><th>Negocio</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody id="table-body"></tbody></table>
+</div>
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;"><div style="font-size:3rem;">👤</div><p class="font-bold" style="color:var(--slate-600);">Sin usuarios registrados.</p></div>
+<div id="modal" class="modal-backdrop hidden">
+    <div class="modal">
+        <div class="modal-header modal-header-admin"><span class="modal-title">Nuevo Usuario</span><button class="btn-icon" onclick="closeModal()" id="icon-x-modal"></button></div>
+        <div class="modal-body">
+            <div><label class="label">Correo Electrónico</label><input id="m-email" class="input" type="email" placeholder="usuario@empresa.com" /></div>
+            <div><label class="label">Contraseña</label><input id="m-pass" class="input" type="password" placeholder="••••••••" /></div>
+            <div><label class="label">Rol</label>
+                <select id="m-rol" class="input">
+                    <option value="SuperAdmin">SuperAdmin</option><option value="AdminNegocio">AdminNegocio</option>
+                    <option value="Cajero">Cajero</option><option value="Mesero">Mesero</option><option value="Cocinero">Cocinero</option>
+                </select>
+            </div>
+            <div><label class="label">Negocio (ID, opcional)</label><input id="m-negocio" class="input" type="number" placeholder="ID del negocio asignado" /></div>
+            <button class="btn btn-primary btn-full" onclick="crearUsuario()"><span id="icon-plus-modal"></span> Crear Usuario</button>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_AdminShellBottom")
+@section Scripts {
+<script>
+const ADMIN_MENU = [
+    { path: '/web/WebAdmin/Negocios',      name: 'Tus Negocios',  short: 'Negocios',  icon: 'store'    },
+    { path: '/web/WebAdmin/Usuarios',      name: 'Usuarios',      short: 'Usuarios',  icon: 'users'    },
+    { path: '/web/WebAdmin/Configuracion', name: 'Configuración', short: 'Config',    icon: 'settings' },
+    { path: '/web/WebAdmin/Papelera',      name: 'Papelera',      short: 'Papelera',  icon: 'trash2'   },
+];
+let allUsuarios = [];
+(async function init() {
+    const user = requireAuth(); if (!user) return;
+    document.getElementById('icon-plus-btn').innerHTML   = ICONS.plus;
+    document.getElementById('icon-plus-modal').innerHTML = ICONS.plus;
+    document.getElementById('icon-x-modal').innerHTML   = ICONS.x;
+    document.getElementById('icon-menu-btn').innerHTML  = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML  = ICONS.x;
+    renderAdminNav(user);
+    try {
+        const data = await apiFetch('/Admin/usuarios');
+        allUsuarios = data || [];
+        renderTable(allUsuarios);
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    finally { document.getElementById('loading').style.display = 'none'; }
+})();
+function renderAdminNav(user) {
+    const cur = window.location.pathname;
+    const navHtml = ADMIN_MENU.map(m=>`<a href="${m.path}" class="nav-link ${cur===m.path?'active-admin':''}">${ICONS[m.icon]||''} ${m.name}</a>`).join('');
+    ['sidebar-nav','drawer-nav'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=navHtml; });
+    ['sidebar-user','drawer-user'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=renderUserInfo(user,'admin'); });
+    const bn=document.getElementById('bottom-nav'); if(bn) bn.innerHTML=ADMIN_MENU.slice(0,4).map(m=>`<a href="${m.path}" class="nav-tab ${cur===m.path?'active':''}">${ICONS[m.icon]||''}<span>${m.short}</span></a>`).join('');
+}
+function renderTable(list) {
+    const wrap=document.getElementById('table-wrap'); const empty=document.getElementById('empty');
+    if (!list.length) { empty.classList.remove('hidden'); empty.style.display='block'; return; }
+    wrap.classList.remove('hidden'); wrap.style.display='block';
+    document.getElementById('table-body').innerHTML = list.map(u=>`
+      <tr><td class="font-bold">${u.email}</td>
+      <td><span class="badge ${u.rol==='SuperAdmin'?'badge-blue':u.rol==='AdminNegocio'?'badge-orange':'badge-slate'}">${u.rol}</span></td>
+      <td style="color:var(--slate-500);">${u.negocioId?`Negocio #${u.negocioId}`:'Global'}</td>
+      <td><span class="badge ${u.activo!==false?'badge-green':'badge-red'}">${u.activo!==false?'Activo':'Inactivo'}</span></td>
+      <td><button onclick="eliminar('${u.id}')" class="btn btn-danger" style="padding:.25rem .75rem;font-size:.75rem;">${ICONS.trash2} Eliminar</button></td></tr>`).join('');
+}
+async function eliminar(id) {
+    if (!confirm('¿Eliminar este usuario?')) return;
+    try { await apiFetch(`/Admin/usuarios/${id}`,{method:'DELETE'}); allUsuarios=allUsuarios.filter(u=>u.id!==id); renderTable(allUsuarios); showToast('Usuario eliminado','success'); }
+    catch(err) { showToast('Error: '+err.message,'error'); }
+}
+function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+async function crearUsuario() {
+    const email=document.getElementById('m-email').value.trim();
+    if (!email) { showToast('El email es obligatorio','error'); return; }
+    try {
+        await apiFetch('/Auth/register',{method:'POST',body:JSON.stringify({ correo:email, password:document.getElementById('m-pass').value, rol:document.getElementById('m-rol').value, negocioId:parseInt(document.getElementById('m-negocio').value)||null })});
+        showToast('Usuario creado','success'); closeModal(); window.location.reload();
+    } catch(err) { showToast('Error: '+err.message,'error'); }
+}
+</script>}

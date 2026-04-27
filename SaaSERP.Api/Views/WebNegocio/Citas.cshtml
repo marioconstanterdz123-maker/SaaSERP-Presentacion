@@ -1,0 +1,169 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "Agenda / Citas";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<div class="page-header flex justify-between items-center">
+    <div>
+        <h2 class="page-title"><span id="icon-cal-h" style="color:var(--orange-500);display:inline-flex;margin-right:.5rem;"></span>Agenda / Citas</h2>
+        <p class="page-subtitle">Gestiona las citas del día y de la semana.</p>
+    </div>
+    <button class="btn btn-orange" onclick="openModal()"><span id="icon-plus-btn"></span> Nueva Cita</button>
+</div>
+
+<div class="loading-center" id="loading"><div class="spinner spinner-orange"></div></div>
+
+<!-- Date Nav -->
+<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;background:white;padding:.75rem 1.25rem;border-radius:var(--radius-2xl);border:1px solid var(--slate-100);box-shadow:var(--shadow-lg);">
+    <button class="btn btn-ghost" style="padding:.5rem .875rem;" onclick="cambiarDia(-1)">&#8592;</button>
+    <span id="fecha-label" style="font-size:1.125rem;font-weight:700;color:var(--slate-800);flex:1;text-align:center;"></span>
+    <button class="btn btn-ghost" style="padding:.5rem .875rem;" onclick="cambiarDia(1)">&#8594;</button>
+    <button class="btn btn-primary" style="padding:.5rem .875rem;" onclick="irHoy()">Hoy</button>
+</div>
+
+<!-- Citas list -->
+<div class="hidden" id="citas-wrap" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+<div class="card-plain text-center hidden" id="empty" style="padding:3rem;">
+    <div style="font-size:3rem;margin-bottom:1rem;">📅</div>
+    <p class="font-bold" style="color:var(--slate-600);">No hay citas para este día.</p>
+</div>
+
+<!-- Modal nueva cita -->
+<div id="modal" class="modal-backdrop hidden">
+    <div class="modal">
+        <div class="modal-header modal-header-negocio">
+            <span class="modal-title">Nueva Cita</span>
+            <button class="btn-icon" onclick="closeModal()" id="icon-x-modal"></button>
+        </div>
+        <div class="modal-body">
+            <div><label class="label">Cliente / Nombre</label><input id="m-cliente" class="input" placeholder="Ej. María García" /></div>
+            <div><label class="label">Teléfono</label><input id="m-telefono" class="input" placeholder="+521234567890" /></div>
+            <div id="m-recurso-wrap">
+                <label class="label">Especialista / Recurso</label>
+                <select id="m-recurso" class="input"><option value="">Sin asignar</option></select>
+            </div>
+            <div id="m-servicio-wrap">
+                <label class="label">Servicio</label>
+                <select id="m-servicio" class="input"><option value="">Seleccionar...</option></select>
+            </div>
+            <div class="grid-2">
+                <div><label class="label">Fecha</label><input id="m-fecha" class="input" type="date" /></div>
+                <div><label class="label">Hora</label><input id="m-hora" class="input" type="time" /></div>
+            </div>
+            <button class="btn btn-orange btn-full" onclick="crearCita()"><span id="icon-plus-modal"></span> Agendar</button>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+let currentDate = new Date();
+let allCitas = [];
+
+(async function init() {
+    const user = requireAuth();
+    if (!user) return;
+    document.getElementById('icon-cal-h').innerHTML      = ICONS.calendar;
+    document.getElementById('icon-plus-btn').innerHTML   = ICONS.plus;
+    document.getElementById('icon-plus-modal').innerHTML = ICONS.plus;
+    document.getElementById('icon-x-modal').innerHTML    = ICONS.x;
+    document.getElementById('icon-menu-btn').innerHTML   = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML   = ICONS.x;
+    document.getElementById('icon-back').innerHTML       = ICONS.arrowLeft;
+    setFechaHoy();
+
+    try {
+        const [negociosRes, citasRes, recursosRes, serviciosRes] = await Promise.all([
+            apiFetch('/negocios').catch(() => []),
+            apiFetch(`/Citas/negocio/${NEGOCIO_ID}`).catch(() => []),
+            apiFetch(`/Recursos/negocio/${NEGOCIO_ID}`).catch(() => []),
+            apiFetch(`/servicios/negocio/${NEGOCIO_ID}`).catch(() => [])
+        ]);
+        const negocio = negociosRes.find(n => n.id == NEGOCIO_ID);
+        renderNegocioNav(user, negocio);
+        allCitas = citasRes || [];
+
+        const recSel = document.getElementById('m-recurso');
+        (recursosRes || []).forEach(r => recSel.innerHTML += `<option value="${r.id}">${r.nombre}</option>`);
+        const srvSel = document.getElementById('m-servicio');
+        (serviciosRes || []).forEach(s => srvSel.innerHTML += `<option value="${s.id}">${s.nombre} — ${formatMXN(s.precio)}</option>`);
+
+        renderCitas();
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    finally { document.getElementById('loading').style.display = 'none'; }
+})();
+
+function setFechaHoy() {
+    const m = document.getElementById('m-fecha');
+    if (m) m.value = currentDate.toISOString().split('T')[0];
+    updateLabel();
+}
+
+function updateLabel() {
+    document.getElementById('fecha-label').textContent = currentDate.toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+function cambiarDia(delta) { currentDate.setDate(currentDate.getDate() + delta); updateLabel(); renderCitas(); }
+function irHoy()            { currentDate = new Date(); updateLabel(); renderCitas(); }
+
+function renderCitas() {
+    const wrap = document.getElementById('citas-wrap');
+    const empty = document.getElementById('empty');
+    const today = currentDate.toISOString().split('T')[0];
+    const filtered = allCitas.filter(c => (c.fechaHora || c.fecha || '').startsWith(today));
+
+    if (!filtered.length) {
+        wrap.classList.add('hidden'); empty.classList.remove('hidden'); empty.style.display='block'; return;
+    }
+    empty.classList.add('hidden');
+    wrap.classList.remove('hidden'); wrap.style.display='flex';
+
+    const sorted = [...filtered].sort((a,b) => new Date(a.fechaHora||a.fecha) - new Date(b.fechaHora||b.fecha));
+    wrap.innerHTML = sorted.map(c => {
+        const hora = new Date(c.fechaHora || c.fecha).toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
+        const estadoBadge = { 'Pendiente':'badge-orange', 'Confirmada':'badge-blue', 'Completada':'badge-green', 'Cancelada':'badge-red' }[c.estado] || 'badge-slate';
+        return `
+        <div style="background:white;border-radius:var(--radius-2xl);border:1px solid var(--slate-100);box-shadow:var(--shadow-lg);padding:1rem;display:flex;align-items:center;gap:1rem;">
+          <div style="background:var(--orange-50);color:var(--orange-500);padding:.75rem;border-radius:var(--radius-xl);text-align:center;min-width:4rem;">
+            <p style="font-size:1.25rem;font-weight:900;">${hora}</p>
+          </div>
+          <div style="flex:1;">
+            <p class="font-bold" style="color:var(--slate-800);">${c.clienteNombre || c.nombre || 'Sin nombre'}</p>
+            <p style="font-size:.75rem;color:var(--slate-500);">${c.servicioNombre || c.servicio || ''} · ${c.recursoNombre || c.especialista || ''}</p>
+          </div>
+          <span class="badge ${estadoBadge}">${c.estado || 'Pendiente'}</span>
+        </div>`;
+    }).join('');
+}
+
+function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+async function crearCita() {
+    const cliente = document.getElementById('m-cliente').value.trim();
+    if (!cliente) { showToast('Ingresa el nombre del cliente', 'error'); return; }
+    const fecha = document.getElementById('m-fecha').value;
+    const hora  = document.getElementById('m-hora').value;
+    if (!fecha || !hora) { showToast('Selecciona fecha y hora', 'error'); return; }
+    try {
+        const cita = await apiFetch('/Citas', { method: 'POST', body: JSON.stringify({
+            negocioId: NEGOCIO_ID,
+            clienteNombre: cliente,
+            telefono: document.getElementById('m-telefono').value,
+            recursoId: parseInt(document.getElementById('m-recurso').value) || null,
+            servicioId: parseInt(document.getElementById('m-servicio').value) || null,
+            fechaHora: `${fecha}T${hora}:00`,
+            estado: 'Pendiente'
+        })});
+        allCitas.push(cita);
+        renderCitas();
+        closeModal();
+        showToast('Cita agendada', 'success');
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+</script>
+}

@@ -1,0 +1,121 @@
+@{
+    var negocioId = ViewBag.NegocioId;
+    ViewData["Title"] = "WhatsApp Web";
+}
+@await Html.PartialAsync("_NegocioShellTop")
+
+<div class="page-header">
+    <h2 class="page-title"><span id="icon-wa-h" style="color:#25d366;display:inline-flex;margin-right:.5rem;"></span>WhatsApp Web</h2>
+    <p class="page-subtitle">Panel de mensajes y estado de la integración con Evolution API.</p>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+    <!-- Estado de conexión -->
+    <div class="card-plain">
+        <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Estado de Conexión</h3>
+        <div id="wa-status" class="loading-center" style="min-height:8rem;"><div class="spinner"></div></div>
+    </div>
+    <!-- Enviar mensaje -->
+    <div class="card-plain">
+        <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Enviar Mensaje</h3>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+            <div><label class="label">Número (con código de país)</label><input id="wa-telefono" class="input" placeholder="+521234567890" /></div>
+            <div><label class="label">Mensaje</label><textarea id="wa-mensaje" class="input" rows="3" placeholder="Escribe tu mensaje..."></textarea></div>
+            <button class="btn btn-full" style="background:#25d366;color:white;" onclick="enviarMensaje()">
+                <span id="icon-wa-send"></span> Enviar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Conversaciones recientes -->
+<div class="card-plain">
+    <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Mensajes Recientes</h3>
+    <div class="loading-center" id="loading-msgs"><div class="spinner"></div></div>
+    <div id="msgs-list" class="hidden" style="display:flex;flex-direction:column;gap:.5rem;max-height:400px;overflow-y:auto;"></div>
+    <div class="hidden" id="empty-msgs" style="text-align:center;padding:2rem;color:var(--slate-400);">
+        <p class="font-bold">Sin mensajes recientes.</p>
+    </div>
+</div>
+
+@await Html.PartialAsync("_NegocioShellBottom")
+
+@section Scripts {
+<script>
+const NEGOCIO_ID = @negocioId;
+
+(async function init() {
+    const user = requireAuth();
+    if (!user) return;
+    document.getElementById('icon-wa-h').innerHTML    = ICONS.messageCircle;
+    document.getElementById('icon-wa-send').innerHTML = ICONS.messageCircle;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+    document.getElementById('icon-back').innerHTML     = ICONS.arrowLeft;
+
+    try {
+        const negociosRes = await apiFetch('/negocios').catch(() => []);
+        const negocio = negociosRes.find(n => n.id == NEGOCIO_ID);
+        renderNegocioNav(user, negocio);
+        cargarEstado(negocio);
+        cargarMensajes();
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+})();
+
+async function cargarEstado(negocio) {
+    const statusEl = document.getElementById('wa-status');
+    try {
+        const status = await apiFetch(`/WhatsApp/status/${NEGOCIO_ID}`).catch(() => null);
+        const conectado = status?.connected || status?.estado === 'open';
+        statusEl.innerHTML = `
+          <div style="text-align:center;">
+            <div style="width:4rem;height:4rem;border-radius:50%;background:${conectado ? 'rgba(16,185,129,.1)' : 'var(--slate-100)'};display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2rem;">
+              ${conectado ? '✅' : '⚠️'}
+            </div>
+            <p class="font-bold" style="color:var(--slate-800);">${conectado ? 'Conectado' : 'Desconectado'}</p>
+            <p style="font-size:.75rem;color:var(--slate-500);margin-top:.25rem;">${negocio?.telefono || 'Sin número registrado'}</p>
+          </div>`;
+    } catch(err) {
+        statusEl.innerHTML = `<p style="color:var(--slate-400);text-align:center;">No se pudo obtener el estado.</p>`;
+    }
+}
+
+async function cargarMensajes() {
+    const loadEl = document.getElementById('loading-msgs');
+    const listEl = document.getElementById('msgs-list');
+    const emptyEl = document.getElementById('empty-msgs');
+    try {
+        const msgs = await apiFetch(`/WhatsApp/sesiones/${NEGOCIO_ID}`).catch(() => []);
+        loadEl.style.display = 'none';
+        if (!msgs || !msgs.length) { emptyEl.classList.remove('hidden'); emptyEl.style.display='block'; return; }
+        listEl.classList.remove('hidden'); listEl.style.display='flex';
+        listEl.innerHTML = msgs.slice(0, 20).map(m => `
+          <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:var(--radius-xl);background:var(--slate-50);border:1px solid var(--slate-100);">
+            <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">
+              ${(m.telefono || m.remitente || '?').charAt(0)}
+            </div>
+            <div style="flex:1;overflow:hidden;">
+              <p class="font-bold truncate" style="color:var(--slate-800);">${m.telefono || m.remitente || 'Desconocido'}</p>
+              <p class="truncate" style="font-size:.75rem;color:var(--slate-500);">${m.ultimoMensaje || m.mensaje || ''}</p>
+            </div>
+            <span style="font-size:.65rem;color:var(--slate-400);">${m.fecha ? new Date(m.fecha).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
+          </div>`).join('');
+    } catch(err) {
+        loadEl.style.display = 'none';
+        emptyEl.classList.remove('hidden'); emptyEl.style.display='block';
+    }
+}
+
+async function enviarMensaje() {
+    const telefono = document.getElementById('wa-telefono').value.trim();
+    const mensaje  = document.getElementById('wa-mensaje').value.trim();
+    if (!telefono || !mensaje) { showToast('Completa todos los campos', 'error'); return; }
+    try {
+        await apiFetch(`/WhatsApp/enviar/${NEGOCIO_ID}`, { method: 'POST', body: JSON.stringify({ telefono, mensaje }) });
+        document.getElementById('wa-mensaje').value = '';
+        showToast('Mensaje enviado', 'success');
+        cargarMensajes();
+    } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+</script>
+}

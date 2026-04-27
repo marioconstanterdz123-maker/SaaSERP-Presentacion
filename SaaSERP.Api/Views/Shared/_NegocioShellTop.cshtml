@@ -1,0 +1,50 @@
+@{
+    var nId = ViewBag.NegocioId;
+}
+<div class="app-shell" id="app">
+    <!-- BG Blobs naranja -->
+    <div class="bg-blob bg-blob-orange animate-blob"></div>
+    <div class="bg-blob bg-blob-rose animate-blob animation-delay-2000"></div>
+
+    <!-- MOBILE HEADER -->
+    <div class="mobile-header">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+            <button id="icon-back" onclick="window.location.href='/web/WebAdmin/Negocios'"
+                    style="padding:.5rem;background:var(--slate-100);border:none;border-radius:.75rem;cursor:pointer;display:flex;"></button>
+            <span id="negocio-nombre-header" style="font-size:1rem;font-weight:900;color:var(--slate-800);">SaaSERP</span>
+        </div>
+        <button onclick="openDrawer()" style="padding:.5rem;background:var(--slate-100);border:none;border-radius:.75rem;cursor:pointer;display:flex;" id="icon-menu-btn"></button>
+    </div>
+
+    <!-- MOBILE DRAWER -->
+    <div id="drawer" class="drawer-overlay hidden animate-fade-in">
+        <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+        <aside class="drawer">
+            <div class="drawer-header">
+                <div>
+                    <h2 style="font-weight:900;color:var(--slate-800);" id="drawer-title">Negocio</h2>
+                    <p style="font-size:.65rem;font-weight:700;color:var(--orange-500);text-transform:uppercase;letter-spacing:.1em;" id="drawer-sistema"></p>
+                </div>
+                <button onclick="closeDrawer()" style="padding:.5rem;background:var(--slate-100);border:none;border-radius:.75rem;cursor:pointer;display:flex;" id="icon-x-drawer"></button>
+            </div>
+            <nav style="flex:1;padding:1rem;display:flex;flex-direction:column;gap:.25rem;" id="drawer-nav"></nav>
+            <div style="padding:1rem;border-top:1px solid var(--slate-100);" id="drawer-user"></div>
+        </aside>
+    </div>
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header sidebar-header-negocio" style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--slate-200);">
+            <button class="sidebar-back-btn" onclick="window.location.href='/web/WebAdmin/Negocios'">
+                <span id="icon-back-desk"></span> Volver a Global
+            </button>
+            <h1 class="sidebar-negocio-name" id="negocio-nombre-sidebar">Cargando...</h1>
+            <p class="sidebar-negocio-tag" id="negocio-sistema-sidebar">Workspace</p>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+        <div class="sidebar-footer" id="sidebar-user"></div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <div class="page-inner animate-fade-in-up">

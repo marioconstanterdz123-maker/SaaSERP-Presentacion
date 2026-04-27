@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. AGREGAR SERVICIOS
 builder.Services.AddControllers();
+builder.Services.AddControllersWithViews(); // ← Habilita vistas Razor para el portal web
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<INegocioService, NegocioService>();
 builder.Services.AddScoped<ICitaService, CitaService>();
@@ -95,6 +96,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // ← Sirve CSS/JS/Imágenes de wwwroot
 
 // EL ORDEN ES VITAL
 // Habilitar CORS ANTES DE LA AUTORIZACIÓN
@@ -103,6 +105,17 @@ app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Rutas API (controladores que devuelven JSON)
 app.MapControllers();
+
+// Rutas MVC Web (controladores que devuelven vistas Razor)
+app.MapControllerRoute(
+    name: "negocio",
+    pattern: "web/negocio/{negocioId}/{action=Dashboard}/{id?}",
+    defaults: new { controller = "WebNegocio" });
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "web/{controller=WebAuth}/{action=Login}/{id?}");
 
 app.Run();

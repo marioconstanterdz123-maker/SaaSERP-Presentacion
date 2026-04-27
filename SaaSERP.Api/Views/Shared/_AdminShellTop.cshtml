@@ -1,0 +1,37 @@
+@* Sidebar compartido para la zona SuperAdmin (azul) *@
+<div class="app-shell" id="app">
+    <!-- BG Blobs -->
+    <div class="bg-blob bg-blob-blue animate-blob"></div>
+    <div class="bg-blob bg-blob-purple animate-blob animation-delay-2000"></div>
+
+    <!-- MOBILE HEADER -->
+    <div class="mobile-header">
+        <span class="mobile-brand">SaaSERP <span style="font-weight:300">Victoria</span></span>
+        <button onclick="openDrawer()" style="padding:.5rem;background:var(--slate-100);border:none;border-radius:.75rem;cursor:pointer;" id="icon-menu-btn"></button>
+    </div>
+
+    <!-- MOBILE DRAWER -->
+    <div id="drawer" class="drawer-overlay hidden animate-fade-in">
+        <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+        <aside class="drawer">
+            <div class="drawer-header" style="background:linear-gradient(to right,var(--blue-600),var(--indigo-600));">
+                <h1 class="sidebar-brand">SaaSERP <span>Victoria</span></h1>
+                <button onclick="closeDrawer()" class="btn-icon" id="icon-x-drawer"></button>
+            </div>
+            <nav style="flex:1;padding:1rem;display:flex;flex-direction:column;gap:.25rem;" id="drawer-nav"></nav>
+            <div style="padding:1rem;border-top:1px solid var(--slate-100);" id="drawer-user"></div>
+        </aside>
+    </div>
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header sidebar-header-admin">
+            <h1 class="sidebar-brand">SaaSERP <span>Victoria</span></h1>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+        <div class="sidebar-footer" id="sidebar-user"></div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <div class="page-inner animate-fade-in-up">

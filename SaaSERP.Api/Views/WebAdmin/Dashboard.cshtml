@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Centro de Mando";
+}
+
+@await Html.PartialAsync("_AdminShellTop")
+
+<div class="page-header">
+    <h2 class="page-title">Centro de Mando</h2>
+    <p class="page-subtitle">Visión global de todos los negocios en tiempo real.</p>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid" style="margin-bottom:1.5rem;">
+    <div class="kpi-card">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div class="kpi-icon" style="color:var(--emerald-500);" id="icon-activity"></div>
+            <span class="kpi-badge kpi-badge-green">+12%</span>
+        </div>
+        <div class="kpi-label">Ingresos Hoy</div>
+        <div class="kpi-value">$24,500</div>
+    </div>
+    <div class="kpi-card">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div class="kpi-icon" style="color:var(--blue-600);" id="icon-users"></div>
+            <span class="kpi-badge kpi-badge-slate">Estable</span>
+        </div>
+        <div class="kpi-label">Citas Activas</div>
+        <div class="kpi-value">18</div>
+    </div>
+    <div class="kpi-card">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div class="kpi-icon" style="color:var(--purple-500);" id="icon-car"></div>
+            <span class="kpi-badge kpi-badge-slate">+5 hoy</span>
+        </div>
+        <div class="kpi-label">Vehículos en Parqueadero</div>
+        <div class="kpi-value">45</div>
+    </div>
+    <div class="kpi-card">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div class="kpi-icon" style="color:var(--orange-500);" id="icon-coffee"></div>
+            <span class="kpi-badge kpi-badge-slate">Pico Alto</span>
+        </div>
+        <div class="kpi-label">Comandas en Curso</div>
+        <div class="kpi-value">12</div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
+    <!-- Chart placeholder -->
+    <div class="card-plain" style="display:flex;flex-direction:column;min-height:280px;">
+        <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Actividad de Inteligencia Artificial (DeepSeek)</h3>
+        <div style="flex:1;background:rgba(241,245,249,.5);border-radius:1rem;display:flex;align-items:center;justify-content:center;border:2px dashed var(--slate-200);">
+            <p style="color:var(--slate-400);font-weight:500;">Gráfico de Mensajes Procesados (Próximamente)</p>
+        </div>
+    </div>
+    <!-- Recent Activity -->
+    <div class="card-plain">
+        <h3 style="font-size:1.125rem;font-weight:700;color:var(--slate-800);margin-bottom:1rem;">Actividad Reciente</h3>
+        <div style="display:flex;flex-direction:column;gap:.75rem;" id="activity-list"></div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_AdminShellBottom")
+
+@section Scripts {
+<script>
+const ADMIN_MENU = [
+    { path: '/web/WebAdmin/Negocios',      name: 'Tus Negocios',  short: 'Negocios',  icon: 'store'    },
+    { path: '/web/WebAdmin/Usuarios',      name: 'Usuarios',      short: 'Usuarios',  icon: 'users'    },
+    { path: '/web/WebAdmin/Configuracion', name: 'Configuración', short: 'Config',    icon: 'settings' },
+    { path: '/web/WebAdmin/Papelera',      name: 'Papelera',      short: 'Papelera',  icon: 'trash2'   },
+];
+
+(function init() {
+    const user = requireAuth();
+    if (!user) return;
+
+    // icons
+    document.getElementById('icon-activity').innerHTML = ICONS.activity;
+    document.getElementById('icon-users').innerHTML    = ICONS.users;
+    document.getElementById('icon-car').innerHTML      = ICONS.car;
+    document.getElementById('icon-coffee').innerHTML   = ICONS.coffee;
+    document.getElementById('icon-menu-btn').innerHTML = ICONS.menu;
+    document.getElementById('icon-x-drawer').innerHTML = ICONS.x;
+
+    renderAdminNav(user);
+
+    // Activity list
+    const items = [1,2,3,4,5];
+    document.getElementById('activity-list').innerHTML = items.map(i => `
+      <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.75rem;cursor:pointer;transition:background .2s;"
+           onmouseover="this.style.background='var(--slate-50)'" onmouseout="this.style.background=''">
+        <div style="width:.5rem;height:.5rem;border-radius:50%;background:var(--blue-500);flex-shrink:0;"></div>
+        <div>
+          <p style="font-size:.875rem;font-weight:600;color:var(--slate-700);">Bot programó cita</p>
+          <p style="font-size:.75rem;color:var(--slate-400);">Hace ${i * 12} mins — Operación Registrada</p>
+        </div>
+      </div>`).join('');
+})();
+
+function renderAdminNav(user) {
+    const cur = window.location.pathname;
+    const navHtml = ADMIN_MENU.map(m => `
+      <a href="${m.path}" class="nav-link ${cur === m.path ? 'active-admin' : ''}">
+        ${ICONS[m.icon] || ''} ${m.name}
+      </a>`).join('');
+    document.getElementById('sidebar-nav').innerHTML  = navHtml;
+    document.getElementById('drawer-nav').innerHTML   = navHtml;
+    document.getElementById('sidebar-user').innerHTML = renderUserInfo(user, 'admin');
+    document.getElementById('drawer-user').innerHTML  = renderUserInfo(user, 'admin');
+    document.getElementById('bottom-nav').innerHTML   = ADMIN_MENU.slice(0,4).map(m => `
+      <a href="${m.path}" class="nav-tab ${cur === m.path ? 'active' : ''}">
+        ${ICONS[m.icon] || ''} <span>${m.short}</span>
+      </a>`).join('');
+}
+</script>
+}

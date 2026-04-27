@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = "_Layout";
+}
+
+<!-- Login Page — fiel al diseño React (slate-950 bg + glassmorphism card) -->
+<div style="min-height:100vh;position:relative;background:var(--slate-950);display:flex;align-items:center;justify-content:center;padding:1rem;overflow:hidden;">
+
+    <!-- Background gradient blobs -->
+    <div class="bg-blob animate-blob" style="width:500px;height:500px;background:#7c3aed;top:-20%;left:-10%;opacity:.3;filter:blur(128px);"></div>
+    <div class="bg-blob animate-blob animation-delay-2000" style="width:500px;height:500px;background:#4f46e5;bottom:-20%;right:-10%;opacity:.3;filter:blur(128px);"></div>
+    <div class="bg-blob animate-blob animation-delay-4000" style="width:300px;height:300px;background:#c026d3;top:30%;right:20%;opacity:.2;filter:blur(128px);"></div>
+
+    <div style="position:relative;width:100%;max-width:28rem;">
+
+        <!-- Brand -->
+        <div style="text-align:center;margin-bottom:2.5rem;">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:4rem;height:4rem;background:linear-gradient(135deg,var(--violet-500),var(--indigo-600));border-radius:1rem;box-shadow:0 25px 50px -12px rgba(139,92,246,.4);margin-bottom:1rem;">
+                <span id="icon-zap" style="color:white;display:flex;"></span>
+            </div>
+            <h1 style="font-size:1.875rem;font-weight:900;color:white;letter-spacing:-.025em;">SaaSERP Victoria</h1>
+            <p style="color:var(--slate-400);margin-top:.5rem;font-weight:500;">Sistema de Gestión Multisucursal</p>
+        </div>
+
+        <!-- Card -->
+        <div style="background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:1.5rem;padding:2rem;box-shadow:var(--shadow-2xl);">
+            <h2 style="font-size:1.25rem;font-weight:700;color:white;margin-bottom:.25rem;">Iniciar Sesión</h2>
+            <p style="color:var(--slate-400);font-size:.875rem;margin-bottom:2rem;">Accede con las credenciales asignadas por tu administrador.</p>
+
+            <div id="error-banner" class="alert alert-error hidden">
+                <span id="icon-alert"></span>
+                <span id="error-msg"></span>
+            </div>
+
+            <form id="login-form" style="display:flex;flex-direction:column;gap:1.25rem;">
+                <div>
+                    <label class="label" style="color:var(--slate-400);">Correo Electrónico</label>
+                    <input id="inp-email" type="email" required autofocus
+                           class="input input-dark" placeholder="admin@saaserp.com" />
+                </div>
+                <div style="position:relative;">
+                    <label class="label" style="color:var(--slate-400);">Contraseña</label>
+                    <div style="position:relative;">
+                        <input id="inp-password" type="password" required
+                               class="input input-dark" placeholder="••••••••"
+                               style="padding-right:3rem;" />
+                        <button type="button" id="btn-toggle-pass"
+                                style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--slate-400);"
+                                onclick="togglePassword()">
+                            <span id="icon-eye"></span>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" id="btn-submit" class="btn btn-violet btn-full btn-lg" style="margin-top:.5rem;">
+                    <span id="btn-content"></span>
+                </button>
+            </form>
+        </div>
+
+        <p style="text-align:center;color:var(--slate-600);font-size:.75rem;margin-top:1.5rem;">
+            © 2026 SaaSERP Victoria · Todos los derechos reservados
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Render icons
+document.getElementById('icon-zap').innerHTML   = ICONS.zap;
+document.getElementById('icon-alert').innerHTML = ICONS.alertCircle;
+setSubmitState(false);
+
+function setSubmitState(loading) {
+    const btn = document.getElementById('btn-content');
+    btn.innerHTML = loading
+        ? '<div class="animate-spin" style="width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;"></div>'
+        : ICONS.logIn + ' Entrar al Sistema';
+    document.getElementById('btn-submit').disabled = loading;
+}
+
+let showPass = false;
+function togglePassword() {
+    showPass = !showPass;
+    document.getElementById('inp-password').type = showPass ? 'text' : 'password';
+    document.getElementById('icon-eye').innerHTML = showPass ? ICONS.eyeOff : ICONS.eye;
+}
+document.getElementById('icon-eye').innerHTML = ICONS.eye;
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBanner = document.getElementById('error-banner');
+    const errorMsg    = document.getElementById('error-msg');
+    errorBanner.classList.add('hidden');
+    setSubmitState(true);
+
+    try {
+        const correo   = document.getElementById('inp-email').value;
+        const password = document.getElementById('inp-password').value;
+        const res = await fetch('/Auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correo, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(typeof data === 'string' ? data : 'Credenciales incorrectas.');
+        const token = data.Token || data.token;
+        if (!token) throw new Error('El servidor no devolvió un token.');
+        localStorage.setItem('saas_token', token);
+
+        // Redirigir según rol
+        const user = getUser();
+        if (user?.rol === 'SuperAdmin' || user?.rol === 'Admin') {
+            window.location.href = '/web/WebAdmin/Negocios';
+        } else if (user?.negocioId) {
+            window.location.href = `/web/negocio/${user.negocioId}/Dashboard`;
+        } else {
+            window.location.href = '/web/WebAdmin/Negocios';
+        }
+    } catch (err) {
+        errorBanner.classList.remove('hidden');
+        errorMsg.textContent = err.message || 'Error de autenticación. Intente de nuevo.';
+        setSubmitState(false);
+    }
+});
+
+// Si ya hay sesión activa, redirigir
+(function() {
+    const user = getUser();
+    if (user) {
+        if (user.rol === 'SuperAdmin' || user.rol === 'Admin') {
+            window.location.href = '/web/WebAdmin/Negocios';
+        } else if (user.negocioId) {
+            window.location.href = `/web/negocio/${user.negocioId}/Dashboard`;
+        }
+    }
+})();
+</script>
+}
