@@ -101,9 +101,11 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ correo, password })
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(typeof data === 'string' ? data : 'Credenciales incorrectas.');
-        const token = data.Token || data.token;
+        const ct = res.headers.get('content-type') || '';
+        const data = ct.includes('application/json') ? await res.json() : await res.text();
+        
+        if (!res.ok) throw new Error(typeof data === 'string' ? data : (data.error || 'Credenciales incorrectas.'));
+        const token = typeof data === 'string' ? null : (data.Token || data.token);
         if (!token) throw new Error('El servidor no devolvió un token.');
         localStorage.setItem('saas_token', token);
 
